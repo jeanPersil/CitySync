@@ -1,3 +1,4 @@
+import 'package:citysync/reportaProblema.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -46,7 +47,13 @@ class Telaprincipal extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ReportProblemPage()),
+                    );
+                  },
                   child: const Text(
                     "Reportar problema",
                     style: TextStyle(color: Colors.black),
