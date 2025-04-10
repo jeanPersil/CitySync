@@ -1,5 +1,4 @@
 import 'package:citysync/homePage.dart';
-import 'package:citysync/reportaProblema.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
