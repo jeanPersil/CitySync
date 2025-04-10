@@ -24,9 +24,11 @@ class _TelaLoginState extends State<TelaLogin> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(
-                "assets/images/logo.png",
-                height: 300,
+              Flexible(
+                child: Image.asset(
+                  "assets/images/logo.png",
+                  height: 300,
+                ),
               ),
               const SizedBox(height: 20),
               TextField(
