@@ -1,3 +1,4 @@
+import 'package:citysync/homePage.dart';
 import 'package:citysync/login.dart';
 import 'package:flutter/material.dart';
 
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
       ),
-      home: TelaLogin(),
+      home: Homepage(),
     );
   }
 }
