@@ -1,6 +1,6 @@
-import 'package:citysync/config.dart';
-import 'package:citysync/problemasReport.dart';
-import 'package:citysync/telaPrincipal.dart';
+import 'package:citysync/views/config.dart';
+import 'package:citysync/views/problemasReport.dart';
+import 'package:citysync/views/telaPrincipal.dart';
 import 'package:flutter/material.dart';
 
 class Homepage extends StatefulWidget {
