@@ -22,45 +22,46 @@ class _HomepageState extends State<Homepage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       body: PageView(
         controller: pc,
         physics: const NeverScrollableScrollPhysics(),
         children: [
           Telaprincipal(),
-          Problemasreport(),
-          Tela_config(),
+          const Problemasreport(),
+          const Tela_config(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.blue,
         currentIndex: paginaAtual,
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white,
-        items: [
+        selectedItemColor: colorScheme.onPrimary,
+        unselectedItemColor: colorScheme.onPrimary.withOpacity(0.6),
+        backgroundColor: colorScheme.primary,
+        items: const [
           BottomNavigationBarItem(
-              icon: Icon(
-                Icons.home,
-                color: Colors.white,
-              ),
-              label: "Home"),
+            icon: Icon(Icons.home),
+            label: "Home",
+          ),
           BottomNavigationBarItem(
-              icon: Icon(
-                Icons.report_problem_sharp,
-                color: Colors.white,
-              ),
-              label: "Problemas report"),
+            icon: Icon(Icons.report_problem_sharp),
+            label: "Problemas report",
+          ),
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.settings,
-              color: Colors.white,
-            ),
-            label: "configurações",
+            icon: Icon(Icons.settings),
+            label: "Configurações",
           ),
         ],
         onTap: (pagina) {
-          pc.animateToPage(pagina,
-              duration: Duration(milliseconds: 400), curve: Curves.ease);
+          setState(() {
+            paginaAtual = pagina;
+          });
+          pc.animateToPage(
+            pagina,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.ease,
+          );
         },
       ),
     );
