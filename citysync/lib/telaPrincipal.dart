@@ -9,21 +9,28 @@ class Telaprincipal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+  final colorScheme = theme.colorScheme;
+  final textColor = colorScheme.onBackground;  // texto com cor certa para o fundo
+
+
     return Scaffold(
-      backgroundColor: Colors.lightBlue,
+      backgroundColor: colorScheme.primaryContainer,
       appBar: AppBar(
-        backgroundColor: Colors.blue,
+        backgroundColor: colorScheme.primary,
         title: Row(
-          children: const [
+          children: [
             Icon(
               Icons.people_alt_outlined,
-              color: Colors.white,
+              color: colorScheme.onPrimary,
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Text(
               "denis",
-              style:
-                  TextStyle(fontWeight: FontWeight.w700, color: Colors.white),
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: colorScheme.onPrimary,
+              ),
             ),
           ],
         ),
@@ -34,10 +41,14 @@ class Telaprincipal extends StatelessWidget {
           children: [
             Expanded(
               child: Container(
-                decoration: const BoxDecoration(color: Colors.white),
+                decoration: BoxDecoration(
+                  color: colorScheme.background,
+                ),
                 child: GoogleMap(
-                  initialCameraPosition:
-                      CameraPosition(target: _senaiFeiraDeSantana, zoom: 18),
+                  initialCameraPosition: CameraPosition(
+                    target: _senaiFeiraDeSantana,
+                    zoom: 18,
+                  ),
                   mapType: MapType.normal,
                 ),
               ),
@@ -51,20 +62,27 @@ class Telaprincipal extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => ReportProblemPage()),
+                        builder: (context) => ReportProblemPage(),
+                      ),
                     );
                   },
-                  child: const Text(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.secondary,
+                  ),
+                  child: Text(
                     "Reportar problema",
-                    style: TextStyle(color: Colors.black),
+                    style: TextStyle(color: colorScheme.onSecondary),
                   ),
                 ),
                 const SizedBox(width: 15),
                 ElevatedButton(
                   onPressed: () {},
-                  child: const Text(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.secondary,
+                  ),
+                  child: Text(
                     "Ver problemas",
-                    style: TextStyle(color: Colors.black),
+                    style: TextStyle(color: colorScheme.onSecondary),
                   ),
                 ),
               ],

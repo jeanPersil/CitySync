@@ -17,16 +17,22 @@ class _ReportProblemPageState extends State<ReportProblemPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: Colors.grey[200],
+      backgroundColor: colorScheme.background,
       body: Center(
         child: Container(
           width: 300,
           decoration: BoxDecoration(
-            color: Colors.blue,
+            color: colorScheme.primary,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
-              BoxShadow(color: Colors.black26, blurRadius: 10),
+              BoxShadow(
+                color: theme.shadowColor.withOpacity(0.2),
+                blurRadius: 10,
+              ),
             ],
           ),
           child: Column(
@@ -34,18 +40,19 @@ class _ReportProblemPageState extends State<ReportProblemPage> {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.blue[900],
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  color: colorScheme.primaryContainer,
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(20)),
                 ),
-                padding: EdgeInsets.all(10),
+                padding: const EdgeInsets.all(10),
                 child: Row(
                   children: [
                     CircleAvatar(
-                      backgroundColor: Colors.white,
-                      child: Icon(Icons.person, color: Colors.blue[900]),
+                      backgroundColor: colorScheme.onPrimary,
+                      child: Icon(Icons.person, color: colorScheme.primary),
                     ),
-                    SizedBox(width: 10),
-                    Text('IWIN', style: TextStyle(color: Colors.white)),
+                    const SizedBox(width: 10),
+                    Text('IWIN', style: TextStyle(color: colorScheme.onPrimary)),
                   ],
                 ),
               ),
@@ -58,7 +65,7 @@ class _ReportProblemPageState extends State<ReportProblemPage> {
                       initialCenter: _initialPosition,
                       initialZoom: 16.0,
                       onTap: (tapPosition, location) {
-                        print('Local selecionado: \$location');
+                        print('Local selecionado: $location');
                       },
                     ),
                     children: [
@@ -76,80 +83,98 @@ class _ReportProblemPageState extends State<ReportProblemPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text('Endereço Selecionado',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, color: Colors.white)),
-                    SizedBox(height: 4),
+                    Text(
+                      'Endereço Selecionado',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
                     TextField(
                       controller: addressController,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: colorScheme.onPrimary),
                       decoration: InputDecoration(
                         hintText: 'Digite o endereço',
-                        hintStyle: TextStyle(color: Colors.white),
+                        hintStyle: TextStyle(color: colorScheme.onPrimary),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide(color: Colors.white),
+                          borderSide:
+                              BorderSide(color: colorScheme.onPrimary),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide(color: Colors.white),
+                          borderSide:
+                              BorderSide(color: colorScheme.onPrimary),
                         ),
                       ),
                     ),
-                    SizedBox(height: 8),
-                    Text('Qual problema gostaria de relatar?',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, color: Colors.white)),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Qual problema gostaria de relatar?',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
                     TextField(
                       controller: problemController,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: colorScheme.onPrimary),
                       decoration: InputDecoration(
                         hintText: 'Descreva o problema',
-                        hintStyle: TextStyle(color: Colors.white),
+                        hintStyle: TextStyle(color: colorScheme.onPrimary),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide(color: Colors.white),
+                          borderSide:
+                              BorderSide(color: colorScheme.onPrimary),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide(color: Colors.white),
+                          borderSide:
+                              BorderSide(color: colorScheme.onPrimary),
                         ),
                       ),
                     ),
-                    SizedBox(height: 8),
-                    Text('A quanto tempo ocorre?',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, color: Colors.white)),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 8),
+                    Text(
+                      'A quanto tempo ocorre?',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
                     TextField(
                       controller: timeController,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: colorScheme.onPrimary),
                       decoration: InputDecoration(
                         hintText: 'Ex: 15 horas',
-                        hintStyle: TextStyle(color: Colors.white),
+                        hintStyle: TextStyle(color: colorScheme.onPrimary),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide(color: Colors.white),
+                          borderSide:
+                              BorderSide(color: colorScheme.onPrimary),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide(color: Colors.white),
+                          borderSide:
+                              BorderSide(color: colorScheme.onPrimary),
                         ),
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Container(
-                      padding: EdgeInsets.all(20),
-                      child: Icon(Icons.image, size: 50, color: Colors.white),
+                      padding: const EdgeInsets.all(20),
+                      child: Icon(Icons.image, size: 50, color: colorScheme.onPrimary),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
+                        border: Border.all(color: colorScheme.onPrimary),
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
@@ -165,23 +190,22 @@ class _ReportProblemPageState extends State<ReportProblemPage> {
                             showDialog(
                               context: context,
                               builder: (context) => AlertDialog(
-                                title: Text('Sucesso'),
-                                content: Text(
-                                    'Seu relatório foi enviado com sucesso!'),
+                                title: const Text('Sucesso'),
+                                content: const Text('Seu relatório foi enviado com sucesso!'),
                                 actions: [
                                   TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(),
-                                    child: Text('OK'),
+                                    onPressed: () => Navigator.of(context).pop(),
+                                    child: const Text('OK'),
                                   ),
                                 ],
                               ),
                             );
                           },
-                          icon: Icon(Icons.touch_app),
-                          label: Text('REPORTAR'),
+                          icon: const Icon(Icons.touch_app),
+                          label: const Text('REPORTAR'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
+                            backgroundColor: colorScheme.onPrimary,
+                            foregroundColor: colorScheme.primary,
                           ),
                         ),
                         ElevatedButton(
@@ -193,16 +217,17 @@ class _ReportProblemPageState extends State<ReportProblemPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => Homepage()),
+                                builder: (context) => const Homepage(),
+                              ),
                             );
                           },
-                          child: Text('CANCELAR'),
+                          child: const Text('CANCELAR'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.black,
+                            backgroundColor: colorScheme.onPrimary,
+                            foregroundColor: colorScheme.primary,
                             side: BorderSide(color: Colors.grey),
                           ),
-                        )
+                        ),
                       ],
                     )
                   ],
