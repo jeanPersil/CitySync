@@ -64,15 +64,7 @@ class _TelaprincipalState extends State<Telaprincipal> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-    final api = TesteApi();
-    try {
-      final mensagem = await api.requisicao();
-      print(mensagem); 
-    } catch (e) {
-      print('Erro ao chamar API: $e');
-    }
-  },
+        onPressed: () => mostrarModal(context),
         backgroundColor: isDark ? Colors.red[400] : Colors.redAccent,
         icon: const Icon(Icons.dangerous_sharp, color: Colors.white),
         label: const Text(
