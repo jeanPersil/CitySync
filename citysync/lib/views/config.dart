@@ -41,8 +41,8 @@ class Tela_config extends StatelessWidget {
                   child: Text('Português'),
                 ),
                 DropdownMenuItem(
-                  value: 'en',
-                  child: Text('Inglês'),
+                  value: 'dv',
+                  child: Text('Em desenvolvimento'),
                 ),
               ],
             ),

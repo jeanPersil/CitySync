@@ -163,7 +163,7 @@ class _tela_report_State extends State<tela_report> {
                           child: Text(
                             "Cancelar",
                             style: TextStyle(
-                                color: isDark ? Colors.white : Colors.white,
+                                color: isDark ? Colors.white : Colors.black,
                                 fontSize: 14),
                           ),
                         ),
