@@ -22,7 +22,10 @@ class _HomepageState extends State<Homepage> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final brightness = Theme.of(context).brightness;
+
+    
+    final backgroundColor = brightness == Brightness.light ? Colors.blue : Colors.grey[900];
 
     return Scaffold(
       body: PageView(
@@ -36,9 +39,11 @@ class _HomepageState extends State<Homepage> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: paginaAtual,
-        selectedItemColor: colorScheme.onPrimary,
-        unselectedItemColor: colorScheme.onPrimary.withOpacity(0.6),
-        backgroundColor: colorScheme.primary,
+        backgroundColor: backgroundColor,
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.white.withOpacity(0.7),
+        selectedLabelStyle: const TextStyle(color: Colors.white),
+        unselectedLabelStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),

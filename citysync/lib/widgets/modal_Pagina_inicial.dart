@@ -1,12 +1,15 @@
+import 'package:citysync/views/reportaProblema.dart';
 import 'package:citysync/widgets/botaoCategoria.dart';
 import 'package:flutter/material.dart';
 
 void mostrarModal(BuildContext context) {
   String? categoriaSelecionada;
+  final isDark = Theme.of(context).brightness == Brightness.dark;
 
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
+    backgroundColor: Colors.transparent,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),
@@ -17,18 +20,19 @@ void mostrarModal(BuildContext context) {
             return Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.blue,
-                borderRadius: BorderRadius.all(Radius.circular(10)),
+                color: isDark ? Colors.grey[900] : Colors.blue,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
+                  Text(
                     'Escolha uma das opções que descrevem o seu problema',
                     style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                        fontSize: 13),
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white : Colors.white,
+                      fontSize: 13,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Padding(
@@ -41,8 +45,7 @@ void mostrarModal(BuildContext context) {
                       physics: const NeverScrollableScrollPhysics(),
                       children: [
                         Botaocategoria(
-                          iconeImagem: Image.asset(
-                              'assets/images/icones/icone_buraco.png'),
+                          iconeImagem: Image.asset('assets/images/icones/icone_buraco.png'),
                           texto: 'Buraco',
                           selecionado: categoriaSelecionada == 'Buraco',
                           aoClicar: () {
@@ -52,8 +55,7 @@ void mostrarModal(BuildContext context) {
                           },
                         ),
                         Botaocategoria(
-                          iconeImagem: Image.asset(
-                              'assets/images/icones/icone_poste.png'),
+                          iconeImagem: Image.asset('assets/images/icones/icone_poste.png'),
                           texto: 'Iluminação',
                           selecionado: categoriaSelecionada == 'Iluminação',
                           aoClicar: () {
@@ -63,8 +65,7 @@ void mostrarModal(BuildContext context) {
                           },
                         ),
                         Botaocategoria(
-                          iconeImagem: Image.asset(
-                              'assets/images/icones/icone_lixo.png'),
+                          iconeImagem: Image.asset('assets/images/icones/icone_lixo.png'),
                           texto: 'Lixo',
                           selecionado: categoriaSelecionada == 'Lixo',
                           aoClicar: () {
@@ -74,8 +75,7 @@ void mostrarModal(BuildContext context) {
                           },
                         ),
                         Botaocategoria(
-                          iconeImagem: Image.asset(
-                              'assets/images/icones/icone_semafaro.png'),
+                          iconeImagem: Image.asset('assets/images/icones/icone_semafaro.png'),
                           texto: 'Semafaro',
                           selecionado: categoriaSelecionada == 'Semafaro',
                           aoClicar: () {
@@ -85,11 +85,9 @@ void mostrarModal(BuildContext context) {
                           },
                         ),
                         Botaocategoria(
-                          iconeImagem: Image.asset(
-                              'assets/images/icones/icone_vazamento.png'),
+                          iconeImagem: Image.asset('assets/images/icones/icone_vazamento.png'),
                           texto: 'Vazamento/esgoto',
-                          selecionado:
-                              categoriaSelecionada == 'Vazamento/esgoto',
+                          selecionado: categoriaSelecionada == 'Vazamento/esgoto',
                           aoClicar: () {
                             setModalState(() {
                               categoriaSelecionada = 'Vazamento/esgoto';
@@ -97,8 +95,7 @@ void mostrarModal(BuildContext context) {
                           },
                         ),
                         Botaocategoria(
-                          iconeImagem: Image.asset(
-                              'assets/images/icones/transporte.png'),
+                          iconeImagem: Image.asset('assets/images/icones/transporte.png'),
                           texto: 'Transporte',
                           selecionado: categoriaSelecionada == 'Transporte',
                           aoClicar: () {
@@ -108,8 +105,7 @@ void mostrarModal(BuildContext context) {
                           },
                         ),
                         Botaocategoria(
-                          iconeImagem:
-                              Image.asset('assets/images/icones/outros.png'),
+                          iconeImagem: Image.asset('assets/images/icones/outros.png'),
                           texto: 'Outros',
                           selecionado: categoriaSelecionada == 'Outros',
                           aoClicar: () {
@@ -126,18 +122,21 @@ void mostrarModal(BuildContext context) {
                     onPressed: categoriaSelecionada == null
                         ? null
                         : () {
-                            print(categoriaSelecionada);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => tela_report()),
+                            );
                           },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      disabledBackgroundColor: Colors.white.withOpacity(0.6),
-                      disabledForegroundColor: Colors.black45,
+                      backgroundColor: isDark ? Colors.white : Colors.white,
+                      foregroundColor: isDark ? Colors.black : Colors.black,
+                      disabledBackgroundColor:
+                          isDark ? Colors.white.withOpacity(0.4) : Colors.white.withOpacity(0.6),
+                      disabledForegroundColor: isDark ? Colors.black38 : Colors.black45,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       elevation: 4,
                       textStyle: const TextStyle(
                         fontSize: 16,
@@ -145,7 +144,7 @@ void mostrarModal(BuildContext context) {
                       ),
                     ),
                     child: const Text('Continuar'),
-                  )
+                  ),
                 ],
               ),
             );

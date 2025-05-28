@@ -16,17 +16,24 @@ class _TelaprincipalState extends State<Telaprincipal> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.lightBlue,
+      backgroundColor: isDark ? Colors.grey[900] : Colors.lightBlue,
       appBar: AppBar(
-        backgroundColor: Colors.blue,
+        backgroundColor: isDark ? Colors.grey[850] : Colors.blue,
         title: Row(
-          children: const [
-            Icon(Icons.people_alt_outlined, color: Colors.white),
-            SizedBox(width: 8),
-            Text("denis",
-                style: TextStyle(
-                    fontWeight: FontWeight.w700, color: Colors.white)),
+          children: [
+            Icon(Icons.people_alt_outlined, color: isDark ? Colors.white : Colors.white),
+            const SizedBox(width: 8),
+            Text(
+              "denis",
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: isDark ? Colors.white : Colors.white,
+              ),
+            ),
           ],
         ),
       ),
@@ -35,7 +42,9 @@ class _TelaprincipalState extends State<Telaprincipal> {
           children: [
             Expanded(
               child: Container(
-                decoration: const BoxDecoration(color: Colors.white),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.black : Colors.white,
+                ),
                 child: GoogleMap(
                   initialCameraPosition: CameraPosition(
                     target: _senaiFeiraDeSantana,
@@ -50,7 +59,7 @@ class _TelaprincipalState extends State<Telaprincipal> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => mostrarModal(context),
-        backgroundColor: Colors.redAccent,
+        backgroundColor: isDark ? Colors.red[400] : Colors.redAccent,
         icon: const Icon(Icons.dangerous_sharp, color: Colors.white),
         label: const Text(
           'Reportar um problema',
