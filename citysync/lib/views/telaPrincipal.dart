@@ -1,8 +1,11 @@
+import 'package:citysync/services/testeAPI.dart';
 import 'package:citysync/views/reportaProblema.dart';
 import 'package:citysync/widgets/botaoCategoria.dart';
 import 'package:citysync/widgets/modal_Pagina_inicial.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+
 
 class Telaprincipal extends StatefulWidget {
   Telaprincipal({super.key});
@@ -14,6 +17,9 @@ class Telaprincipal extends StatefulWidget {
 class _TelaprincipalState extends State<Telaprincipal> {
   final LatLng _senaiFeiraDeSantana = const LatLng(-12.2663, -38.9458);
 
+   final api = TesteApi();
+
+   
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -58,7 +64,15 @@ class _TelaprincipalState extends State<Telaprincipal> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => mostrarModal(context),
+        onPressed: () async {
+    final api = TesteApi();
+    try {
+      final mensagem = await api.requisicao();
+      print(mensagem); 
+    } catch (e) {
+      print('Erro ao chamar API: $e');
+    }
+  },
         backgroundColor: isDark ? Colors.red[400] : Colors.redAccent,
         icon: const Icon(Icons.dangerous_sharp, color: Colors.white),
         label: const Text(
