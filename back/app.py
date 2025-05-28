@@ -1,15 +1,18 @@
-
-from flask import Flask, render_template, jsonify, request
-import sqlite3
+from flask import Flask, jsonify
+from flask_cors import CORS  # 👈 import
 
 app = Flask(__name__)
+CORS(app)  # 👈 habilita CORS
 
 @app.route('/teste')
-def login():
-    return jsonify({'mensagem' : 'ola mundo'});
-
+def teste():
+    return jsonify({'mensagem': 'Iwweizinho apelao!'})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000)  
 
-    
+
+
+@app.route('/login')
+def logarUsuario():
+    print("Usuario Logado")
