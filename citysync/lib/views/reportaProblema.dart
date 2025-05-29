@@ -1,5 +1,10 @@
+import 'dart:typed_data';
+import 'dart:io' as io show File;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:image_picker_web/image_picker_web.dart';
 
 class tela_report extends StatefulWidget {
   @override
@@ -15,22 +20,87 @@ class _tela_report_State extends State<tela_report> {
   final LatLng _initialPosicao = LatLng(-12.2664, -38.9668);
   GoogleMapController? _mapController;
 
+  Uint8List? imageBytes;
+  io.File? imageFile;
+  String? imageName;
+
+  Future<void> pickImage() async {
+    if (kIsWeb) {
+      // Web
+      final media = await ImagePickerWeb.getImageInfo;
+      if (media != null) {
+        setState(() {
+          imageBytes = media.data;
+          imageName = media.fileName ?? 'imagem_web.png';
+        });
+      }
+    } else {
+      // Mobile
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.camera);
+
+      if (pickedFile != null) {
+        setState(() {
+          imageFile = io.File(pickedFile.path);
+          imageName = pickedFile.name;
+        });
+      }
+    }
+  }
+
+  void _abrirVisualizacaoImagem() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Scaffold(
+          backgroundColor: Colors.black.withOpacity(0.9),
+          body: Stack(
+            children: [
+              Center(
+                child: kIsWeb
+                    ? Image.memory(imageBytes!)
+                    : Image.file(imageFile!),
+              ),
+              Positioned(
+                top: 40,
+                right: 20,
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.5),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      size: 28,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _reportarProblema() {
     if (addressController.text.isNotEmpty &&
         problemController.text.isNotEmpty &&
         timeController.text.isNotEmpty) {
       showDialog(
         context: context,
-        builder: (BuildContext context) {
+        builder: (context) {
           return AlertDialog(
             title: const Text("Sucesso"),
             content: const Text("Seu problema foi reportado!"),
-            actions: <Widget>[
+            actions: [
               TextButton(
                 child: const Text("OK"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
+                onPressed: () => Navigator.of(context).pop(),
               ),
             ],
           );
@@ -73,8 +143,8 @@ class _tela_report_State extends State<tela_report> {
                 ),
                 // ÍCONE NO CANTO SUPERIOR DO MAPA
                 Positioned(
-                  top: 16.0,
-                  left: 16.0,
+                  top: 16,
+                  left: 16,
                   child: CircleAvatar(
                     backgroundColor: Colors.grey[300],
                     child: const Icon(
@@ -111,8 +181,9 @@ class _tela_report_State extends State<tela_report> {
                   _buildSectionTitle("Descrição (opcional)"),
                   _buildTextField(descriptionController, "Descreva o problema com mais detalhes..."),
                   const SizedBox(height: 10),
-                  Align(
-                    alignment: Alignment.center,
+
+                  GestureDetector(
+                    onTap: pickImage, // Tocar aqui para tirar ou selecionar uma nova imagem
                     child: Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
@@ -122,7 +193,28 @@ class _tela_report_State extends State<tela_report> {
                       child: const Icon(Icons.camera_alt, color: Colors.black, size: 30),
                     ),
                   ),
+
+                  // --- NOVO BOTÃO DE VISUALIZAÇÃO AQUI ---
+                  if (imageName != null) // Só mostra o botão se houver uma imagem salva
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10), // Adiciona um pequeno espaçamento
+                      child: ElevatedButton(
+                        onPressed: _abrirVisualizacaoImagem, // Chama sua função de visualização
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white, // Cor do botão
+                          foregroundColor: Colors.black, // Cor do texto do botão
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: const Text("Visualizar Imagem"),
+                      ),
+                    ),
+
                   const SizedBox(height: 20),
+
+                  const SizedBox(height: 20),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [

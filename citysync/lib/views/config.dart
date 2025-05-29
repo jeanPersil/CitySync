@@ -1,12 +1,15 @@
+import 'package:citysync/views/login.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:citysync/Tema/theme_provider.dart';
 
 class Tela_config extends StatelessWidget {
   const Tela_config({super.key});
 
   @override
   Widget build(BuildContext context) {
-    bool isDarkMode = false; // Estado fictício para o tema
-    String selectedLanguage = 'pt'; // Estado fictício para o idioma
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    String selectedLanguage = 'pt';
 
     return Scaffold(
       appBar: AppBar(
@@ -18,10 +21,9 @@ class Tela_config extends StatelessWidget {
             leading: const Icon(Icons.brightness_6),
             title: const Text('Tema Escuro'),
             trailing: Switch(
-              value: isDarkMode,
-              onChanged: (bool value) {
-                //lógica par alternar o tema
-                
+              value: themeProvider.isDarkMode,
+              onChanged: (value) {
+                themeProvider.toggleTheme();
               },
             ),
           ),
@@ -31,8 +33,7 @@ class Tela_config extends StatelessWidget {
             trailing: DropdownButton<String>(
               value: selectedLanguage,
               onChanged: (String? newValue) {
-                //lógica pra trocar o idioma
-                
+                // lógica para trocar o idioma
               },
               items: const [
                 DropdownMenuItem(
@@ -40,10 +41,9 @@ class Tela_config extends StatelessWidget {
                   child: Text('Português'),
                 ),
                 DropdownMenuItem(
-                  value: 'en',
-                  child: Text('Inglês'),
+                  value: 'dv',
+                  child: Text('Em desenvolvimento'),
                 ),
-                // Adicione mais idiomas
               ],
             ),
           ),
@@ -51,7 +51,11 @@ class Tela_config extends StatelessWidget {
             leading: const Icon(Icons.exit_to_app),
             title: const Text('Logout'),
             onTap: () {
-              
+               Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => TelaLogin()),
+                (Route<dynamic> route) => false, 
+              );
             },
           ),
         ],

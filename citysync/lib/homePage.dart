@@ -1,6 +1,6 @@
-import 'package:citysync/config.dart';
-import 'package:citysync/problemasReport.dart';
-import 'package:citysync/telaPrincipal.dart';
+import 'package:citysync/views/config.dart';
+import 'package:citysync/views/problemasReport.dart';
+import 'package:citysync/views/telaPrincipal.dart';
 import 'package:flutter/material.dart';
 
 class Homepage extends StatefulWidget {
@@ -22,45 +22,51 @@ class _HomepageState extends State<Homepage> {
 
   @override
   Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+
+    
+    final backgroundColor = brightness == Brightness.light ? Colors.blue : Colors.grey[900];
+
     return Scaffold(
       body: PageView(
         controller: pc,
         physics: const NeverScrollableScrollPhysics(),
         children: [
           Telaprincipal(),
-          Problemasreport(),
-          Tela_config(),
+          const Problemasreport(),
+          const Tela_config(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.blue,
         currentIndex: paginaAtual,
+        backgroundColor: backgroundColor,
         selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white,
-        items: [
+        unselectedItemColor: Colors.white.withOpacity(0.7),
+        selectedLabelStyle: const TextStyle(color: Colors.white),
+        unselectedLabelStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+        items: const [
           BottomNavigationBarItem(
-              icon: Icon(
-                Icons.home,
-                color: Colors.white,
-              ),
-              label: "Home"),
+            icon: Icon(Icons.home),
+            label: "Home",
+          ),
           BottomNavigationBarItem(
-              icon: Icon(
-                Icons.report_problem_sharp,
-                color: Colors.white,
-              ),
-              label: "Problemas report"),
+            icon: Icon(Icons.report_problem_sharp),
+            label: "Problemas report",
+          ),
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.settings,
-              color: Colors.white,
-            ),
-            label: "configurações",
+            icon: Icon(Icons.settings),
+            label: "Configurações",
           ),
         ],
         onTap: (pagina) {
-          pc.animateToPage(pagina,
-              duration: Duration(milliseconds: 400), curve: Curves.ease);
+          setState(() {
+            paginaAtual = pagina;
+          });
+          pc.animateToPage(
+            pagina,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.ease,
+          );
         },
       ),
     );
