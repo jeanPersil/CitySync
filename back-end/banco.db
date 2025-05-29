@@ -1,5 +1,5 @@
 CREATE DATABASE IF NOT EXISTS citySync;
--- Remover 'USE citySync;' se você seleciona via conexão no app
+USE citySync;
 
 CREATE TABLE endereco (
     id_endereco INT AUTO_INCREMENT PRIMARY KEY,
@@ -30,13 +30,14 @@ CREATE TABLE categoria (
 
 CREATE TABLE report (
     id_report INT AUTO_INCREMENT PRIMARY KEY,
-    titulo VARCHAR(100) NOT NULL,
-    descricao TEXT,
-    data_report TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
-    id_usuario INT,
+    endereco VARCHAR(100) NOT NULL,
     id_categoria INT,
-    
-    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
-    FOREIGN KEY (id_categoria) REFERENCES categoria(id_categoria)
+    duracao INT,
+    descricao VARCHAR(255) NOT NULL, 
+    url_imagem varchar(200) NOT NULL,
+    data_report TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id_usuario INT,
+
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE SET NULL,
+    FOREIGN KEY (id_categoria) REFERENCES categoria(id_categoria) ON DELETE SET NULL
 );
