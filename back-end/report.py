@@ -34,9 +34,15 @@ def efetuar_report():
 
 @report_bp.route("/listar_reports", methods=['GET'])  
 def listar_reports():
+
+    dados = request.json
+    id_usuario = dados["id_usuario"];
+
     try:
         cursor = mysql.connection.cursor()
-        cursor.execute("SELECT id_report, endereco, id_categoria, duracao, descricao, url_imagem, data_report, id_usuario FROM report")
+        cursor.execute("""
+        SELECT id_report, endereco, id_categoria, duracao, descricao, url_imagem, data_report, id_usuario FROM report WHERE id_usuario = %s
+""", (int(id_usuario),))
         resultados = cursor.fetchall()
         
         reports = []
