@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'dart:io' as io show File;
+
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -125,10 +126,12 @@ class _tela_report_State extends State<tela_report> {
     final screenHeight = MediaQuery.of(context).size.height;
     final panelHeight = screenHeight * 0.6;
 
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
       body: Column(
         children: [
-          // MAPA NA PARTE DE CIMA
           Expanded(
             child: Stack(
               children: [
@@ -141,29 +144,25 @@ class _tela_report_State extends State<tela_report> {
                     _mapController = controller;
                   },
                 ),
-                // ÍCONE NO CANTO SUPERIOR DO MAPA
                 Positioned(
                   top: 16,
                   left: 16,
                   child: CircleAvatar(
-                    backgroundColor: Colors.grey[300],
-                    child: const Icon(
-                      Icons.person,
-                      color: Colors.black,
-                    ),
+                    backgroundColor: isDark ? Colors.grey[700] : Colors.grey[300],
+                    child: Icon(Icons.person,
+                        color: isDark ? Colors.black : Colors.white),
                   ),
                 ),
               ],
             ),
           ),
-          // PARTE AZUL EM BAIXO
           Container(
             width: double.infinity,
             height: panelHeight,
             padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              color: Colors.blue,
-              borderRadius: BorderRadius.only(
+            decoration: BoxDecoration(
+              color: isDark ? Colors.grey[900] : Colors.blue,
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(25),
                 topRight: Radius.circular(25),
               ),
@@ -172,25 +171,62 @@ class _tela_report_State extends State<tela_report> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildSectionTitle("Endereço selecionado:"),
-                  _buildTextField(addressController, "EX: Senai - FSA"),
-                  _buildSectionTitle("Problema relatado"),
-                  _buildTextField(problemController, "EX: Buraco"),
-                  _buildSectionTitle("A quanto tempo ocorre?"),
-                  _buildTextField(timeController, "EX: 2 horas"),
-                  _buildSectionTitle("Descrição (opcional)"),
-                  _buildTextField(descriptionController, "Descreva o problema com mais detalhes..."),
+                  _buildSectionTitle("Endereço selecionado:", isDark),
+                  _buildTextField(addressController, "EX: Senai - FSA", isDark),
+                  _buildSectionTitle("Problema relatado", isDark),
+                  _buildTextField(problemController, "EX: Buraco", isDark),
+                  _buildSectionTitle("A quanto tempo ocorre?", isDark),
+                  _buildTextField(timeController, "EX: 2 horas", isDark),
+                  _buildSectionTitle("Descrição (opcional)", isDark),
+                  _buildTextField(descriptionController, "Descreva o problema...", isDark),
+
                   const SizedBox(height: 10),
 
-                  GestureDetector(
+                 GestureDetector(
                     onTap: pickImage, // Tocar aqui para tirar ou selecionar uma nova imagem
                     child: Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: isDark ? Colors.grey[800] : Colors.white,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(Icons.camera_alt, color: Colors.black, size: 30),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.camera_alt,
+                            color: isDark ? Colors.white : Colors.black,
+                            size: 30,
+                          ),
+                          if (imageName != null) ...[
+                            const SizedBox(width: 8),
+                            // Texto "Imagem salva" ao lado do ícone
+                            Text(
+                              'Imagem salva: ${imageName!.length > 15 ? imageName!.substring(0, 12) + '...' : imageName}',
+                              style: TextStyle(
+                                color: isDark ? Colors.white : Colors.black,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            // Botão 'X' para remover a imagem
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  imageBytes = null;
+                                  imageFile = null;
+                                  imageName = null;
+                                });
+                              },
+                              child: Icon(
+                                Icons.close,
+                                color: isDark ? Colors.redAccent : Colors.red,
+                                size: 20,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
                   ),
 
@@ -210,9 +246,6 @@ class _tela_report_State extends State<tela_report> {
                         child: const Text("Visualizar Imagem"),
                       ),
                     ),
-
-                  const SizedBox(height: 20),
-
                   const SizedBox(height: 20),
 
                   Row(
@@ -241,15 +274,19 @@ class _tela_report_State extends State<tela_report> {
                         child: ElevatedButton(
                           onPressed: _cancelarReport,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
+                            backgroundColor:
+                                isDark ? Colors.grey[800] : Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
-                              side: const BorderSide(color: Colors.grey),
+                              side: BorderSide(
+                                  color: isDark ? Colors.white30 : Colors.grey),
                             ),
                           ),
-                          child: const Text(
+                          child: Text(
                             "Cancelar",
-                            style: TextStyle(color: Colors.black, fontSize: 14),
+                            style: TextStyle(
+                                color: isDark ? Colors.white : Colors.black,
+                                fontSize: 14),
                           ),
                         ),
                       ),
@@ -264,7 +301,7 @@ class _tela_report_State extends State<tela_report> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(String title, bool isDark) {
     return Padding(
       padding: const EdgeInsets.only(top: 12, bottom: 8),
       child: Text(
@@ -279,7 +316,8 @@ class _tela_report_State extends State<tela_report> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String hint) {
+  Widget _buildTextField(
+      TextEditingController controller, String hint, bool isDark) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: TextField(
