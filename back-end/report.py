@@ -1,9 +1,4 @@
-from flask import Blueprint, request, jsonify
-from config import mysql  
-
-report_bp = Blueprint('auth', __name__)
-
-
+#report.py
 from flask import Blueprint, request, jsonify
 from config import mysql  
 
@@ -17,26 +12,30 @@ def efetuar_report():
     duracao = dados['duracao']
     descricao = dados['descricao']
     url_imagem = dados['url_imagem']
-    data_report = dados['data_report']
     id_usuario = dados['id_usuario']
     
     try:
         cursor = mysql.connection.cursor()
         cursor.execute("""
-            INSERT INTO report (endereco, id_categoria, duracao, descricao, url_imagem, data_report, id_usuario)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """, (endereco, categoria, duracao, descricao, url_imagem, data_report, id_usuario))
+            INSERT INTO report (endereco, id_categoria, duracao, descricao, url_imagem, id_usuario)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (endereco, categoria, duracao, descricao, url_imagem, id_usuario))
         mysql.connection.commit()
         cursor.close()
-        return jsonify({'mensagem': 'Reporte realizado com sucesso!'}), 201
+        return jsonify({
+            'status': 'successo',
+            'mensagem': 'Reporte realizado com sucesso!'
+        }), 201
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
 
-@report_bp.route("/listar_reports", methods=['GET'])  
+@report_bp.route("/listar_reports", methods=['POST'])  
 def listar_reports():
 
     dados = request.json
-    id_usuario = dados["id_usuario"];
+    if "id_usuario" not in dados:
+        return jsonify({"erro": "Campo 'id_usuario' ausente"}), 400
+    id_usuario = dados["id_usuario"]
 
     try:
         cursor = mysql.connection.cursor()

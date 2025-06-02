@@ -1,3 +1,4 @@
+#app.py
 from flask import Flask
 from flask_cors import CORS
 from config import mysql, init_app
@@ -12,6 +13,9 @@ from report import report_bp
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(report_bp)
+@app.route('/')
+def teste():
+    return {'mensagem': 'Api Funcional'}
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)
