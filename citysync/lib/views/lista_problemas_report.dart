@@ -43,18 +43,22 @@ class ProblemasReport  extends StatelessWidget {
     final horizontalPadding = (screenWidth < 600) ? 16.0 : (screenWidth - containerWidth) / 2;
     final colorScheme = Theme.of(context).colorScheme;
 
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: isDark ? Colors.grey[900] : Colors.lightBlue.withOpacidade(0.4),
       appBar: AppBar(
-        backgroundColor: colorScheme.primary,
+        backgroundColor: isDark ? Colors.grey[850] : Colors.blue,
         title: Row(
           children: [
-            Icon(Icons.people_alt_outlined, color: colorScheme.onPrimary),
+            Icon(Icons.people_alt_outlined, color: isDark ? Colors.white : Colors.white),
             const SizedBox(width: 8),
             Text(
               "Sylas",
               style: TextStyle(
                 fontWeight: FontWeight.w700,
-                color: colorScheme.onPrimary,
+                color: isDark ? Colors.white : Colors.white,
               ),
             ),
           ],
@@ -70,7 +74,7 @@ class ProblemasReport  extends StatelessWidget {
               padding: const EdgeInsets.all(8.0),
               margin: const EdgeInsets.only(bottom: 16.0),
               decoration: BoxDecoration(
-                color: colorScheme.secondary.withOpacidade(0.7),
+                color: colorScheme.secondary.withOpacidade(0.8),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Center(
@@ -88,7 +92,7 @@ class ProblemasReport  extends StatelessWidget {
                 width: containerWidth,
                 margin: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
-                  color: colorScheme.surface,
+                  color: colorScheme.secondary.withOpacidade(0.8),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 padding: const EdgeInsets.all(8),
