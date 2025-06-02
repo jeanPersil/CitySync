@@ -1,6 +1,6 @@
 import 'package:citysync/views/config.dart';
-import 'package:citysync/views/problemasReport.dart';
-import 'package:citysync/views/telaPrincipal.dart';
+import 'package:citysync/views/problemas_report.dart';
+import 'package:citysync/views/tela_principal.dart';
 import 'package:flutter/material.dart';
 
 class Homepage extends StatefulWidget {
@@ -34,7 +34,7 @@ class _HomepageState extends State<Homepage> {
         children: [
           Telaprincipal(),
           const Problemasreport(),
-          const Tela_config(),
+          const TelaConfig(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(

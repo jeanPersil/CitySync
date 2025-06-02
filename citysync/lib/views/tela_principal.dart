@@ -1,7 +1,7 @@
-import 'package:citysync/services/testeAPI.dart';
-import 'package:citysync/views/reportaProblema.dart';
-import 'package:citysync/widgets/botaoCategoria.dart';
-import 'package:citysync/widgets/modal_Pagina_inicial.dart';
+import 'package:citysync/services/teste_api.dart';
+import 'package:citysync/views/report_problema.dart';
+import 'package:citysync/widgets/botao_categoria.dart';
+import 'package:citysync/widgets/modal_pagina_inicial.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 

@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:citysync/Tema/theme_provider.dart';
 
-class Tela_config extends StatelessWidget {
-  const Tela_config({super.key});
+class TelaConfig extends StatelessWidget {
+  const TelaConfig({super.key});
 
   @override
   Widget build(BuildContext context) {
