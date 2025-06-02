@@ -6,20 +6,22 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_picker_web/image_picker_web.dart';
+import 'package:citysync/Tema/color_extension.dart';
 
-class tela_report extends StatefulWidget {
+class TelaReport extends StatefulWidget {
+  const TelaReport({super.key});
+
   @override
-  _tela_report_State createState() => _tela_report_State();
+  TelaReportState createState() => TelaReportState();
 }
 
-class _tela_report_State extends State<tela_report> {
+class TelaReportState extends State<TelaReport> {
   final TextEditingController addressController = TextEditingController();
   final TextEditingController problemController = TextEditingController();
   final TextEditingController timeController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
 
   final LatLng _initialPosicao = LatLng(-12.2664, -38.9668);
-  GoogleMapController? _mapController;
 
   Uint8List? imageBytes;
   io.File? imageFile;
@@ -54,7 +56,7 @@ class _tela_report_State extends State<tela_report> {
       context: context,
       builder: (context) {
         return Scaffold(
-          backgroundColor: Colors.black.withOpacity(0.9),
+          backgroundColor: Colors.black.withOpacidade(0.9),
           body: Stack(
             children: [
               Center(
@@ -70,7 +72,7 @@ class _tela_report_State extends State<tela_report> {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withOpacidade(0.5),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -141,7 +143,6 @@ class _tela_report_State extends State<tela_report> {
                     zoom: 16,
                   ),
                   onMapCreated: (controller) {
-                    _mapController = controller;
                   },
                 ),
                 Positioned(
@@ -202,7 +203,7 @@ class _tela_report_State extends State<tela_report> {
                             const SizedBox(width: 8),
                             // Texto "Imagem salva" ao lado do ícone
                             Text(
-                              'Imagem salva: ${imageName!.length > 15 ? imageName!.substring(0, 12) + '...' : imageName}',
+                              'Imagem salva: ${imageName!.length > 15 ? '${imageName!.substring(0, 12)}...' : imageName}',
                               style: TextStyle(
                                 color: isDark ? Colors.white : Colors.black,
                                 fontSize: 14,

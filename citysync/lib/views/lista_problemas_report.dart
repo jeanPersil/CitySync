@@ -1,8 +1,9 @@
+// problemas_report.dart
 import 'package:flutter/material.dart';
 import 'package:citysync/Tema/color_extension.dart';
 
-class Problemasreport extends StatelessWidget {
-  const Problemasreport({super.key});
+class ProblemasReport  extends StatelessWidget {
+  const ProblemasReport ({super.key});
 
   // Simulação de "dados vindo do Banco de dados"
   final List<String> prioridades = const [

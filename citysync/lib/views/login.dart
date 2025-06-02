@@ -11,8 +11,8 @@ class TelaLogin extends StatefulWidget {
 class _TelaLoginState extends State<TelaLogin> {
   final TextEditingController _emailControler = TextEditingController();
   final TextEditingController _senhaControler = TextEditingController();
-  String? erro_email;
-  String? erro_senha;
+  String? erroEmail;
+  String? erroSenha;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +35,7 @@ class _TelaLoginState extends State<TelaLogin> {
                 controller: _emailControler,
                 decoration: InputDecoration(
                   labelText: "Email",
-                  errorText: erro_email,
+                  errorText: erroEmail,
                   labelStyle: TextStyle(color: Colors.white),
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(
@@ -53,7 +53,7 @@ class _TelaLoginState extends State<TelaLogin> {
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: "Senha",
-                  errorText: erro_senha,
+                  errorText: erroSenha,
                   labelStyle: TextStyle(color: Colors.white),
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white),
@@ -78,14 +78,14 @@ class _TelaLoginState extends State<TelaLogin> {
                   onPressed: () {
                     if (_emailControler.text.isEmpty) {
                       setState(() {
-                        erro_email = "Preencha seu e-mail";
+                        erroEmail = "Preencha seu e-mail";
                       });
                       return;
                     }
 
                     if (_senhaControler.text.isEmpty) {
                       setState(() {
-                        erro_senha = "Preencha sua senha";
+                        erroSenha = "Preencha sua senha";
                       });
                       return;
                     }

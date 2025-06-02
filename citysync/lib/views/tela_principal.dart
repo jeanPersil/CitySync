@@ -1,6 +1,4 @@
 import 'package:citysync/services/teste_api.dart';
-import 'package:citysync/views/report_problema.dart';
-import 'package:citysync/widgets/botao_categoria.dart';
 import 'package:citysync/widgets/modal_pagina_inicial.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -8,7 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 
 class Telaprincipal extends StatefulWidget {
-  Telaprincipal({super.key});
+  const Telaprincipal({super.key});
 
   @override
   State<Telaprincipal> createState() => _TelaprincipalState();
