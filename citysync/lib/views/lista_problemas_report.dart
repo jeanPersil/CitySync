@@ -23,14 +23,14 @@ class ProblemasReport  extends StatelessWidget {
   Color corPorPrioridade(ColorScheme cs, String prioridade) {
     switch (prioridade) {
       case "Alta":
-        return Colors.red.withOpacidade(0.6);
+        return Colors.red.withOpacidade(0.4);
       case "Mediana":
-        return Colors.yellow.withOpacidade(0.6);
+        return Colors.yellow.withOpacidade(0.4);
       case "Baixa":
-        return Colors.green.withOpacidade(0.6);
+        return Colors.green.withOpacidade(0.4);
       default:
         // fallback
-        return cs.secondary.withOpacidade(0.6);
+        return cs.secondary.withOpacidade(0.4);
     }
   }
 
@@ -47,7 +47,7 @@ class ProblemasReport  extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? Colors.grey[900] : Colors.lightBlue.withOpacidade(0.4),
+      backgroundColor: isDark ? Colors.grey[900] : const Color.fromARGB(255, 3, 115, 244).withOpacidade(0.4),
       appBar: AppBar(
         backgroundColor: isDark ? Colors.grey[850] : Colors.blue,
         title: Row(
@@ -108,6 +108,7 @@ class ProblemasReport  extends StatelessWidget {
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: corFundo,
+                        border: Border.all(color: corFundo, width: 4),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: IntrinsicHeight(
