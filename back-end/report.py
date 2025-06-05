@@ -8,16 +8,16 @@ report_bp = Blueprint('report', __name__)
 def efetuar_report():
     dados = request.json
     endereco = dados['endereco']
-    categoria = dados['id_categoria']
+    categoria = dados['categoria']
+    id_usuario = dados['id_usuario']
     duracao = dados['duracao']
     descricao = dados['descricao']
     url_imagem = dados['url_imagem']
-    id_usuario = dados['id_usuario']
     
     try:
         cursor = mysql.connection.cursor()
         cursor.execute("""
-            INSERT INTO report (endereco, id_categoria, duracao, descricao, url_imagem, id_usuario)
+            INSERT INTO report (endereco, categoria_id, duracao, descricao, url_imagem, usuario_id)
             VALUES (%s, %s, %s, %s, %s, %s)
         """, (endereco, categoria, duracao, descricao, url_imagem, id_usuario))
         mysql.connection.commit()
@@ -40,7 +40,7 @@ def listar_reports():
     try:
         cursor = mysql.connection.cursor()
         cursor.execute("""
-        SELECT id_report, endereco, id_categoria, duracao, descricao, url_imagem, data_report, id_usuario FROM report WHERE id_usuario = %s
+        SELECT id, endereco, categoria_id, duracao, descricao, url_imagem, data_criacao, usuario_id FROM report WHERE usuario_id = %s
 """, (int(id_usuario),))
         resultados = cursor.fetchall()
         
@@ -49,7 +49,7 @@ def listar_reports():
             reports.append({
                 "id": linha[0],
                 "endereco": linha[1],
-                "id_categoria": linha[2],
+                "categoria_id": linha[2],
                 "duracao": linha[3],
                 "descricao": linha[4],
                 "url_imagem": linha[5],

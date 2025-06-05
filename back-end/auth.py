@@ -14,7 +14,7 @@ def cadastrar_usuario():
     nome_usuario = dados['nome']
     cpf_usuario = dados['cpf']
     email_usuario = dados['email']
-    senha_usuario = dados['senha']  # Sem hash aqui
+    senha_usuario = dados['senha']  
     telefone_usuario = dados['telefone']
 
     try:
