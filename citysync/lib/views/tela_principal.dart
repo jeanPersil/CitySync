@@ -1,12 +1,11 @@
-import 'package:citysync/services/teste_api.dart';
 import 'package:citysync/widgets/modal_pagina_inicial.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-
-
 class Telaprincipal extends StatefulWidget {
-  const Telaprincipal({super.key});
+  const Telaprincipal({super.key, required this.nomeUsuario});
+
+  final String nomeUsuario;
 
   @override
   State<Telaprincipal> createState() => _TelaprincipalState();
@@ -15,9 +14,6 @@ class Telaprincipal extends StatefulWidget {
 class _TelaprincipalState extends State<Telaprincipal> {
   final LatLng _senaiFeiraDeSantana = const LatLng(-12.2663, -38.9458);
 
-   final api = TesteApi();
-
-   
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -29,10 +25,11 @@ class _TelaprincipalState extends State<Telaprincipal> {
         backgroundColor: isDark ? Colors.grey[850] : Colors.blue,
         title: Row(
           children: [
-            Icon(Icons.people_alt_outlined, color: isDark ? Colors.white : Colors.white),
+            Icon(Icons.people_alt_outlined,
+                color: isDark ? Colors.white : Colors.white),
             const SizedBox(width: 8),
             Text(
-              "denis",
+              widget.nomeUsuario,
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 color: isDark ? Colors.white : Colors.white,

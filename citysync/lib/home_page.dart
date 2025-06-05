@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'Tema/color_extension.dart';
 
 class Homepage extends StatefulWidget {
-  const Homepage({super.key});
+  Homepage({super.key, required this.usuarioNome});
+
+  final String usuarioNome;
 
   @override
   State<Homepage> createState() => _HomepageState();
@@ -25,15 +27,17 @@ class _HomepageState extends State<Homepage> {
   Widget build(BuildContext context) {
     final brightness = Theme.of(context).brightness;
 
-    
-    final backgroundColor = brightness == Brightness.light ? Colors.blue : Colors.grey[900];
+    final backgroundColor =
+        brightness == Brightness.light ? Colors.blue : Colors.grey[900];
 
     return Scaffold(
       body: PageView(
         controller: pc,
         physics: const NeverScrollableScrollPhysics(),
         children: [
-          Telaprincipal(),
+          Telaprincipal(
+            nomeUsuario: widget.usuarioNome,
+          ),
           const ProblemasReport(),
           const TelaConfig(),
         ],

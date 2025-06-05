@@ -70,7 +70,6 @@ def login_usuario():
             'usuario': {
                 'id': id_usuario,
                 'nome': nome,
-                'email': email
             }
         }), 200
 
