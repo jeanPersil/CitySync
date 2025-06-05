@@ -161,7 +161,7 @@ class _TelaLoginState extends State<TelaLogin> {
                 child: const Text("Cadastre-se!"),
               ),
 
-              const SizedBox(height: 40), // espaçamento inferior opcional
+              const SizedBox(height: 40), 
             ],
           ),
         ),

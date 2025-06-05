@@ -33,22 +33,3 @@ class Botaocategoria extends StatelessWidget {
 }
 
 
-/*
-
-estureDetector(
-      onTap: () => aoClicar(id),
-      child: Container(
-        decoration: BoxDecoration(
-          color: clicado ? Colors.green : Colors.red
-        ),
-        child: Column(
-          children: [
-            Icon(icone),
-            Text(
-              texto,
-            )
-          ],
-        ),
-      ),
-    );
- */
