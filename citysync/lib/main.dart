@@ -1,5 +1,3 @@
-import 'package:citysync/home_page.dart';
-import 'package:citysync/views/cadastro.dart';
 import 'package:citysync/views/login.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -27,9 +25,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'CitySync',
       theme: themeProvider.themeData,
-      home: Homepage(
-        usuarioNome: 'a',
-      ),
+      home: TelaLogin(), 
     );
   }
 }
