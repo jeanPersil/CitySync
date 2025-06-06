@@ -121,7 +121,7 @@ class _TelaLoginState extends State<TelaLogin> {
                 style: TextStyle(color: Colors.white),
               ),
               TextButton(
-                onPressed: () {},
+                onPressed: () { },
                 child: const Text(
                   "Cadastre-se!",
                   style: TextStyle(color: Color(0xFF20C997)),
