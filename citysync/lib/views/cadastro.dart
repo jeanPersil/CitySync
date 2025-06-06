@@ -56,7 +56,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
             children: [
               const SizedBox(height: 40),
 
-              // Logo 
+              // Logo
               Image.asset(
                 "assets/images/logo.png",
                 height: screenHeight * 0.25,
@@ -80,7 +80,8 @@ class _TelaCadastroState extends State<TelaCadastro> {
                         labelText: "Nome completo",
                         labelStyle: TextStyle(color: Colors.white),
                         enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color.fromARGB(255, 153, 150, 150)),
+                          borderSide: BorderSide(
+                              color: Color.fromARGB(255, 153, 150, 150)),
                         ),
                         focusedBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.white),
@@ -106,7 +107,8 @@ class _TelaCadastroState extends State<TelaCadastro> {
                         labelText: "CPF (somente dígitos)",
                         labelStyle: TextStyle(color: Colors.white),
                         enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color.fromARGB(255, 153, 150, 150)),
+                          borderSide: BorderSide(
+                              color: Color.fromARGB(255, 153, 150, 150)),
                         ),
                         focusedBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.white),
@@ -117,7 +119,8 @@ class _TelaCadastroState extends State<TelaCadastro> {
                         if (value == null || value.trim().isEmpty) {
                           return "Preencha seu CPF";
                         }
-                        if (value.length != 11 || !RegExp(r'^\d{11}$').hasMatch(value)) {
+                        if (value.length != 11 ||
+                            !RegExp(r'^\d{11}$').hasMatch(value)) {
                           return "CPF deve ter 11 dígitos numéricos";
                         }
                         return null;
@@ -136,7 +139,8 @@ class _TelaCadastroState extends State<TelaCadastro> {
                         labelText: "Email",
                         labelStyle: TextStyle(color: Colors.white),
                         enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color.fromARGB(255, 153, 150, 150)),
+                          borderSide: BorderSide(
+                              color: Color.fromARGB(255, 153, 150, 150)),
                         ),
                         focusedBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.white),
@@ -195,7 +199,8 @@ class _TelaCadastroState extends State<TelaCadastro> {
                         labelText: "Telefone (somente dígitos)",
                         labelStyle: TextStyle(color: Colors.white),
                         enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color.fromARGB(255, 153, 150, 150)),
+                          borderSide: BorderSide(
+                              color: Color.fromARGB(255, 153, 150, 150)),
                         ),
                         focusedBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.white),
@@ -224,7 +229,8 @@ class _TelaCadastroState extends State<TelaCadastro> {
                         labelText: "Logradouro",
                         labelStyle: TextStyle(color: Colors.white),
                         enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color.fromARGB(255, 153, 150, 150)),
+                          borderSide: BorderSide(
+                              color: Color.fromARGB(255, 153, 150, 150)),
                         ),
                         focusedBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.white),
@@ -250,7 +256,8 @@ class _TelaCadastroState extends State<TelaCadastro> {
                         labelText: "Número da casa",
                         labelStyle: TextStyle(color: Colors.white),
                         enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color.fromARGB(255, 153, 150, 150)),
+                          borderSide: BorderSide(
+                              color: Color.fromARGB(255, 153, 150, 150)),
                         ),
                         focusedBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.white),
@@ -276,7 +283,8 @@ class _TelaCadastroState extends State<TelaCadastro> {
                         labelText: "Bairro",
                         labelStyle: TextStyle(color: Colors.white),
                         enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color.fromARGB(255, 153, 150, 150)),
+                          borderSide: BorderSide(
+                              color: Color.fromARGB(255, 153, 150, 150)),
                         ),
                         focusedBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.white),
@@ -302,7 +310,8 @@ class _TelaCadastroState extends State<TelaCadastro> {
                         labelText: "Cidade",
                         labelStyle: TextStyle(color: Colors.white),
                         enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color.fromARGB(255, 153, 150, 150)),
+                          borderSide: BorderSide(
+                              color: Color.fromARGB(255, 153, 150, 150)),
                         ),
                         focusedBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.white),
@@ -328,7 +337,8 @@ class _TelaCadastroState extends State<TelaCadastro> {
                         labelText: "Estado",
                         labelStyle: TextStyle(color: Colors.white),
                         enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color.fromARGB(255, 153, 150, 150)),
+                          borderSide: BorderSide(
+                              color: Color.fromARGB(255, 153, 150, 150)),
                         ),
                         focusedBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.white),
@@ -354,7 +364,8 @@ class _TelaCadastroState extends State<TelaCadastro> {
                         labelText: "CEP (somente dígitos)",
                         labelStyle: TextStyle(color: Colors.white),
                         enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color.fromARGB(255, 153, 150, 150)),
+                          borderSide: BorderSide(
+                              color: Color.fromARGB(255, 153, 150, 150)),
                         ),
                         focusedBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.white),
@@ -365,7 +376,8 @@ class _TelaCadastroState extends State<TelaCadastro> {
                         if (value == null || value.trim().isEmpty) {
                           return "Preencha o CEP";
                         }
-                        if (value.length != 8 || !RegExp(r'^\d{8}$').hasMatch(value)) {
+                        if (value.length != 8 ||
+                            !RegExp(r'^\d{8}$').hasMatch(value)) {
                           return "CEP inválido";
                         }
                         return null;
@@ -421,10 +433,6 @@ class _TelaCadastroState extends State<TelaCadastro> {
                       // }
 
                       // Por enquanto, só navega para Home:
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => const Homepage()),
-                      );
                     }
                   },
                   child: const Text(
