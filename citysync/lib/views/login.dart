@@ -1,5 +1,6 @@
 import 'package:citysync/home_page.dart';
 import 'package:citysync/services/auth.dart';
+import 'package:citysync/views/cadastro.dart';
 import 'package:flutter/material.dart';
 
 class TelaLogin extends StatefulWidget {
@@ -101,6 +102,7 @@ class _TelaLoginState extends State<TelaLogin> {
                         MaterialPageRoute(
                             builder: (_) => Homepage(
                                   usuarioNome: resultado['usuario']['nome'],
+                                  usuarioID: resultado['usuario']['id'],
                                 )),
                       );
                     } else {
@@ -121,7 +123,12 @@ class _TelaLoginState extends State<TelaLogin> {
                 style: TextStyle(color: Colors.white),
               ),
               TextButton(
-                onPressed: () { },
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => TelaCadastro()),
+                  );
+                },
                 child: const Text(
                   "Cadastre-se!",
                   style: TextStyle(color: Color(0xFF20C997)),

@@ -1,9 +1,15 @@
+import 'package:citysync/model/modelReport.dart';
+import 'package:citysync/services/reports.dart';
 import 'package:citysync/widgets/cardProblema.dart';
 import 'package:flutter/material.dart';
 
-
 class ProblemasReport extends StatelessWidget {
-  const ProblemasReport({super.key});
+  ProblemasReport(
+      {super.key, required this.nomeUsuario, required this.usuarioID});
+
+  ReportApiService reportApiService = ReportApiService();
+  final String nomeUsuario;
+  final int usuarioID;
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +19,6 @@ class ProblemasReport extends StatelessWidget {
     final horizontalPadding =
         (screenWidth < 600) ? 16.0 : (screenWidth - containerWidth) / 2;
 
-   
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -27,7 +32,7 @@ class ProblemasReport extends StatelessWidget {
                 color: isDark ? Colors.white : Colors.white),
             const SizedBox(width: 8),
             Text(
-              "Sylas",
+              nomeUsuario,
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 color: isDark ? Colors.white : Colors.white,
@@ -49,13 +54,29 @@ class ProblemasReport extends StatelessWidget {
                   fontSize: 18),
             ),
             Flexible(
-              child: ListView.builder(
-                itemCount: 10,
-                itemBuilder: (context, index) {
-                  return CardPRoblema();
-                },
-              ),
-            ),
+                child: FutureBuilder<List<Report>>(
+              future: reportApiService.obterListaReports(usuarioID),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text("Erro: ${snapshot.error}"));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(child: Text("Nenhum problema reportado."));
+                }
+
+                final reports = snapshot.data!;
+                return ListView.builder(
+                  itemCount: reports.length,
+                  itemBuilder: (context, index) {
+                    final report = reports[index];
+                    return CardPRoblema(
+                      report: report,
+                    ); // passando dados
+                  },
+                );
+              },
+            )),
           ],
         ),
       ),

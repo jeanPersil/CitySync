@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class Telaprincipal extends StatefulWidget {
-  const Telaprincipal({super.key, required this.nomeUsuario});
+  const Telaprincipal(
+      {super.key, required this.nomeUsuario, required this.usuarioID});
 
   final String nomeUsuario;
+  final int usuarioID;
 
   @override
   State<Telaprincipal> createState() => _TelaprincipalState();
@@ -59,7 +61,7 @@ class _TelaprincipalState extends State<Telaprincipal> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => mostrarModal(context),
+        onPressed: () => mostrarModal(context, widget.usuarioID),
         backgroundColor: isDark ? Colors.red[400] : Colors.redAccent,
         icon: const Icon(Icons.dangerous_sharp, color: Colors.white),
         label: const Text(

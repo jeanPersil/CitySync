@@ -3,7 +3,28 @@ import 'package:citysync/widgets/botao_categoria.dart';
 import 'package:flutter/material.dart';
 import 'package:citysync/Tema/color_extension.dart';
 
-void mostrarModal(BuildContext context) {
+int mapearCategoriaId(String nome) {
+  switch (nome.toLowerCase()) {
+    case 'buraco':
+      return 1;
+    case 'iluminação':
+      return 2;
+    case 'lixo':
+      return 3;
+    case 'semafaro':
+      return 4;
+    case 'vazamento/esgoto':
+      return 5;
+    case 'transporte':
+      return 6;
+    case 'outros':
+      return 7;
+    default:
+      return 0;
+  }
+}
+
+void mostrarModal(BuildContext context, int id_usuario) {
   String? categoriaSelecionada;
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -132,10 +153,14 @@ void mostrarModal(BuildContext context) {
                     onPressed: categoriaSelecionada == null
                         ? null
                         : () {
+                            Navigator.pop(context);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => TelaReport()),
+                                  builder: (context) => TelaReport(
+                                        categoria: categoriaSelecionada!,
+                                        usuarioId: id_usuario,
+                                      )),
                             );
                           },
                     style: ElevatedButton.styleFrom(

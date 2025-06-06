@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'dart:io' as io show File;
 
+import 'package:citysync/services/reports.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -9,7 +10,11 @@ import 'package:image_picker_web/image_picker_web.dart';
 import 'package:citysync/Tema/color_extension.dart';
 
 class TelaReport extends StatefulWidget {
-  const TelaReport({super.key});
+  const TelaReport(
+      {super.key, required this.usuarioId, required this.categoria});
+
+  final int usuarioId;
+  final String categoria;
 
   @override
   TelaReportState createState() => TelaReportState();
@@ -22,6 +27,11 @@ class TelaReportState extends State<TelaReport> {
   final TextEditingController descriptionController = TextEditingController();
 
   final LatLng _initialPosicao = LatLng(-12.2664, -38.9668);
+
+  void initState() {
+    super.initState();
+    problemController.text = widget.categoria;
+  }
 
   Uint8List? imageBytes;
   io.File? imageFile;
@@ -51,6 +61,27 @@ class TelaReportState extends State<TelaReport> {
     }
   }
 
+  int mapearCategoriaId(String nome) {
+    switch (nome.toLowerCase()) {
+      case 'buraco':
+        return 1;
+      case 'iluminação':
+        return 2;
+      case 'lixo':
+        return 3;
+      case 'semafaro':
+        return 4;
+      case 'vazamento/esgoto':
+        return 5;
+      case 'transporte':
+        return 6;
+      case 'outros':
+        return 7;
+      default:
+        return 0;
+    }
+  }
+
   void _abrirVisualizacaoImagem() {
     showDialog(
       context: context,
@@ -60,9 +91,8 @@ class TelaReportState extends State<TelaReport> {
           body: Stack(
             children: [
               Center(
-                child: kIsWeb
-                    ? Image.memory(imageBytes!)
-                    : Image.file(imageFile!),
+                child:
+                    kIsWeb ? Image.memory(imageBytes!) : Image.file(imageFile!),
               ),
               Positioned(
                 top: 40,
@@ -90,25 +120,29 @@ class TelaReportState extends State<TelaReport> {
     );
   }
 
-  void _reportarProblema() {
+  void _reportarProblema() async {
     if (addressController.text.isNotEmpty &&
         problemController.text.isNotEmpty &&
         timeController.text.isNotEmpty) {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text("Sucesso"),
-            content: const Text("Seu problema foi reportado!"),
-            actions: [
-              TextButton(
-                child: const Text("OK"),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
-          );
-        },
+      final sucesso = await ReportApiService().enviarReport(
+        endereco: addressController.text,
+        categoriaId: mapearCategoriaId(widget.categoria),
+        usuarioId: widget.usuarioId,
+        duracao: timeController.text,
+        descricao: descriptionController.text,
+        urlImagem: imageName,
       );
+
+      if (sucesso) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Seu problema foi reportado!")),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Erro ao enviar o report")),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -142,14 +176,14 @@ class TelaReportState extends State<TelaReport> {
                     target: _initialPosicao,
                     zoom: 16,
                   ),
-                  onMapCreated: (controller) {
-                  },
+                  onMapCreated: (controller) {},
                 ),
                 Positioned(
                   top: 16,
                   left: 16,
                   child: CircleAvatar(
-                    backgroundColor: isDark ? Colors.grey[700] : Colors.grey[300],
+                    backgroundColor:
+                        isDark ? Colors.grey[700] : Colors.grey[300],
                     child: Icon(Icons.person,
                         color: isDark ? Colors.black : Colors.white),
                   ),
@@ -175,16 +209,19 @@ class TelaReportState extends State<TelaReport> {
                   _buildSectionTitle("Endereço selecionado:", isDark),
                   _buildTextField(addressController, "EX: Senai - FSA", isDark),
                   _buildSectionTitle("Problema relatado", isDark),
-                  _buildTextField(problemController, "EX: Buraco", isDark),
+                  _buildTextField(problemController, "EX: Buraco", isDark,
+                      readOnly: true),
                   _buildSectionTitle("A quanto tempo ocorre?", isDark),
                   _buildTextField(timeController, "EX: 2 horas", isDark),
                   _buildSectionTitle("Descrição (opcional)", isDark),
-                  _buildTextField(descriptionController, "Descreva o problema...", isDark),
+                  _buildTextField(
+                      descriptionController, "Descreva o problema...", isDark),
 
                   const SizedBox(height: 10),
 
-                 GestureDetector(
-                    onTap: pickImage, // Tocar aqui para tirar ou selecionar uma nova imagem
+                  GestureDetector(
+                    onTap:
+                        pickImage, // Tocar aqui para tirar ou selecionar uma nova imagem
                     child: Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
@@ -232,14 +269,18 @@ class TelaReportState extends State<TelaReport> {
                   ),
 
                   // --- NOVO BOTÃO DE VISUALIZAÇÃO AQUI ---
-                  if (imageName != null) // Só mostra o botão se houver uma imagem salva
+                  if (imageName !=
+                      null) // Só mostra o botão se houver uma imagem salva
                     Padding(
-                      padding: const EdgeInsets.only(top: 10), // Adiciona um pequeno espaçamento
+                      padding: const EdgeInsets.only(
+                          top: 10), // Adiciona um pequeno espaçamento
                       child: ElevatedButton(
-                        onPressed: _abrirVisualizacaoImagem, // Chama sua função de visualização
+                        onPressed:
+                            _abrirVisualizacaoImagem, // Chama sua função de visualização
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white, // Cor do botão
-                          foregroundColor: Colors.black, // Cor do texto do botão
+                          foregroundColor:
+                              Colors.black, // Cor do texto do botão
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -318,11 +359,16 @@ class TelaReportState extends State<TelaReport> {
   }
 
   Widget _buildTextField(
-      TextEditingController controller, String hint, bool isDark) {
+    TextEditingController controller,
+    String hint,
+    bool isDark, {
+    bool readOnly = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: TextField(
         controller: controller,
+        readOnly: readOnly,
         textAlign: TextAlign.center,
         style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(

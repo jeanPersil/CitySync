@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 import 'Tema/color_extension.dart';
 
 class Homepage extends StatefulWidget {
-  Homepage({super.key, required this.usuarioNome});
+  Homepage({super.key, required this.usuarioNome, required this.usuarioID});
 
   final String usuarioNome;
+  final int usuarioID;
 
   @override
   State<Homepage> createState() => _HomepageState();
@@ -37,8 +38,12 @@ class _HomepageState extends State<Homepage> {
         children: [
           Telaprincipal(
             nomeUsuario: widget.usuarioNome,
+            usuarioID: widget.usuarioID,
           ),
-          const ProblemasReport(),
+          ProblemasReport(
+            nomeUsuario: widget.usuarioNome,
+            usuarioID: widget.usuarioID,
+          ),
           const TelaConfig(),
         ],
       ),

@@ -31,7 +31,6 @@ def efetuar_report():
 
 @report_bp.route("/listar_reports", methods=['POST'])  
 def listar_reports():
-
     dados = request.json
     if "id_usuario" not in dados:
         return jsonify({"erro": "Campo 'id_usuario' ausente"}), 400
@@ -40,8 +39,8 @@ def listar_reports():
     try:
         cursor = mysql.connection.cursor()
         cursor.execute("""
-        SELECT id, endereco, categoria_id, duracao, descricao, url_imagem, data_criacao, usuario_id FROM report WHERE usuario_id = %s
-""", (int(id_usuario),))
+            SELECT * FROM listar_problemas WHERE usuario_id = %s
+        """, (int(id_usuario),))
         resultados = cursor.fetchall()
         
         reports = []
@@ -49,15 +48,18 @@ def listar_reports():
             reports.append({
                 "id": linha[0],
                 "endereco": linha[1],
-                "categoria_id": linha[2],
-                "duracao": linha[3],
-                "descricao": linha[4],
-                "url_imagem": linha[5],
-                "data_report": linha[6].strftime('%Y-%m-%d %H:%M:%S') if linha[6] else None,
-                "id_usuario": linha[7]
+                "categoria": linha[2],  
+                "status": linha[3],     
+                "id_usuario": linha[4],
+                "duracao": linha[5],
+                "url_imagem": linha[6],
+                "data_report": linha[7] 
             })
+        
     except Exception as e:
         mysql.connection.rollback()
         return jsonify({"erro": "Falha ao buscar relatórios", "detalhes": str(e)}), 500
+    finally:
+        cursor.close()
 
     return jsonify({"reports": reports}), 200

@@ -86,3 +86,21 @@ CREATE TABLE report (
     FOREIGN KEY (status_id) REFERENCES status(id) ON DELETE RESTRICT
 
 );
+
+
+CREATE VIEW listar_problemas AS
+SELECT 
+    report.id,
+    report.endereco,
+    categoria.nome_categoria,
+    status.nome_status,
+    report.usuario_id,
+    report.duracao,
+    report.url_imagem,
+    report.data_criacao
+FROM 
+    report
+JOIN 
+    categoria ON report.categoria_id = categoria.id
+JOIN 
+    status ON report.status_id = status.id;
