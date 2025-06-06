@@ -1,8 +1,6 @@
 import 'package:citysync/views/login.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import 'package:citysync/Tema/tema.dart';
 import 'package:citysync/Tema/theme_provider.dart';
 
 void main() async {

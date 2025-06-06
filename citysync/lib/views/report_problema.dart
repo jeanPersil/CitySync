@@ -1,25 +1,26 @@
 import 'dart:typed_data';
 import 'dart:io' as io show File;
-
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_picker_web/image_picker_web.dart';
+import 'package:citysync/Tema/color_extension.dart';
 
-class tela_report extends StatefulWidget {
+class TelaReport extends StatefulWidget {
+  const TelaReport({super.key});
+
   @override
-  _tela_report_State createState() => _tela_report_State();
+  TelaReportState createState() => TelaReportState();
 }
 
-class _tela_report_State extends State<tela_report> {
+class TelaReportState extends State<TelaReport> {
   final TextEditingController addressController = TextEditingController();
   final TextEditingController problemController = TextEditingController();
   final TextEditingController timeController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
 
   final LatLng _initialPosicao = LatLng(-12.2664, -38.9668);
-  GoogleMapController? _mapController;
 
   Uint8List? imageBytes;
   io.File? imageFile;
@@ -54,7 +55,7 @@ class _tela_report_State extends State<tela_report> {
       context: context,
       builder: (context) {
         return Scaffold(
-          backgroundColor: Colors.black.withOpacity(0.9),
+          backgroundColor: Colors.black.withOpacidade(0.9),
           body: Stack(
             children: [
               Center(
@@ -70,7 +71,7 @@ class _tela_report_State extends State<tela_report> {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withOpacidade(0.5),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -141,7 +142,6 @@ class _tela_report_State extends State<tela_report> {
                     zoom: 16,
                   ),
                   onMapCreated: (controller) {
-                    _mapController = controller;
                   },
                 ),
                 Positioned(
@@ -161,7 +161,7 @@ class _tela_report_State extends State<tela_report> {
             height: panelHeight,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isDark ? Colors.grey[900] : Colors.blue,
+              color: isDark ? Colors.grey[900] : const Color(0xFF1E3A5F),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(25),
                 topRight: Radius.circular(25),
@@ -183,7 +183,7 @@ class _tela_report_State extends State<tela_report> {
                   const SizedBox(height: 10),
 
                  GestureDetector(
-                    onTap: pickImage, // Tocar aqui para tirar ou selecionar uma nova imagem
+                    onTap: pickImage, 
                     child: Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
@@ -200,16 +200,15 @@ class _tela_report_State extends State<tela_report> {
                           ),
                           if (imageName != null) ...[
                             const SizedBox(width: 8),
-                            // Texto "Imagem salva" ao lado do ícone
                             Text(
-                              'Imagem salva: ${imageName!.length > 15 ? imageName!.substring(0, 12) + '...' : imageName}',
+                              'Imagem salva: ${imageName!.length > 15 ? '${imageName!.substring(0, 12)}...' : imageName}',
                               style: TextStyle(
                                 color: isDark ? Colors.white : Colors.black,
                                 fontSize: 14,
                               ),
                             ),
                             const SizedBox(width: 4),
-                            // Botão 'X' para remover a imagem
+                            
                             GestureDetector(
                               onTap: () {
                                 setState(() {
@@ -230,15 +229,15 @@ class _tela_report_State extends State<tela_report> {
                     ),
                   ),
 
-                  // --- NOVO BOTÃO DE VISUALIZAÇÃO AQUI ---
-                  if (imageName != null) // Só mostra o botão se houver uma imagem salva
+                  
+                  if (imageName != null) 
                     Padding(
-                      padding: const EdgeInsets.only(top: 10), // Adiciona um pequeno espaçamento
+                      padding: const EdgeInsets.only(top: 10), 
                       child: ElevatedButton(
-                        onPressed: _abrirVisualizacaoImagem, // Chama sua função de visualização
+                        onPressed: _abrirVisualizacaoImagem, 
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white, // Cor do botão
-                          foregroundColor: Colors.black, // Cor do texto do botão
+                          backgroundColor: Colors.white, 
+                          foregroundColor: Colors.black, 
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),

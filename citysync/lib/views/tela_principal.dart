@@ -1,14 +1,12 @@
-import 'package:citysync/services/testeAPI.dart';
-import 'package:citysync/views/reportaProblema.dart';
-import 'package:citysync/widgets/botaoCategoria.dart';
-import 'package:citysync/widgets/modal_Pagina_inicial.dart';
+import 'package:citysync/services/teste_api.dart';
+import 'package:citysync/widgets/modal_pagina_inicial.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 
 
 class Telaprincipal extends StatefulWidget {
-  Telaprincipal({super.key});
+  const Telaprincipal({super.key});
 
   @override
   State<Telaprincipal> createState() => _TelaprincipalState();
@@ -26,9 +24,9 @@ class _TelaprincipalState extends State<Telaprincipal> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? Colors.grey[900] : Colors.lightBlue,
+      backgroundColor: isDark ? Colors.grey[900] : Color(0xFF1E3A5F),
       appBar: AppBar(
-        backgroundColor: isDark ? Colors.grey[850] : Colors.blue,
+        backgroundColor: isDark ? Colors.grey[850] : Color(0xFF1E3A5F),
         title: Row(
           children: [
             Icon(Icons.people_alt_outlined, color: isDark ? Colors.white : Colors.white),

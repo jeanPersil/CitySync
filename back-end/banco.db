@@ -1,0 +1,43 @@
+CREATE DATABASE IF NOT EXISTS citySync;
+USE citySync;
+
+CREATE TABLE endereco (
+    id_endereco INT AUTO_INCREMENT PRIMARY KEY,
+    logradouro VARCHAR(100) NOT NULL,
+    numero_casa VARCHAR(10) NOT NULL,
+    bairro VARCHAR(30) NOT NULL,
+    cidade VARCHAR(30) NOT NULL,
+    estado VARCHAR(30) NOT NULL,
+    cep VARCHAR(10) NOT NULL     
+);
+
+CREATE TABLE usuario (
+    id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    cpf CHAR(11) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    senha VARCHAR(100) NOT NULL,
+    telefone VARCHAR(20) NOT NULL,
+    
+    id_endereco INT,
+    FOREIGN KEY (id_endereco) REFERENCES endereco(id_endereco)
+);
+
+CREATE TABLE categoria (
+    id_categoria INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(50) NOT NULL UNIQUE 
+);
+
+CREATE TABLE report (
+    id_report INT AUTO_INCREMENT PRIMARY KEY,
+    endereco VARCHAR(100) NOT NULL,
+    id_categoria INT,
+    duracao INT,
+    descricao VARCHAR(255) NOT NULL, 
+    url_imagem varchar(200) NOT NULL,
+    data_report TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id_usuario INT,
+
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE SET NULL,
+    FOREIGN KEY (id_categoria) REFERENCES categoria(id_categoria) ON DELETE SET NULL
+);
