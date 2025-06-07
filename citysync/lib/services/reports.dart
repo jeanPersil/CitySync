@@ -5,7 +5,7 @@ import 'package:citysync/model/modelReport.dart';
 class ReportApiService {
   Future<List<Report>> obterListaReports(int idUsuario) async {
     final response = await http.post(
-      Uri.parse('http://192.168.0.17:5000/listar_reports'),
+      Uri.parse('http://192.168.0.4:5000/listar_reports'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({"id_usuario": idUsuario}),
     );
@@ -28,7 +28,7 @@ class ReportApiService {
     String? urlImagem,
   }) async {
     final response = await http.post(
-      Uri.parse('http://192.168.0.17:5000/efetuar_report'),
+      Uri.parse('http://192.168.0.4:5000/efetuar_report'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         "endereco": endereco,

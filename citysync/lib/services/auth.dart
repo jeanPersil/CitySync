@@ -3,7 +3,7 @@ import 'dart:convert';
 
 class AutenticacaoUsuario {
   Future<Map<String, dynamic>> login(String email, String senha) async {
-    final String _urlBase = "http://192.168.0.17:5000/login";
+    final String _urlBase = "http://192.168.0.4:5000/login";
     try {
       final resposta = await http.post(
         Uri.parse(_urlBase),
