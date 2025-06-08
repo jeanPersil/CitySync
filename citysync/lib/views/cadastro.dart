@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:citysync/home_page.dart';
 import 'package:citysync/views/login.dart';
+import 'package:flutter/material.dart';
 
 class TelaCadastro extends StatefulWidget {
   const TelaCadastro({super.key});
@@ -9,25 +9,45 @@ class TelaCadastro extends StatefulWidget {
   State<TelaCadastro> createState() => _TelaCadastroState();
 }
 
-class _TelaCadastroState extends State<TelaCadastro> {
+class _TelaCadastroState extends State<TelaCadastro> with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers para todos os campos necessários
-  final TextEditingController _nomeController = TextEditingController();
-  final TextEditingController _cpfController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _senhaController = TextEditingController();
-  final TextEditingController _telefoneController = TextEditingController();
-  final TextEditingController _logradouroController = TextEditingController();
-  final TextEditingController _numeroCasaController = TextEditingController();
-  final TextEditingController _bairroController = TextEditingController();
-  final TextEditingController _cidadeController = TextEditingController();
-  final TextEditingController _estadoController = TextEditingController();
-  final TextEditingController _cepController = TextEditingController();
+  final _nomeController = TextEditingController();
+  final _cpfController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _senhaController = TextEditingController();
+  final _telefoneController = TextEditingController();
+  final _logradouroController = TextEditingController();
+  final _numeroCasaController = TextEditingController();
+  final _bairroController = TextEditingController();
+  final _cidadeController = TextEditingController();
+  final _estadoController = TextEditingController();
+  final _cepController = TextEditingController();
+
+  late final AnimationController _animationController;
+  late final Animation<double> _scaleAnimation;
+
+  
+  bool _obscureText = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+
+    _scaleAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+  }
 
   @override
   void dispose() {
-    // Fechar todos os controllers quando o widget for descartado
     _nomeController.dispose();
     _cpfController.dispose();
     _emailController.dispose();
@@ -39,334 +59,308 @@ class _TelaCadastroState extends State<TelaCadastro> {
     _cidadeController.dispose();
     _estadoController.dispose();
     _cepController.dispose();
+    _animationController.dispose();
     super.dispose();
+  }
+
+  
+  InputDecoration _buildInputDecoration({
+    required String labelText,
+    required IconData icon,
+    Widget? suffixIcon, 
+  }) {
+    return InputDecoration(
+      labelText: labelText,
+      labelStyle: const TextStyle(color: Colors.white),
+      prefixIcon: Icon(icon, color: Colors.white),
+      suffixIcon: suffixIcon, 
+      filled: true,
+      fillColor: Colors.white12,
+      border: OutlineInputBorder( 
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.white.withOpacity(0.5)),
+      ),
+      enabledBorder: OutlineInputBorder( 
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.white.withOpacity(0.5)),
+      ),
+      focusedBorder: OutlineInputBorder( 
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.white, width: 2.0),
+      ),
+      errorBorder: OutlineInputBorder( 
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.red, width: 2.0),
+      ),
+      focusedErrorBorder: OutlineInputBorder( 
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.red, width: 2.0),
+      ),
+    );
+  }
+
+  
+  Widget _buildField(
+    TextEditingController controller,
+    String label,
+    IconData icon, {
+    TextInputType keyboardType = TextInputType.text, 
+    bool obscureText = false,
+    int? maxLength,
+    String? Function(String?)? validator,
+    Widget? suffixIcon, 
+  }) {
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText,
+      maxLength: maxLength,
+      keyboardType: keyboardType, 
+      style: const TextStyle(color: Colors.white),
+      autovalidateMode: AutovalidateMode.onUserInteraction, 
+      decoration: _buildInputDecoration(labelText: label, icon: icon, suffixIcon: suffixIcon),
+      validator: validator ??
+          (value) {
+            if (value == null || value.trim().isEmpty) {
+              return "Campo obrigatório";
+            }
+            return null;
+          },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-
     return Scaffold(
-      backgroundColor: const Color(0xFF2978B5),
+      backgroundColor: const Color(0xFF1E3A5F),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(height: 40),
+              const SizedBox(height: 30),
 
-              // Logo 
-              Image.asset(
-                "assets/images/logo.png",
-                height: screenHeight * 0.25,
-                fit: BoxFit.contain,
+            
+              AnimatedBuilder(
+                animation: _scaleAnimation,
+                builder: (context, child) => Transform.scale(
+                  scale: _scaleAnimation.value,
+                  child: child,
+                ),
+                child: Image.asset("assets/images/logo.png", height: 200),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 20),
+              const Text(
+                "Criar Nova Conta",
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
 
-              // ===== Formulário de Cadastro =====
+              const SizedBox(height: 30),
               Form(
                 key: _formKey,
                 child: Column(
                   children: [
-                    // Nome completo
-                    TextFormField(
-                      controller: _nomeController,
-                      keyboardType: TextInputType.name,
-                      style: const TextStyle(color: Colors.white),
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: const InputDecoration(
-                        labelText: "Nome completo",
-                        labelStyle: TextStyle(color: Colors.white),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color.fromARGB(255, 153, 150, 150)),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                      ),
+                    
+                    _buildField(
+                      _nomeController,
+                      "Nome completo",
+                      Icons.person,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return "Preencha seu nome";
+                          return "Por favor, digite seu nome completo.";
+                        }
+                        if (value.trim().length < 3) {
+                          return "Nome muito curto.";
                         }
                         return null;
                       },
                     ),
+                    const SizedBox(height: 15),
 
-                    const SizedBox(height: 20),
-
-                    // CPF
-                    TextFormField(
-                      controller: _cpfController,
+                    
+                    _buildField(
+                      _cpfController,
+                      "CPF (somente dígitos)",
+                      Icons.badge,
                       keyboardType: TextInputType.number,
-                      style: const TextStyle(color: Colors.white),
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: const InputDecoration(
-                        labelText: "CPF (somente dígitos)",
-                        labelStyle: TextStyle(color: Colors.white),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color.fromARGB(255, 153, 150, 150)),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                      ),
                       maxLength: 11,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return "Preencha seu CPF";
+                          return "Por favor, digite seu CPF.";
                         }
                         if (value.length != 11 || !RegExp(r'^\d{11}$').hasMatch(value)) {
-                          return "CPF deve ter 11 dígitos numéricos";
+                          return "CPF deve ter 11 dígitos numéricos válidos.";
                         }
                         return null;
                       },
                     ),
+                    const SizedBox(height: 15),
 
-                    const SizedBox(height: 20),
-
-                    // E-mail
-                    TextFormField(
-                      controller: _emailController,
+                    
+                    _buildField(
+                      _emailController,
+                      "Email",
+                      Icons.email,
                       keyboardType: TextInputType.emailAddress,
-                      style: const TextStyle(color: Colors.white),
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: const InputDecoration(
-                        labelText: "Email",
-                        labelStyle: TextStyle(color: Colors.white),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color.fromARGB(255, 153, 150, 150)),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                      ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return "Preencha seu e-mail";
+                          return "Por favor, digite seu e-mail.";
                         }
                         final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
                         if (!emailRegex.hasMatch(value)) {
-                          return "Email inválido";
+                          return "E-mail inválido.";
                         }
                         return null;
                       },
                     ),
+                    const SizedBox(height: 15),
 
-                    const SizedBox(height: 20),
-
-                    // Senha
-                    TextFormField(
-                      controller: _senhaController,
-                      obscureText: true,
-                      style: const TextStyle(color: Colors.white),
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: const InputDecoration(
-                        labelText: "Senha",
-                        labelStyle: TextStyle(color: Colors.white),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
+                    
+                    _buildField(
+                      _senhaController,
+                      "Senha",
+                      Icons.lock,
+                      obscureText: _obscureText, 
+                      maxLength: 20, 
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureText ? Icons.visibility_off : Icons.visibility,
+                          color: Colors.white,
                         ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureText = !_obscureText;
+                          });
+                        },
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return "Preencha sua senha";
+                          return "Por favor, digite sua senha.";
                         }
                         if (value.length < 6) {
-                          return "Senha com mínimo de 6 caracteres";
+                          return "Senha deve ter no mínimo 6 caracteres.";
                         }
                         return null;
                       },
                     ),
+                    const SizedBox(height: 15),
 
-                    const SizedBox(height: 20),
-
-                    // Telefone
-                    TextFormField(
-                      controller: _telefoneController,
+                    
+                    _buildField(
+                      _telefoneController,
+                      "Telefone (somente dígitos)",
+                      Icons.phone,
                       keyboardType: TextInputType.phone,
-                      style: const TextStyle(color: Colors.white),
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: const InputDecoration(
-                        labelText: "Telefone (somente dígitos)",
-                        labelStyle: TextStyle(color: Colors.white),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color.fromARGB(255, 153, 150, 150)),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                      ),
+                      maxLength: 12, 
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return "Preencha seu telefone";
+                          return "Por favor, digite seu telefone.";
                         }
-                        if (!RegExp(r'^\d{8,15}$').hasMatch(value)) {
-                          return "Telefone inválido";
+                        if (!RegExp(r'^\d{10,12}$').hasMatch(value)) { 
+                          return "Telefone inválido (ex: DDD+Número).";
                         }
                         return null;
                       },
                     ),
 
                     const SizedBox(height: 20),
+                    const Divider(color: Colors.white38),
+                    const SizedBox(height: 10),
 
-                    // Logradouro
-                    TextFormField(
-                      controller: _logradouroController,
-                      keyboardType: TextInputType.streetAddress,
-                      style: const TextStyle(color: Colors.white),
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: const InputDecoration(
-                        labelText: "Logradouro",
-                        labelStyle: TextStyle(color: Colors.white),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color.fromARGB(255, 153, 150, 150)),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                      ),
+                    
+                    _buildField(
+                      _logradouroController,
+                      "Logradouro",
+                      Icons.home,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return "Preencha o logradouro";
+                          return "Por favor, digite seu logradouro.";
                         }
                         return null;
                       },
                     ),
+                    const SizedBox(height: 15),
 
-                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildField(
+                            _numeroCasaController,
+                            "Número",
+                            Icons.looks_one,
+                            keyboardType: TextInputType.number, 
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return "Campo obrigatório";
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _buildField(
+                            _bairroController,
+                            "Bairro",
+                            Icons.location_city,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return "Campo obrigatório";
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 15),
 
-                    // Número da casa
-                    TextFormField(
-                      controller: _numeroCasaController,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildField(
+                            _cidadeController,
+                            "Cidade",
+                            Icons.apartment,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return "Campo obrigatório";
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _buildField(
+                            _estadoController,
+                            "Estado",
+                            Icons.map,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return "Campo obrigatório";
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 15),
+
+                    
+                    _buildField(
+                      _cepController,
+                      "CEP (somente dígitos)",
+                      Icons.numbers,
                       keyboardType: TextInputType.number,
-                      style: const TextStyle(color: Colors.white),
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: const InputDecoration(
-                        labelText: "Número da casa",
-                        labelStyle: TextStyle(color: Colors.white),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color.fromARGB(255, 153, 150, 150)),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return "Preencha o número da casa";
-                        }
-                        return null;
-                      },
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Bairro
-                    TextFormField(
-                      controller: _bairroController,
-                      keyboardType: TextInputType.text,
-                      style: const TextStyle(color: Colors.white),
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: const InputDecoration(
-                        labelText: "Bairro",
-                        labelStyle: TextStyle(color: Colors.white),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color.fromARGB(255, 153, 150, 150)),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return "Preencha o bairro";
-                        }
-                        return null;
-                      },
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Cidade
-                    TextFormField(
-                      controller: _cidadeController,
-                      keyboardType: TextInputType.text,
-                      style: const TextStyle(color: Colors.white),
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: const InputDecoration(
-                        labelText: "Cidade",
-                        labelStyle: TextStyle(color: Colors.white),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color.fromARGB(255, 153, 150, 150)),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return "Preencha a cidade";
-                        }
-                        return null;
-                      },
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Estado
-                    TextFormField(
-                      controller: _estadoController,
-                      keyboardType: TextInputType.text,
-                      style: const TextStyle(color: Colors.white),
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: const InputDecoration(
-                        labelText: "Estado",
-                        labelStyle: TextStyle(color: Colors.white),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color.fromARGB(255, 153, 150, 150)),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return "Preencha o estado";
-                        }
-                        return null;
-                      },
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // CEP
-                    TextFormField(
-                      controller: _cepController,
-                      keyboardType: TextInputType.number,
-                      style: const TextStyle(color: Colors.white),
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: const InputDecoration(
-                        labelText: "CEP (somente dígitos)",
-                        labelStyle: TextStyle(color: Colors.white),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color.fromARGB(255, 153, 150, 150)),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                      ),
                       maxLength: 8,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return "Preencha o CEP";
+                          return "Por favor, digite seu CEP.";
                         }
                         if (value.length != 8 || !RegExp(r'^\d{8}$').hasMatch(value)) {
-                          return "CEP inválido";
+                          return "CEP deve ter 8 dígitos numéricos válidos.";
                         }
                         return null;
                       },
@@ -375,87 +369,54 @@ class _TelaCadastroState extends State<TelaCadastro> {
                 ),
               ),
 
-              const SizedBox(height: 40),
+              const SizedBox(height: 30),
 
-              // ===== Botão Cadastrar =====
               SizedBox(
                 width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
+                height: 48,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.check),
+                  label: const Text("Cadastrar", style: TextStyle(fontSize: 18)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF20C997),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   onPressed: () {
+                    
                     if (_formKey.currentState!.validate()) {
-                      // Campo para a requisição POST para /cadastrar
-                      // Exemplo:
-                      //
-                      // final response = await http.post(
-                      //   Uri.parse('https://servidor.com/auth/cadastrar'),
-                      //   headers: { 'Content-Type': 'application/json' },
-                      //   body: jsonEncode({
-                      //     'nome': _nomeController.text,
-                      //     'cpf': _cpfController.text,
-                      //     'email': _emailController.text,
-                      //     'senha': _senhaController.text,
-                      //     'telefone': _telefoneController.text,
-                      //     'logradouro': _logradouroController.text,
-                      //     'numero_casa': _numeroCasaController.text,
-                      //     'bairro': _bairroController.text,
-                      //     'cidade': _cidadeController.text,
-                      //     'estado': _estadoController.text,
-                      //     'cep': _cepController.text,
-                      //   }),
-                      // );
-                      //
-                      // if (response.statusCode == 201) {
-                      //   Navigator.pushReplacement(
-                      //     context,
-                      //     MaterialPageRoute(builder: (_) => const Homepage()),
-                      //   );
-                      // } else {
-                      //   mostrarSnackbarComErro(response.body);
-                      // }
-
-                      // Por enquanto, só navega para Home:
+                     
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (_) => const Homepage()),
                       );
+                    } else {
+                      
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Por favor, preencha todos os campos corretamente.'),
+                          backgroundColor: Colors.black,
+                        ),
+                      );
                     }
                   },
-                  child: const Text(
-                    "Cadastrar",
-                    style: TextStyle(fontSize: 18, color: Colors.white),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Já tem uma conta?", style: TextStyle(color: Colors.white70)),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const TelaLogin()));
+                    },
+                    child: const Text("Faça Login", style: TextStyle(color: Color(0xFF20C997))),
                   ),
-                ),
+                ],
               ),
-
               const SizedBox(height: 30),
-
-              // ===== Texto “Já tem uma conta? Faça Login” =====
-              const Text(
-                "Já tem uma conta?",
-                style: TextStyle(color: Colors.white),
-              ),
-              TextButton(
-                onPressed: () {
-                  // Voltar para a tela de login
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const TelaLogin()),
-                  );
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF20C997),
-                ),
-                child: const Text("Faça Login"),
-              ),
-
-              const SizedBox(height: 40),
             ],
           ),
         ),

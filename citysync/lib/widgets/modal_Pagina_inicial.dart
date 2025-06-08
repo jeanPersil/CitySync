@@ -21,7 +21,7 @@ void mostrarModal(BuildContext context) {
             return Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isDark ? Colors.grey[900] : Colors.blue,
+                color: isDark ? Colors.grey[900] : Color(0xFF1E3A5F),
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(16)),
               ),

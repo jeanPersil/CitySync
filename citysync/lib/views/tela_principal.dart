@@ -24,9 +24,9 @@ class _TelaprincipalState extends State<Telaprincipal> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? Colors.grey[900] : Colors.lightBlue,
+      backgroundColor: isDark ? Colors.grey[900] : Color(0xFF1E3A5F),
       appBar: AppBar(
-        backgroundColor: isDark ? Colors.grey[850] : Colors.blue,
+        backgroundColor: isDark ? Colors.grey[850] : Color(0xFF1E3A5F),
         title: Row(
           children: [
             Icon(Icons.people_alt_outlined, color: isDark ? Colors.white : Colors.white),

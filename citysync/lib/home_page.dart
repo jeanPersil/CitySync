@@ -26,7 +26,7 @@ class _HomepageState extends State<Homepage> {
     final brightness = Theme.of(context).brightness;
 
     
-    final backgroundColor = brightness == Brightness.light ? Colors.blue : Colors.grey[900];
+    final backgroundColor = brightness == Brightness.light ? Color(0xFF1E3A5F): Colors.grey[900];
 
     return Scaffold(
       body: PageView(

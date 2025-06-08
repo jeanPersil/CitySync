@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 import 'dart:io' as io show File;
-
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -162,7 +161,7 @@ class TelaReportState extends State<TelaReport> {
             height: panelHeight,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isDark ? Colors.grey[900] : Colors.blue,
+              color: isDark ? Colors.grey[900] : const Color(0xFF1E3A5F),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(25),
                 topRight: Radius.circular(25),
@@ -184,7 +183,7 @@ class TelaReportState extends State<TelaReport> {
                   const SizedBox(height: 10),
 
                  GestureDetector(
-                    onTap: pickImage, // Tocar aqui para tirar ou selecionar uma nova imagem
+                    onTap: pickImage, 
                     child: Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
@@ -201,7 +200,6 @@ class TelaReportState extends State<TelaReport> {
                           ),
                           if (imageName != null) ...[
                             const SizedBox(width: 8),
-                            // Texto "Imagem salva" ao lado do ícone
                             Text(
                               'Imagem salva: ${imageName!.length > 15 ? '${imageName!.substring(0, 12)}...' : imageName}',
                               style: TextStyle(
@@ -210,7 +208,7 @@ class TelaReportState extends State<TelaReport> {
                               ),
                             ),
                             const SizedBox(width: 4),
-                            // Botão 'X' para remover a imagem
+                            
                             GestureDetector(
                               onTap: () {
                                 setState(() {
@@ -231,15 +229,15 @@ class TelaReportState extends State<TelaReport> {
                     ),
                   ),
 
-                  // --- NOVO BOTÃO DE VISUALIZAÇÃO AQUI ---
-                  if (imageName != null) // Só mostra o botão se houver uma imagem salva
+                  
+                  if (imageName != null) 
                     Padding(
-                      padding: const EdgeInsets.only(top: 10), // Adiciona um pequeno espaçamento
+                      padding: const EdgeInsets.only(top: 10), 
                       child: ElevatedButton(
-                        onPressed: _abrirVisualizacaoImagem, // Chama sua função de visualização
+                        onPressed: _abrirVisualizacaoImagem, 
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white, // Cor do botão
-                          foregroundColor: Colors.black, // Cor do texto do botão
+                          backgroundColor: Colors.white, 
+                          foregroundColor: Colors.black, 
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
