@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:citysync/home_page.dart';
+import 'package:citysync/services/auth.dart';
 import 'package:citysync/views/cadastro.dart';
+import 'package:flutter/material.dart';
 
 class TelaLogin extends StatefulWidget {
   const TelaLogin({super.key});
@@ -67,47 +69,64 @@ class _TelaLoginState extends State<TelaLogin> with SingleTickerProviderStateMix
                 ),
               ),
               const SizedBox(height: 40),
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    _buildTextField(
-                      controller: _emailController,
-                      label: "Email",
-                      icon: Icons.email,
-                      validator: _validateEmail,
-                      keyboardType: TextInputType.emailAddress,
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF20C997),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    const SizedBox(height: 20),
-                    _buildTextField(
-                      controller: _senhaController,
-                      label: "Senha",
-                      icon: Icons.lock,
-                      obscureText: _obscureText,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureText ? Icons.visibility_off : Icons.visibility,
-                          color: Colors.white70,
-                        ),
-                        onPressed: () => setState(() => _obscureText = !_obscureText),
-                      ),
-                      validator: _validateSenha,
-                    ),
-                  ],
+                  ),
+                  onPressed: () async {
+                    if (_emailControler.text.isEmpty) {
+                      setState(() {
+                        erro_email = "Preencha seu e-mail";
+                      });
+                      return;
+                    }
+
+                    if (_senhaControler.text.isEmpty) {
+                      setState(() {
+                        erro_senha = "Preencha sua senha";
+                      });
+                      return;
+                    }
+                    final resultado = await auth.login(
+                        _emailControler.text, _senhaControler.text);
+
+                    if (resultado["sucesso"]) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => Homepage(
+                                  usuarioNome: resultado['usuario']['nome'],
+                                  usuarioID: resultado['usuario']['id'],
+                                )),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(resultado["mensagem"])),
+                      );
+                    }
+                  },
+                  child: const Text(
+                    "Login",
+                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  ),
                 ),
               ),
-              const SizedBox(height: 35),
-              _buildLoginButton(),
-              const SizedBox(height: 25),
+              const SizedBox(height: 30),
               const Text(
                 "Ainda não tem uma conta?",
                 style: TextStyle(color: Colors.white70),
               ),
               TextButton(
                 onPressed: () {
-                  Navigator.pushReplacement(
+                  Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const TelaCadastro()),
+                    MaterialPageRoute(builder: (_) => TelaCadastro()),
                   );
                 },
                 child: const Text(

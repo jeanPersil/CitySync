@@ -5,7 +5,10 @@ import 'package:flutter/material.dart';
 import 'Tema/color_extension.dart';
 
 class Homepage extends StatefulWidget {
-  const Homepage({super.key});
+  Homepage({super.key, required this.usuarioNome, required this.usuarioID});
+
+  final String usuarioNome;
+  final int usuarioID;
 
   @override
   State<Homepage> createState() => _HomepageState();
@@ -33,8 +36,14 @@ class _HomepageState extends State<Homepage> {
         controller: pc,
         physics: const NeverScrollableScrollPhysics(),
         children: [
-          Telaprincipal(),
-          const ProblemasReport(),
+          Telaprincipal(
+            nomeUsuario: widget.usuarioNome,
+            usuarioID: widget.usuarioID,
+          ),
+          ProblemasReport(
+            nomeUsuario: widget.usuarioNome,
+            usuarioID: widget.usuarioID,
+          ),
           const TelaConfig(),
         ],
       ),
