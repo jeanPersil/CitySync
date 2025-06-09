@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:citysync/home_page.dart';
 import 'package:citysync/services/auth.dart';
 import 'package:citysync/views/cadastro.dart';
-import 'package:flutter/material.dart';
 
 class TelaLogin extends StatefulWidget {
   const TelaLogin({super.key});
@@ -11,13 +10,15 @@ class TelaLogin extends StatefulWidget {
   State<TelaLogin> createState() => _TelaLoginState();
 }
 
-class _TelaLoginState extends State<TelaLogin> with SingleTickerProviderStateMixin {
+class _TelaLoginState extends State<TelaLogin>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
 
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
+  final AutenticacaoUsuario auth = AutenticacaoUsuario();
 
   bool _obscureText = true;
 
@@ -60,7 +61,8 @@ class _TelaLoginState extends State<TelaLogin> with SingleTickerProviderStateMix
               AnimatedBuilder(
                 animation: _scaleAnimation,
                 builder: (context, child) {
-                  return Transform.scale(scale: _scaleAnimation.value, child: child);
+                  return Transform.scale(
+                      scale: _scaleAnimation.value, child: child);
                 },
                 child: Image.asset(
                   "assets/images/logo.png",
@@ -69,54 +71,45 @@ class _TelaLoginState extends State<TelaLogin> with SingleTickerProviderStateMix
                 ),
               ),
               const SizedBox(height: 40),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF20C997),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    _buildTextField(
+                      controller: _emailController,
+                      label: "E-mail",
+                      icon: Icons.email,
+                      validator: _validateEmail,
+                      keyboardType: TextInputType.emailAddress,
                     ),
-                  ),
-                  onPressed: () async {
-                    if (_emailControler.text.isEmpty) {
-                      setState(() {
-                        erro_email = "Preencha seu e-mail";
-                      });
-                      return;
-                    }
-
-                    if (_senhaControler.text.isEmpty) {
-                      setState(() {
-                        erro_senha = "Preencha sua senha";
-                      });
-                      return;
-                    }
-                    final resultado = await auth.login(
-                        _emailControler.text, _senhaControler.text);
-
-                    if (resultado["sucesso"]) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => Homepage(
-                                  usuarioNome: resultado['usuario']['nome'],
-                                  usuarioID: resultado['usuario']['id'],
-                                )),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(resultado["mensagem"])),
-                      );
-                    }
-                  },
-                  child: const Text(
-                    "Login",
-                    style: TextStyle(fontSize: 18, color: Colors.white),
-                  ),
+                    const SizedBox(height: 20),
+                    _buildTextField(
+                      controller: _senhaController,
+                      label: "Senha",
+                      icon: Icons.lock,
+                      validator: _validateSenha,
+                      obscureText: _obscureText,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureText
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: Colors.white70,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureText = !_obscureText;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    _buildLoginButton(),
+                  ],
                 ),
               ),
+
               const SizedBox(height: 30),
               const Text(
                 "Ainda não tem uma conta?",
@@ -131,7 +124,8 @@ class _TelaLoginState extends State<TelaLogin> with SingleTickerProviderStateMix
                 },
                 child: const Text(
                   "Cadastre-se!",
-                  style: TextStyle(color: Color(0xFF20C997), fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      color: Color(0xFF20C997), fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 30),
@@ -141,6 +135,7 @@ class _TelaLoginState extends State<TelaLogin> with SingleTickerProviderStateMix
       ),
     );
   }
+
 
   Widget _buildTextField({
     required TextEditingController controller,
@@ -197,22 +192,39 @@ class _TelaLoginState extends State<TelaLogin> with SingleTickerProviderStateMix
             borderRadius: BorderRadius.circular(14),
           ),
         ),
-        onPressed: () {
-          if (_formKey.currentState?.validate() ?? false) {
+        onPressed: () async {
+          if (_formKey.currentState?.validate() != true) return;
+
+          final resultado = await auth.login(
+            _emailController.text,
+            _senhaController.text,
+          );
+
+          if (resultado["sucesso"]) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => const Homepage()),
+              MaterialPageRoute(
+                builder: (_) => Homepage(
+                  usuarioNome: resultado['usuario']['nome'],
+                  usuarioID: resultado['usuario']['id'],
+                ),
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(resultado["mensagem"])),
             );
           }
         },
         child: const Text(
-          "Entrar",
+          "Login",
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ),
     );
   }
 
+  // 🔎 Validação de E-mail
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) return "Preencha seu e-mail";
     final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
@@ -220,9 +232,10 @@ class _TelaLoginState extends State<TelaLogin> with SingleTickerProviderStateMix
     return null;
   }
 
+  // 🔐 Validação de Senha
   String? _validateSenha(String? value) {
     if (value == null || value.isEmpty) return "Preencha sua senha";
-    if (value.length < 6) return "Senha com mínimo de 6 caracteres";
+
     return null;
   }
 }

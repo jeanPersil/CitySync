@@ -3,7 +3,7 @@ import 'dart:convert';
 
 class AutenticacaoUsuario {
   Future<Map<String, dynamic>> login(String email, String senha) async {
-    final String _urlBase = "http://192.168.0.4:5000/login";
+    final String _urlBase = "http://192.168.0.10:5000/login";
     try {
       final resposta = await http.post(
         Uri.parse(_urlBase),
@@ -35,10 +35,34 @@ class AutenticacaoUsuario {
     }
   }
 
+  Future<Map<String, dynamic>> cadastrar(Map<String, dynamic> dados) async {
+    final String _urlBase = "http://192.168.0.10:5000/cadastrar";
+    try {
+      final resposta = await http.post(
+        Uri.parse(_urlBase),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(dados),
+      );
 
-
-  
-
-
-  
+      if (resposta.statusCode == 200) {
+        final respostaJson = jsonDecode(resposta.body);
+        return {
+          "sucesso": true,
+          "mensagem":
+              respostaJson["mensagem"] ?? "Cadastro realizado com sucesso!",
+        };
+      } else {
+        final erro = jsonDecode(resposta.body);
+        return {
+          "sucesso": false,
+          "mensagem": erro["erro"] ?? "Erro desconhecido no cadastro",
+        };
+      }
+    } catch (e) {
+      return {
+        "sucesso": false,
+        "mensagem": "Erro de conexão: $e",
+      };
+    }
+  }
 }

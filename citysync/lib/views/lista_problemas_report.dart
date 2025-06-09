@@ -4,10 +4,13 @@ import 'package:citysync/widgets/cardProblema.dart';
 import 'package:flutter/material.dart';
 
 class ProblemasReport extends StatelessWidget {
-  ProblemasReport(
-      {super.key, required this.nomeUsuario, required this.usuarioID});
+  ProblemasReport({
+    super.key,
+    required this.nomeUsuario,
+    required this.usuarioID,
+  });
 
-  ReportApiService reportApiService = ReportApiService();
+  final ReportApiService reportApiService = ReportApiService();
   final String nomeUsuario;
   final int usuarioID;
 
@@ -21,21 +24,22 @@ class ProblemasReport extends StatelessWidget {
 
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: isDark ? Colors.grey[900] : const Color.fromARGB(255, 3, 115, 244).withOpacidade(0.4),
+      backgroundColor: isDark
+          ? Colors.grey[900]
+          : const Color.fromARGB(255, 3, 115, 244).withOpacity(0.4),
       appBar: AppBar(
-        backgroundColor: isDark ? Colors.grey[850] : Colors.blue,
+        backgroundColor: isDark ? Colors.grey[850] : Color(0xFF1E3A5F),
         title: Row(
           children: [
-            Icon(Icons.people_alt_outlined, color: isDark ? Colors.white : Colors.white),
+            Icon(Icons.people_alt_outlined, color: Colors.white),
             const SizedBox(width: 8),
             Text(
               nomeUsuario,
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: isDark ? Colors.white : Colors.white,
-              ),
+              style: const TextStyle(
+                  fontWeight: FontWeight.w700, color: Colors.white),
             ),
           ],
         ),
@@ -50,7 +54,7 @@ class ProblemasReport extends StatelessWidget {
               padding: const EdgeInsets.all(8.0),
               margin: const EdgeInsets.only(bottom: 16.0),
               decoration: BoxDecoration(
-                color: colorScheme.secondary.withOpacidade(0.8),
+                color: colorScheme.secondary.withOpacity(0.8),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Center(
@@ -61,32 +65,32 @@ class ProblemasReport extends StatelessWidget {
               ),
             ),
 
-            // Box de listagem(ListView)
+            /// Lista de reports
+            Expanded(
+              child: FutureBuilder<List<Report>>(
+                future: reportApiService.obterListaReports(usuarioID),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text("Erro: ${snapshot.error}"));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(
+                        child: Text("Nenhum problema reportado."));
+                  }
 
-            Flexible(
-                child: FutureBuilder<List<Report>>(
-              future: reportApiService.obterListaReports(usuarioID),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text("Erro: ${snapshot.error}"));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text("Nenhum problema reportado."));
-                }
-
-                final reports = snapshot.data!;
-                return ListView.builder(
-                  itemCount: reports.length,
-                  itemBuilder: (context, index) {
-                    final report = reports[index];
-                    return CardPRoblema(
-                      report: report,
-                    ); // passando dados
-                  },
-                );
-              },
-            )),
+                  final reports = snapshot.data!;
+                  return ListView.builder(
+                    itemCount: reports.length,
+                    itemBuilder: (context, index) {
+                      final report = reports[index];
+                      return CardPRoblema(
+                          report: report); // nome correto da classe
+                    },
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),
