@@ -12,13 +12,10 @@ def efetuar_report():
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
 
-@report_bp.route("/listar_reports", methods=['POST'])  
-def listar_reports():
-    dados = request.json
-    if "id_usuario" not in dados:
-        return jsonify({"erro": "Campo 'id_usuario' ausente"}), 400
+@report_bp.route("/listar_reports/<int:id_usuario>", methods=['GET'])  
+def listar_reports(id_usuario):
     try:
-        reports = report_services.listar_reports(dados["id_usuario"])
+        reports = report_services.listar_reports(id_usuario)
         return jsonify({"reports": reports}), 200
     except Exception as e:
         return jsonify({"erro": "Falha ao buscar relatórios", "detalhes": str(e)}), 500
