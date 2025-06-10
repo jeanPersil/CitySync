@@ -1,4 +1,5 @@
 from config import mysql
+import bcrypt  
 
 def buscar_usuario_por_cpf_ou_email(cpf, email):
     cursor = mysql.connection.cursor()
@@ -38,7 +39,7 @@ def realizar_login(email, senha_digitada):
 
     id_usuario, nome, senha_armazenada = usuario
 
-    if senha_digitada == senha_armazenada:
+    if bcrypt.checkpw(senha_digitada.encode('utf-8'), senha_armazenada.encode('utf-8')):
         return {"id_usuario": id_usuario, "nome": nome}
     else:
         return None

@@ -1,11 +1,13 @@
 from validate_docbr import CPF
 from repositories import auth_repository
+import bcrypt
 
 cpf_validator = CPF()
 
 def cadastrar_usuario(dados):
     try:
         cpf = dados['cpf']
+        senha = dados['senha']
 
         if not cpf_validator.validate(cpf):
             return {'erro': 'CPF inválido'}, 400
@@ -16,6 +18,9 @@ def cadastrar_usuario(dados):
 
         if usuario_existente:
             return {'erro': 'Usuário já cadastrado.'}, 400
+        
+        senha_bytes = senha.encode('utf-8')
+        senha_hash = bcrypt.hashpw(senha_bytes, bcrypt.gensalt())
 
         id_endereco = auth_repository.inserir_endereco(
             dados['logradouro'],
@@ -30,7 +35,7 @@ def cadastrar_usuario(dados):
             dados['cpf'],
             dados['email'],
             dados['telefone'],
-            dados['senha'],
+            senha_hash.decode('utf-8'),
             id_endereco
         )
 
