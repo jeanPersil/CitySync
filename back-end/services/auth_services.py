@@ -55,7 +55,7 @@ def realizar_login(dados):
             return{"erro": "Usuário ou senha inválido."}, 401
 
     except Exception as e:
-        return {'erro': 'erro ao realizar login', 'detalhes': str(e)}, 500
+        return {'erro': str(e)}, 500
     
    
 

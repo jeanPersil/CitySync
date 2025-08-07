@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:citysync/model/modelReport.dart';
+import 'package:intl/intl.dart';
 
 class CardPRoblema extends StatelessWidget {
   CardPRoblema({super.key, required this.report});
 
   final Report report;
+
+  String formatarDataHora(String dataCriacao) {
+    try {
+      final dateTime = DateTime.parse(dataCriacao).toLocal();
+      return DateFormat('dd/MM/yyyy').format(dateTime);
+    } catch (e) {
+      return dataCriacao;
+    }
+  }
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
@@ -48,7 +58,7 @@ class CardPRoblema extends StatelessWidget {
             ),
             SizedBox(height: 4),
             Text(
-              report.dataCriacao,
+              formatarDataHora(report.dataCriacao),
               style: TextStyle(fontSize: 12, color: Colors.black54),
             ),
             SizedBox(height: 8),

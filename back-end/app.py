@@ -1,11 +1,11 @@
 from flask import Flask
 from flask_cors import CORS
-from config import mysql, init_app
+from config import init_supabase
 
 app = Flask(__name__)
 CORS(app)
 
-init_app(app)  
+init_supabase()  
 
 from controller.auth import auth_bp
 from controller.report import report_bp

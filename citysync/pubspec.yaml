@@ -34,6 +34,7 @@ dependencies:
   flutter_map: ^8.1.1
   latlong2: ^0.9.1
   http: ^1.2.1
+  intl: ^0.18.1
   image_picker: ^1.0.4
   image_picker_web: ^3.0.0+1
   universal_io: ^2.2.2
@@ -66,8 +67,8 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-     - assets/images/
-     - assets/images/icones/
+    - assets/images/
+    - assets/images/icones/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

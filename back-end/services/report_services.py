@@ -14,13 +14,13 @@ def efetuar_report(dados):
 def listar_reports(id_usuario):
     resultados = report_repository.buscar_reports_por_usuario(id_usuario)
     reports = [{
-        "id": linha[0],
-        "endereco": linha[1],
-        "categoria": linha[2],
-        "status": linha[3],
-        "id_usuario": linha[4],
-        "duracao": linha[5],
-        "url_imagem": linha[6],
-        "data_report": linha[7]
+        "id": linha["id"],
+        "endereco": linha["endereco"],
+        "categoria": linha["nome_categoria"],
+        "status": linha["nome_status"],
+        "id_usuario": linha["usuario_id"],
+        "duracao": linha["duracao"],
+        "url_imagem": linha["url_imagem"],
+        "data_report": linha["data_criacao"]
     } for linha in resultados]
     return reports
