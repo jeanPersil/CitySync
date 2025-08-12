@@ -1,33 +1,34 @@
 from config import mysql
 from config import init_supabase
+from models.usuario_endereço import Endereco, Usuario
 import bcrypt
 
 
 supabase = init_supabase()
 
-def buscar_usuario_por_cpf_ou_email(cpf, email):
-    response = supabase.table("usuario").select("id_usuario").or_(f"cpf.eq.{cpf},email.eq.{email}").execute()
+def buscar_usuario_por_cpf_ou_email(usuario_dados):
+    response = supabase.table("usuario").select("id_usuario").or_(f"cpf.eq.{usuario_dados.cpf},email.eq.{usuario_dados.email}").execute()
     data = response.data
     return data[0] if data else None
 
-def inserir_endereco(logradouro, numero, bairro, cidade, cep):
+def inserir_endereco(endereco_usuario):
     response = supabase.table("endereco").insert({
-        "logradouro": logradouro,
-        "numero": numero,
-        "bairro": bairro,
-        "fk_cidade": cidade,
-        "cep": cep
+        "logradouro": endereco_usuario.logradouro,
+        "numero": endereco_usuario.numero,
+        "bairro": endereco_usuario.bairro,
+        "fk_cidade": endereco_usuario.id_cidade,
+        "cep": endereco_usuario.cep
     }).execute()
     data = response.data
     return data[0]["id_endereco"] if data else None
 
 
-def inserir_usuario(nome, cpf, email, telefone, senha, id_endereco):
+def inserir_usuario( usuario_dados, senha, id_endereco,):
     response = supabase.table("usuario").insert({
-        "nome": nome,
-        "cpf": cpf,
-        "email": email,
-        "telefone": telefone,
+        "nome": usuario_dados.nome,
+        "cpf": usuario_dados.cpf,
+        "email": usuario_dados.email,
+        "telefone": usuario_dados.telefone,
         "senha": senha,
         "id_endereco": id_endereco
     }).execute()

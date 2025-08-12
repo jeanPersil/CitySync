@@ -4,40 +4,26 @@ import bcrypt
 
 cpf_validator = CPF()
 
-def cadastrar_usuario(dados):
+def cadastrar_usuario(usuario, endereco):
     try:
-        cpf = dados['cpf']
-        senha = dados['senha']
-
-        if not cpf_validator.validate(cpf):
-            return {'erro': 'CPF inválido'}, 400
-
-        usuario_existente = auth_repository.buscar_usuario_por_cpf_ou_email(
-            dados['cpf'], dados['email']
-        )
-
+        usuario_existente = auth_repository.buscar_usuario_por_cpf_ou_email(usuario)
         if usuario_existente:
             return {'erro': 'Usuário já cadastrado.'}, 400
         
+
+        if not cpf_validator.validate(usuario.cpf):
+            return {'erro': 'CPF inválido'}, 400
+
+        #criptografando a senha
+        senha = usuario.senha
         senha_bytes = senha.encode('utf-8')
         senha_hash = bcrypt.hashpw(senha_bytes, bcrypt.gensalt())
 
-        id_endereco = auth_repository.inserir_endereco(
-            dados['logradouro'],
-            dados['numero'],
-            dados['bairro'],
-            dados['cidade'],
-            dados['cep']
-        )
+        # inserindo o endereço no banco de dados
+        id_endereco = auth_repository.inserir_endereco(endereco)
 
-        auth_repository.inserir_usuario(
-            dados['nome'],
-            dados['cpf'],
-            dados['email'],
-            dados['telefone'],
-            senha_hash.decode('utf-8'),
-            id_endereco
-        )
+        #cadastrando usuario no banco com senha criptografada + id de endereço
+        auth_repository.inserir_usuario(usuario, senha_hash.decode('utf-8'), id_endereco)
 
         return {'mensagem': 'Usuário cadastrado com sucesso!'}, 200
 

@@ -1,11 +1,16 @@
 from flask import Blueprint, request, jsonify
 from services import report_services
+from models.usuario_endereço import Report
 
 report_bp = Blueprint('report', __name__)
 
 @report_bp.route("/efetuar_report", methods=['POST']) 
 def efetuar_report():
     dados = request.json
+
+    report = Report(
+        
+    )
     try:
         report_services.efetuar_report(dados)
         return jsonify({'status': 'successo', 'mensagem': 'Reporte realizado com sucesso!'}), 201
