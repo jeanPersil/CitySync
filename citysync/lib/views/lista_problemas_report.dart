@@ -21,7 +21,6 @@ class ProblemasReport extends StatelessWidget {
         (screenWidth < 600) ? screenWidth * 0.9 : screenWidth * 0.5;
     final horizontalPadding =
         (screenWidth < 600) ? 16.0 : (screenWidth - containerWidth) / 2;
-
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final colorScheme = theme.colorScheme;

@@ -9,11 +9,20 @@ def efetuar_report():
     dados = request.json
 
     report = Report(
-        
+        None,
+        dados['endereco'],
+        dados['categoria'],
+        None,
+        dados['id_usuario'],
+        dados['duracao'],
+        dados['descricao'],
+        dados['url_imagem'],
+
     )
     try:
-        report_services.efetuar_report(dados)
-        return jsonify({'status': 'successo', 'mensagem': 'Reporte realizado com sucesso!'}), 201
+        report_services.efetuar_report(report)
+        return jsonify({'status': 'successo', 'mensagem': 'Reporte realizado com #sucesso!'}), 201 
+ 
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
 

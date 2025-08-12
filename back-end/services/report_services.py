@@ -1,15 +1,8 @@
 from repositories import report_repository
+from models.usuario_endereço import Report
 
-def efetuar_report(dados):
-    return report_repository.inserir_report(
-        dados['endereco'],
-        dados['categoria'],
-        dados['duracao'],
-        dados['descricao'],
-        dados['url_imagem'],
-        dados['id_usuario']
-    )
-
+def efetuar_report(report : Report):
+    return report_repository.inserir_report(report)
 
 def listar_reports(id_usuario):
     resultados = report_repository.buscar_reports_por_usuario(id_usuario)

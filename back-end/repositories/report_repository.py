@@ -1,16 +1,16 @@
 from config import init_supabase
-
+from models.usuario_endereço import Report
 supabase = init_supabase()
 
-def inserir_report(endereco, categoria_id, duracao, descricao, url_imagem, usuario_id):
+def inserir_report(report : Report):
     try:
         response = supabase.table("report").insert({
-            "endereco": endereco,
-            "categoria_id": categoria_id,
-            "duracao": duracao,
-            "descricao": descricao,
-            "url_imagem": url_imagem,
-            "usuario_id": usuario_id
+            "endereco": report.endereco,
+            "categoria_id": report.categoria_id,
+            "duracao": report.duracao,
+            "descricao": report.descricao,
+            "url_imagem": report.url_imagem,
+            "usuario_id": report.usuario_id
         }).execute()
         return True if response.data else False
     except Exception as e:

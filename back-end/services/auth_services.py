@@ -1,16 +1,17 @@
 from validate_docbr import CPF
 from repositories import auth_repository
+from models.usuario_endereço import Endereco, Usuario
 import bcrypt
 
 cpf_validator = CPF()
 
-def cadastrar_usuario(usuario, endereco):
+def cadastrar_usuario(usuario : Usuario, endereco : Endereco):
     try:
+        
         usuario_existente = auth_repository.buscar_usuario_por_cpf_ou_email(usuario)
         if usuario_existente:
             return {'erro': 'Usuário já cadastrado.'}, 400
         
-
         if not cpf_validator.validate(usuario.cpf):
             return {'erro': 'CPF inválido'}, 400
 
