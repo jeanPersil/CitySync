@@ -14,11 +14,18 @@ def inserir_report(report : Report):
         }).execute()
         return True if response.data else False
     except Exception as e:
-        raise e
+         return {"erro" : "falha ao reportar o problema", 'detalhes' : str(e)}
 
 def buscar_reports_por_usuario(usuario_id):
     try:
         response = supabase.rpc("listar_problemas_por_usuario", {"u_id": usuario_id}).execute()
         return response.data
     except Exception as e:
-        raise e
+         return {"erro" : "falha ao buscar reports", 'detalhes' : str(e)}
+    
+def buscar_todos_reports():
+    try:
+        response = supabase.table("view_reports_completos").select("*").execute()
+        return response.data
+    except Exception as e:
+        return {"erro" : "falha ao buscar reports", 'detalhes' : str(e)}

@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS usuario (
     senha VARCHAR(100) NOT NULL,
     telefone VARCHAR(20) NOT NULL,
     id_endereco INT REFERENCES endereco(id_endereco) ON DELETE SET NULL
+    tipo_usuario TEXT NOT NULL DEFAULT 'usuario' CHECK (tipo_usuario IN ('usuario', 'admin'))
 );
 
 -- Tabela de categorias
@@ -107,3 +108,26 @@ SELECT
 FROM report r
 JOIN categoria c ON r.categoria_id = c.id
 JOIN status s ON r.status_id = s.id;
+
+-- view para listar problemas complestos
+CREATE OR REPLACE view view_reports_completos as
+select
+r.id as id_report,
+r.endereco as local_problema,
+r.url_imagem as imagem,
+c.nome_categoria as categoria,
+s.nome_status as status,
+u.nome as nome_usuario,
+r.descricao,
+r.duracao as dias_em_aberto,
+TO_CHAR(r.data_criacao, 'DD/MM/YYYY HH24:MI') AS data_criacao_formatada,
+TO_CHAR(r.data_atualizacao, 'DD/MM/YYYY HH24:MI') AS ultima_atualizacao
+from report r
+join
+  categoria c on r.categoria_id = c.id
+join 
+  status s on r.status_id = s.id
+JOIN 
+    usuario u ON r.usuario_id = u.id_usuario;
+
+

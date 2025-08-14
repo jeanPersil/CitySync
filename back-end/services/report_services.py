@@ -4,7 +4,7 @@ from models.usuario_endereço import Report
 def efetuar_report(report : Report):
     return report_repository.inserir_report(report)
 
-def listar_reports(id_usuario):
+def listar_reports_do_usuario(id_usuario):
     resultados = report_repository.buscar_reports_por_usuario(id_usuario)
     reports = [{
         "id": linha["id"],
@@ -17,3 +17,12 @@ def listar_reports(id_usuario):
         "data_report": linha["data_criacao"]
     } for linha in resultados]
     return reports
+
+
+def listar_reports_admin():
+   try: 
+    reports = report_repository.buscar_todos_reports()
+    return reports
+   except Exception as e:
+      return ({'erro' : 'Falha ao buscar reports', 'detalhes' : str(e)})
+

@@ -29,7 +29,22 @@ def efetuar_report():
 @report_bp.route("/listar_reports/<int:id_usuario>", methods=['GET'])  
 def listar_reports(id_usuario):
     try:
-        reports = report_services.listar_reports(id_usuario)
+        reports = report_services.listar_reports_do_usuario(id_usuario)
         return jsonify({"reports": reports}), 200
     except Exception as e:
         return jsonify({"erro": "Falha ao buscar relatórios", "detalhes": str(e)}), 500
+
+
+
+@report_bp.route("/listar_reports_admin", methods=['GET'])
+def listar_reports_admin():
+    try:
+        reports = report_services.listar_reports_admin()
+        return jsonify({"lista": reports})  
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  
+    
+
+@report_bp.route("/filtrar_reports", methods=['GET'])
+def filtrar_reports():
+    print("filtrado")
