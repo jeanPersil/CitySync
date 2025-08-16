@@ -1,4 +1,3 @@
-from config import mysql
 from config import init_supabase
 from models.usuario_endereço import Endereco, Usuario
 import bcrypt
@@ -6,12 +5,12 @@ import bcrypt
 
 supabase = init_supabase()
 
-def buscar_usuario_por_cpf_ou_email(usuario_dados):
+def buscar_usuario_por_cpf_ou_email(usuario_dados : Usuario):
     response = supabase.table("usuario").select("id_usuario").or_(f"cpf.eq.{usuario_dados.cpf},email.eq.{usuario_dados.email}").execute()
     data = response.data
     return data[0] if data else None
 
-def inserir_endereco(endereco_usuario):
+def inserir_endereco(endereco_usuario : Endereco):
     response = supabase.table("endereco").insert({
         "logradouro": endereco_usuario.logradouro,
         "numero": endereco_usuario.numero,
@@ -23,7 +22,7 @@ def inserir_endereco(endereco_usuario):
     return data[0]["id_endereco"] if data else None
 
 
-def inserir_usuario( usuario_dados, senha, id_endereco,):
+def inserir_usuario( usuario_dados : Usuario, senha, id_endereco,):
     response = supabase.table("usuario").insert({
         "nome": usuario_dados.nome,
         "cpf": usuario_dados.cpf,

@@ -1,5 +1,5 @@
 from config import init_supabase
-from models.usuario_endereço import Report
+from models.report import Report
 supabase = init_supabase()
 
 def inserir_report(report : Report):
@@ -23,9 +23,29 @@ def buscar_reports_por_usuario(usuario_id):
     except Exception as e:
          return {"erro" : "falha ao buscar reports", 'detalhes' : str(e)}
     
-def buscar_todos_reports():
+def buscar_todos_reports(bairro = None, status= None, data=None, categoria=None):
     try:
-        response = supabase.table("view_reports_completos").select("*").execute()
-        return response.data
+        query = supabase.table("view_reports_completos").select("*")
+    
+        if bairro:
+            query = query.ilike("local_problema", bairro)
+            
+        if status:
+            query = query.eq("status", status)
+        
+        if categoria:
+            query = query.eq("categoria", categoria)
+        
+        if data:
+            query = query.gte("data_criacao_formatada", data)
+
+        respose = query.execute()
+
+        if respose.data:
+            return respose.data
+        else:
+            return []
+        
+        
     except Exception as e:
         return {"erro" : "falha ao buscar reports", 'detalhes' : str(e)}

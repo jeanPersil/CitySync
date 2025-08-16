@@ -1,8 +1,13 @@
 from repositories import report_repository
-from models.usuario_endereço import Report
+from models.report import Report
 
 def efetuar_report(report : Report):
-    return report_repository.inserir_report(report)
+    try:
+       return report_repository.inserir_report(report)
+    except Exception as e:
+       return ({'erro' : 'Falha ao reportar', 'detalhes' : str(e)})
+       
+
 
 def listar_reports_do_usuario(id_usuario):
     resultados = report_repository.buscar_reports_por_usuario(id_usuario)
@@ -19,9 +24,9 @@ def listar_reports_do_usuario(id_usuario):
     return reports
 
 
-def listar_reports_admin():
+def listar_reports_admin(bairro, status, data, categoria):
    try: 
-    reports = report_repository.buscar_todos_reports()
+    reports = report_repository.buscar_todos_reports(bairro=bairro, status=status, data=data, categoria=categoria)
     return reports
    except Exception as e:
       return ({'erro' : 'Falha ao buscar reports', 'detalhes' : str(e)})

@@ -5,7 +5,7 @@ import 'package:citysync/model/modelReport.dart';
 class ReportApiService {
   Future<List<Report>> obterListaReports(int idUsuario) async {
     final response = await http.get(
-      Uri.parse('http://192.168.0.5:5000/listar_reports/$idUsuario'),
+      Uri.parse('http://192.168.0.9:5000/listar_reports/$idUsuario'),
       headers: {'Content-Type': 'application/json'},
     );
 
@@ -18,7 +18,7 @@ class ReportApiService {
     }
   }
 
-  Future<bool> enviarReport({
+  Future<String?> enviarReport({
     required String endereco,
     required int categoriaId,
     required int usuarioId,
@@ -26,23 +26,32 @@ class ReportApiService {
     required String descricao,
     String? urlImagem,
   }) async {
-    final response = await http.post(
-      Uri.parse('http://192.168.0.5:5000/efetuar_report'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
+    try {
+      final uri = Uri.parse('http://192.168.0.9:5000/efetuar_report');
+      final body = jsonEncode({
         "endereco": endereco,
         "categoria": categoriaId,
         "id_usuario": usuarioId,
         "duracao": duracao,
         "descricao": descricao,
         "url_imagem": urlImagem ?? "",
-      }),
-    );
+      });
 
-    if (response.statusCode == 201) {
-      return true;
-    } else {
-      return false;
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
+
+      if (response.statusCode == 201) {
+        return null;
+      } else {
+        final decoded = jsonDecode(response.body);
+        final mensagemErro = decoded['erro'] ?? 'erro desconhecido';
+        return mensagemErro;
+      }
+    } catch (e) {
+      return e.toString();
     }
   }
 }

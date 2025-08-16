@@ -124,7 +124,7 @@ class TelaReportState extends State<TelaReport> {
     if (addressController.text.isNotEmpty &&
         problemController.text.isNotEmpty &&
         timeController.text.isNotEmpty) {
-      final sucesso = await ReportApiService().enviarReport(
+      final resultado = await ReportApiService().enviarReport(
         endereco: addressController.text,
         categoriaId: mapearCategoriaId(widget.categoria),
         usuarioId: widget.usuarioId,
@@ -133,14 +133,14 @@ class TelaReportState extends State<TelaReport> {
         urlImagem: imageName,
       );
 
-      if (sucesso) {
+      if (resultado == null) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Seu problema foi reportado!")),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Erro ao enviar o report")),
+          SnackBar(content: Text("Erro: $resultado")),
         );
       }
     } else {

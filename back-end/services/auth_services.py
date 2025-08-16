@@ -12,9 +12,6 @@ def cadastrar_usuario(usuario : Usuario, endereco : Endereco):
         if usuario_existente:
             return {'erro': 'Usuário já cadastrado.'}, 400
         
-        if not cpf_validator.validate(usuario.cpf):
-            return {'erro': 'CPF inválido'}, 400
-
         #criptografando a senha
         senha = usuario.senha
         senha_bytes = senha.encode('utf-8')
