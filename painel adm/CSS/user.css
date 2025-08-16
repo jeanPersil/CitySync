@@ -1,0 +1,325 @@
+
+/* Paleta de Cores e Tipografia */
+:root {
+    --bg-main: #f0f2f5;
+    --bg-card: #ffffff;
+    --bg-sidebar: #2c3e50;
+    --text-primary: #34495e;
+    --text-secondary: #95a5a6;
+    --accent-blue: #3498db;
+    --accent-green: #2ecc71;
+    --accent-red: #e74c3c;
+    --shadow-light: rgba(0, 0, 0, 0.08);
+    --border-color: #dcdfe4;
+}
+
+/* Paleta de Cores Modo Escuro */
+body.dark-mode {
+    --bg-main: #121212;
+    --bg-card: #1e1e1e;
+    --bg-sidebar: #1f2937;
+    --text-primary: #e0e0e0;
+    --text-secondary: #b0b0b0;
+    --accent-blue: #3b82f6;
+    --accent-green: #22c55e;
+    --accent-red: #ef4444;
+    --shadow-light: rgba(255, 255, 255, 0.05);
+    --border-color: #374151;
+}
+
+/* Base */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    min-height: 100vh;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+
+.sidebar {
+    width: 250px;
+    background-color: var(--bg-sidebar);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+    box-shadow: 2px 0 5px var(--shadow-light);
+    transition: width 0.3s ease, background-color 0.3s, box-shadow 0.3s;
+}
+
+.sidebar-header {
+    text-align: center;
+    padding: 20px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 20px;
+}
+
+.sidebar-nav {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 20px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 15px;
+    color: #ecf0f1;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.nav-item:hover,
+.nav-item.active {
+    background-color: var(--text-primary);
+    color: var(--bg-card);
+}
+
+body.dark-mode .nav-item:hover,
+body.dark-mode .nav-item.active {
+    background-color: #2c3e50;
+}
+
+.nav-item i {
+    font-size: 1.2rem;
+}
+
+.sidebar-footer {
+    padding: 20px;
+}
+
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: #ecf0f1;
+    text-decoration: none;
+    padding: 12px 15px;
+    border-radius: 8px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.logout-btn:hover {
+    background-color: var(--accent-red);
+    color: #fff;
+}
+
+
+.main-content {
+    flex: 1;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    overflow-y: auto;
+}
+
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+    transition: border-color 0.3s;
+}
+
+.main-header h1 {
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.profile-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    transition: color 0.3s;
+}
+
+/* Estilo para o ícone pequeno no cabeçalho */
+.user-profile .profile-avatar {
+    font-size: 40px;
+    color: var(--text-primary);
+    transition: color 0.3s;
+}
+
+/* Estilo para o ícone grande no card de perfil */
+.profile-card .profile-avatar-lg {
+    font-size: 150px;
+    color: var(--accent-blue);
+    margin-bottom: 20px;
+    border: none;
+    box-shadow: none;
+}
+
+
+.profile-section {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.profile-card,
+.profile-details {
+    background-color: var(--bg-card);
+    border-radius: 12px;
+    box-shadow: 0 4px 10px var(--shadow-light);
+    padding: 30px;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.profile-card {
+    flex: 1;
+    min-width: 280px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-card h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.profile-card .role {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    transition: color 0.3s;
+}
+
+.profile-links {
+    margin-top: 20px;
+    display: flex;
+    gap: 15px;
+}
+
+.profile-link {
+    width: 40px;
+    height: 40px;
+    background-color: var(--bg-main);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.profile-link:hover {
+    background-color: var(--accent-blue);
+    color: #fff;
+}
+
+.profile-details {
+    flex: 2;
+    min-width: 320px;
+}
+
+.profile-details h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+.btn-save {
+    padding: 12px 25px;
+    background-color: var(--accent-blue);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-save:hover {
+    background-color: #2980b9;
+}
+
+/* Responsividade */
+@media (max-width: 992px) {
+    .dashboard-container {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        height: auto;
+        padding: 10px;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 5px var(--shadow-light);
+    }
+    .sidebar-header {
+        display: none;
+    }
+    .sidebar-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .sidebar-nav a span, .logout-btn span {
+        display: none;
+    }
+    .logout-btn {
+        display: none;
+    }
+    .main-content {
+        padding: 20px;
+    }
+    .profile-section {
+        flex-direction: column;
+    }
+}
