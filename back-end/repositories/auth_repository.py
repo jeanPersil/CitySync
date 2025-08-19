@@ -61,6 +61,6 @@ def realizar_login_admin(email, senha):
         
         return None
   
-
     except Exception as e:
         return {"erro": str(e)}, 500
+        

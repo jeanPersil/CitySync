@@ -32,6 +32,19 @@ def efetuar_report():
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
 
+@report_bp.rout("/editar_report", methods=['POST'])
+def editar_report():
+    dados = request.json
+    id_usuario = dados["id_usuario"]
+    id_report = dados["id_report"]
+    status_id = dados["status_id"]
+
+    try:
+        resposta, status = report_services.editar_report(id_usuario, id_report, status_id)
+        return jsonify(resposta), status
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
 @report_bp.route("/listar_reports/<int:id_usuario>", methods=['GET'])  
 def listar_reports(id_usuario):
     if id_usuario <= 0:

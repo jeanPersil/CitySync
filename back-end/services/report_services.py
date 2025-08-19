@@ -6,8 +6,19 @@ def efetuar_report(report : Report):
        return report_repository.inserir_report(report)
     except Exception as e:
        return ({'erro' : 'Falha ao reportar', 'detalhes' : str(e)})
-       
+    
 
+def editar_report(report_id, status_id):
+    try:
+        resultado = report_repository.editar_status_report(report_id, status_id)
+
+        if not resultado:
+            return {"erro": "Report não encontrado ou não atualizado"}, 404
+                
+        return {"status": "sucesso"}, 200
+
+    except Exception as e:
+        return {'erro': 'Falha ao editar report', 'detalhes': str(e)}, 500
 
 def listar_reports_do_usuario(id_usuario):
     resultados = report_repository.buscar_reports_por_usuario(id_usuario)

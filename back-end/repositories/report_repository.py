@@ -15,6 +15,14 @@ def inserir_report(report : Report):
         return True if response.data else False
     except Exception as e:
          return {"erro" : "falha ao reportar o problema", 'detalhes' : str(e)}
+    
+
+def editar_status_report(report_id, status_id):
+    try:
+        response = supabase.table("report").update({"status_id": status_id}).eq("id", report_id).execute()
+        return True if response.data else False
+    except Exception as e:
+         return {"erro" : "falha ao editar o status do problema", 'detalhes' : str(e)} 
 
 def buscar_reports_por_usuario(usuario_id):
     try:
