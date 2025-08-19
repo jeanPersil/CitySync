@@ -43,3 +43,24 @@ def realizar_login(email, senha_digitada):
         return {"id_usuario": usuario["id_usuario"], "nome": usuario["nome"]}
     else:
         return None
+
+def realizar_login_admin(email, senha):
+    try:
+        response = supabase.table("usuario").select("nome, senha, tipo_usuario").eq("email", email).execute()
+        
+        if not response.data:
+            return None 
+
+        usuario = response.data[0]  
+        
+        if bcrypt.checkpw(senha.encode('utf-8'), usuario["senha"].encode('utf-8')):
+            return {
+                "nome": usuario["nome"],
+                "tipo_usuario": usuario["tipo_usuario"]
+            }
+        
+        return None
+  
+
+    except Exception as e:
+        return {"erro": str(e)}, 500

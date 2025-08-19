@@ -1,10 +1,8 @@
 from flask import Blueprint, request, jsonify
-from validate_docbr import CPF
 from services import auth_services
 from models.usuario_endereço import Endereco, Usuario
 
 auth_bp = Blueprint('auth', __name__)
-validador_cpf = CPF()
 
 @auth_bp.route('/cadastrar', methods=['POST'])
 def cadastrar_usuario():
@@ -47,5 +45,20 @@ def login_usuario():
     dados = request.json  
     resultado, status = auth_services.realizar_login(dados)
     return jsonify(resultado), status
+
+
+@auth_bp.route("/login_admin", methods=['POST'])
+def login_admin():
+    dados = request.json
+    email = dados["email"]
+    senha = dados["senha"]
+
+    if email == "" or senha == "":
+        return jsonify({"erro" : "Os campos não foram preenchdios"})
+    
+    resultado, status = auth_services.realizar_login_admin(email, senha)
+    return jsonify(resultado), status
+    
+   
    
     
