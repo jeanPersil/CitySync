@@ -1,4 +1,5 @@
 import 'package:citysync/views/login.dart';
+import 'package:citysync/views/suporte.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:citysync/Tema/theme_provider.dart';
@@ -146,6 +147,32 @@ class _TelaConfigState extends State<TelaConfig> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => const PoliticaPrivacidadePage()),
+                          );
+                        },
+                      ),
+                    ),
+
+                    Card(
+                      margin: const EdgeInsets.symmetric(vertical: 8.0),
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      color: isDark ? Colors.grey[800] : Colors.white.withOpacity(0.9),
+                      child: ListTile(
+                        leading: Icon(Icons.help_outline, color: isDark ? Colors.white : Colors.blueGrey[700]),
+                        title: Text(
+                          'Suporte e Feedback',
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.blueGrey[900],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        trailing: Icon(Icons.arrow_forward_ios, size: 18, color: isDark ? Colors.white54 : Colors.blueGrey[400]),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const SuportePage()),
                           );
                         },
                       ),

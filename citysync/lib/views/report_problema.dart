@@ -23,7 +23,6 @@ class TelaReport extends StatefulWidget {
 class TelaReportState extends State<TelaReport> {
   final TextEditingController addressController = TextEditingController();
   final TextEditingController problemController = TextEditingController();
-  final TextEditingController timeController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
 
   final LatLng _initialPosicao = LatLng(-12.2664, -38.9668);
@@ -122,13 +121,12 @@ class TelaReportState extends State<TelaReport> {
 
   void _reportarProblema() async {
     if (addressController.text.isNotEmpty &&
-        problemController.text.isNotEmpty &&
-        timeController.text.isNotEmpty) {
+        problemController.text.isNotEmpty)
+         {
       final resultado = await ReportApiService().enviarReport(
         endereco: addressController.text,
         categoriaId: mapearCategoriaId(widget.categoria),
         usuarioId: widget.usuarioId,
-        duracao: timeController.text,
         descricao: descriptionController.text,
         urlImagem: imageName,
       );
@@ -211,8 +209,6 @@ class TelaReportState extends State<TelaReport> {
                   _buildSectionTitle("Problema relatado", isDark),
                   _buildTextField(problemController, "EX: Buraco", isDark,
                       readOnly: true),
-                  _buildSectionTitle("A quanto tempo ocorre?", isDark),
-                  _buildTextField(timeController, "EX: 2 horas", isDark),
                   _buildSectionTitle("Descrição (opcional)", isDark),
                   _buildTextField(
                       descriptionController, "Descreva o problema...", isDark),
@@ -266,19 +262,19 @@ class TelaReportState extends State<TelaReport> {
                     ),
                   ),
 
-                  // --- NOVO BOTÃO DE VISUALIZAÇÃO AQUI ---
+                 
                   if (imageName !=
-                      null) // Só mostra o botão se houver uma imagem salva
+                      null) 
                     Padding(
                       padding: const EdgeInsets.only(
-                          top: 10), // Adiciona um pequeno espaçamento
+                          top: 10), 
                       child: ElevatedButton(
                         onPressed:
-                            _abrirVisualizacaoImagem, // Chama sua função de visualização
+                            _abrirVisualizacaoImagem, 
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white, // Cor do botão
+                          backgroundColor: Colors.white,
                           foregroundColor:
-                              Colors.black, // Cor do texto do botão
+                              Colors.black, 
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
