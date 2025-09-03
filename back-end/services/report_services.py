@@ -8,9 +8,9 @@ def efetuar_report(report : Report):
        return ({'erro' : 'Falha ao reportar', 'detalhes' : str(e)})
     
 
-def editar_report(report_id, status_id):
+def editar_report(report_id, novo_status):
     try:
-        resultado = report_repository.editar_status_report(report_id, status_id)
+        resultado = report_repository.editar_status_report(report_id, novo_status)
 
         if not resultado:
             return {"erro": "Report não encontrado ou não atualizado"}, 404
@@ -41,4 +41,18 @@ def listar_reports_admin(bairro, status, data, categoria):
     return reports
    except Exception as e:
       return ({'erro' : 'Falha ao buscar reports', 'detalhes' : str(e)})
+   
 
+
+def deletar_report(id_report):
+    try:
+        resultado = report_repository.deletar_report(id_report)
+
+        if resultado is True:
+            return {"status": "sucesso"}, 200
+        elif isinstance(resultado, dict) and "erro" in resultado:
+            return resultado, 404  
+        else:
+            return {"erro": "Erro desconhecido ao deletar o report"}, 500
+    except Exception as e:
+        return {"erro": "Falha ao apagar o report", "detalhes": str(e)}, 500

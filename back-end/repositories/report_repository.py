@@ -17,9 +17,9 @@ def inserir_report(report : Report):
          return {"erro" : "falha ao reportar o problema", 'detalhes' : str(e)}
     
 
-def editar_status_report(report_id, status_id):
+def editar_status_report(report_id, novo_status):
     try:
-        response = supabase.table("report").update({"status_id": status_id}).eq("id", report_id).execute()
+        response = supabase.table("report").update({"status_id": novo_status}).eq("id", report_id).execute()
         return True if response.data else False
     except Exception as e:
          return {"erro" : "falha ao editar o status do problema", 'detalhes' : str(e)} 
@@ -53,7 +53,17 @@ def buscar_todos_reports(bairro = None, status= None, data=None, categoria=None)
             return respose.data
         else:
             return []
-        
-        
+         
     except Exception as e:
         return {"erro" : "falha ao buscar reports", 'detalhes' : str(e)}
+
+
+def deletar_report(id_report):
+    try:
+        response = supabase.table("report").delete().eq("id", id_report).execute()
+        if response.data:
+            return True
+        else:
+            return {"erro": "Report não encontrado"}
+    except Exception as e:
+        return {"erro": "Falha ao apagar o report", "detalhes": str(e)}
