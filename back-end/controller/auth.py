@@ -1,20 +1,12 @@
 from flask import Blueprint, request, jsonify
 from services import auth_services
-from models.usuario_endereço import Endereco, Usuario
+from models.usuario_endereco import Usuario
 
 auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/cadastrar', methods=['POST'])
 def cadastrar_usuario():
     dados = request.json
-    endereco = Endereco(
-        None,
-        dados ['logradouro'],
-        dados['numero'],
-        dados['bairro'],
-        dados['cep'],
-        dados['cidade'],
-    )
 
     usuario = Usuario(
         None, 
@@ -23,20 +15,21 @@ def cadastrar_usuario():
         dados['email'],
         dados['telefone'],
         dados['senha'],
-        None
+        dados['cep'],
+        dados['fk_cidade'],
     ) 
 
-    if not usuario.verificar_campos_obrigatorios() or not endereco.verificar_campos_obrigatorios():
+    if not usuario.verificar_campos_obrigatorios():
         return jsonify ({'erro' : 'Dados de cadastro incompletos'}), 401
     
     if not usuario.validar_cpf_usuario():
         return jsonify({'erro': 'CPF inválido'}), 401
     
-    if not endereco.validar_cep():
+    if not usuario.validar_cep():
         return jsonify({"erro" : "CEP invalido"}), 401
     
     
-    resposta, status = auth_services.cadastrar_usuario(usuario, endereco)
+    resposta, status = auth_services.cadastrar_usuario(usuario)
     return jsonify(resposta), status
 
 

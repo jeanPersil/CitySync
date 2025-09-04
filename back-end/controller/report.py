@@ -17,7 +17,6 @@ def efetuar_report():
         dados['categoria'],
         None,
         dados['id_usuario'],
-        dados['duracao'],
         dados['descricao'],
         dados['url_imagem'],
     )

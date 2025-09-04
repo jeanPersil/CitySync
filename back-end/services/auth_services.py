@@ -1,9 +1,9 @@
 from repositories import auth_repository
-from models.usuario_endereço import Endereco, Usuario
+from models.usuario_endereco import Usuario
 import bcrypt
 
 
-def cadastrar_usuario(usuario : Usuario, endereco : Endereco):
+def cadastrar_usuario(usuario : Usuario):
     try:
         
         usuario_existente = auth_repository.buscar_usuario_por_cpf_ou_email(usuario)
@@ -15,11 +15,8 @@ def cadastrar_usuario(usuario : Usuario, endereco : Endereco):
         senha_bytes = senha.encode('utf-8')
         senha_hash = bcrypt.hashpw(senha_bytes, bcrypt.gensalt())
 
-        # inserindo o endereço no banco de dados
-        id_endereco = auth_repository.inserir_endereco(endereco)
-
         #cadastrando usuario no banco com senha criptografada + id de endereço
-        auth_repository.inserir_usuario(usuario, senha_hash.decode('utf-8'), id_endereco)
+        auth_repository.inserir_usuario(usuario, senha_hash.decode('utf-8'))
 
         return {'mensagem': 'Usuário cadastrado com sucesso!'}, 200
 

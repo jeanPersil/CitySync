@@ -4,7 +4,6 @@ class Report {
   final String nomeCategoria;
   final String nomeStatus;
   final int idUsuario;
-  final String duracao;
   final String urlImagem;
   final String dataCriacao;
 
@@ -14,7 +13,6 @@ class Report {
     required this.nomeCategoria,
     required this.nomeStatus,
     required this.idUsuario,
-    required this.duracao,
     required this.urlImagem,
     required this.dataCriacao,
   });
@@ -26,7 +24,6 @@ class Report {
       nomeCategoria: json['categoria'] ?? '',
       nomeStatus: json['status'] ?? '',
       idUsuario: json['id_usuario'] ?? 0,
-      duracao: (json['duracao'] ?? 0).toString(),
       urlImagem: json['url_imagem'] ?? '',
       dataCriacao: json['data_report'] ?? '',
     );

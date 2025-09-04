@@ -7,7 +7,6 @@ def inserir_report(report : Report):
         response = supabase.table("report").insert({
             "endereco": report.endereco,
             "categoria_id": report.categoria_id,
-            "duracao": report.duracao,
             "descricao": report.descricao,
             "url_imagem": report.url_imagem,
             "usuario_id": report.usuario_id
@@ -26,10 +25,10 @@ def editar_status_report(report_id, novo_status):
 
 def buscar_reports_por_usuario(usuario_id):
     try:
-        response = supabase.rpc("listar_problemas_por_usuario", {"u_id": usuario_id}).execute()
+        response = supabase.table("listar_problemas").select("*").eq("usuario_id", usuario_id).execute()
         return response.data
     except Exception as e:
-         return {"erro" : "falha ao buscar reports", 'detalhes' : str(e)}
+        return {"erro": "Falha ao buscar reports", "detalhes": str(e)}
     
 def buscar_todos_reports(bairro = None, status= None, data=None, categoria=None):
     try:

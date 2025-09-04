@@ -31,14 +31,14 @@ class _TelaCadastroState extends State<TelaCadastro>
 
   bool _obscureText = true;
   bool _isLoading = false;
-  
+
   int? _cidadeSelecionada = 1;
   final auth = AutenticacaoUsuario();
 
   @override
   void initState() {
     super.initState();
-    
+
     // Controlador para a animação de escala (pulsação)
     _scaleAnimationController = AnimationController(
       vsync: this,
@@ -160,9 +160,9 @@ class _TelaCadastroState extends State<TelaCadastro>
         style: const TextStyle(color: Colors.white),
         autovalidateMode: AutovalidateMode.onUserInteraction,
         decoration: _buildInputDecoration(
-          labelText: label, 
-          icon: icon, 
-          suffixIcon: suffixIcon, 
+          labelText: label,
+          icon: icon,
+          suffixIcon: suffixIcon,
           counterStyle: counterStyle,
         ),
         validator: validator ??
@@ -188,10 +188,7 @@ class _TelaCadastroState extends State<TelaCadastro>
         "email": _emailController.text.trim(),
         "senha": _senhaController.text.trim(),
         "telefone": _telefoneController.text.trim(),
-        "logradouro": _logradouroController.text.trim(),
-        "numero": _numeroCasaController.text.trim(),
-        "bairro": _bairroController.text.trim(),
-        "cidade": _cidadeSelecionada.toString(),
+        "fk_cidade": _cidadeSelecionada.toString(),
         "cep": _cepController.text.trim(),
       };
 
@@ -232,7 +229,7 @@ class _TelaCadastroState extends State<TelaCadastro>
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(
+        SnackBar(
           content: Text('Por favor, preencha todos os campos corretamente.'),
           backgroundColor: Colors.black54,
           behavior: SnackBarBehavior.floating,
@@ -267,7 +264,8 @@ class _TelaCadastroState extends State<TelaCadastro>
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                         ),
-                        child: Image.asset("assets/images/logo.png", height: 180),
+                        child:
+                            Image.asset("assets/images/logo.png", height: 180),
                       ),
                     ),
                   ),
@@ -340,7 +338,8 @@ class _TelaCadastroState extends State<TelaCadastro>
                             Icons.badge,
                             keyboardType: TextInputType.number,
                             maxLength: 11,
-                            counterStyle: const TextStyle(color: Colors.white70),
+                            counterStyle:
+                                const TextStyle(color: Colors.white70),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return "Por favor, digite seu CPF.";
@@ -376,7 +375,8 @@ class _TelaCadastroState extends State<TelaCadastro>
                             Icons.lock,
                             obscureText: _obscureText,
                             maxLength: 20,
-                            counterStyle: const TextStyle(color: Colors.white70),
+                            counterStyle:
+                                const TextStyle(color: Colors.white70),
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscureText
@@ -407,7 +407,8 @@ class _TelaCadastroState extends State<TelaCadastro>
                             Icons.phone,
                             keyboardType: TextInputType.phone,
                             maxLength: 12,
-                            counterStyle: const TextStyle(color: Colors.white70),
+                            counterStyle:
+                                const TextStyle(color: Colors.white70),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return "Por favor, digite seu telefone.";
@@ -421,7 +422,7 @@ class _TelaCadastroState extends State<TelaCadastro>
                           const SizedBox(height: 20),
                           const Divider(color: Colors.white38),
                           const SizedBox(height: 10),
-                          
+
                           // Dropdown de cidade
                           Container(
                             decoration: BoxDecoration(
@@ -470,7 +471,8 @@ class _TelaCadastroState extends State<TelaCadastro>
                             Icons.numbers,
                             keyboardType: TextInputType.number,
                             maxLength: 8,
-                            counterStyle: const TextStyle(color: Colors.white70),
+                            counterStyle:
+                                const TextStyle(color: Colors.white70),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return "Por favor, digite seu CEP.";
@@ -503,7 +505,8 @@ class _TelaCadastroState extends State<TelaCadastro>
                         borderRadius: BorderRadius.circular(14),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF20C997).withOpacity(_isLoading ? 0.3 : 0.6),
+                            color: const Color(0xFF20C997)
+                                .withOpacity(_isLoading ? 0.3 : 0.6),
                             blurRadius: 10,
                             offset: const Offset(0, 5),
                           ),
@@ -516,13 +519,16 @@ class _TelaCadastroState extends State<TelaCadastro>
                                 height: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
                                 ),
                               )
                             : const Icon(Icons.check, size: 22),
                         label: _isLoading
-                            ? const Text("Processando...", style: TextStyle(fontSize: 16))
-                            : const Text("Cadastrar", style: TextStyle(fontSize: 18)),
+                            ? const Text("Processando...",
+                                style: TextStyle(fontSize: 16))
+                            : const Text("Cadastrar",
+                                style: TextStyle(fontSize: 18)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF20C997),
                           foregroundColor: Colors.white,
@@ -562,8 +568,10 @@ class _TelaCadastroState extends State<TelaCadastro>
                         ),
                         child: TextButton(
                           onPressed: () {
-                            Navigator.pushReplacement(context,
-                                MaterialPageRoute(builder: (_) => const TelaLogin()));
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const TelaLogin()));
                           },
                           child: const Text("Faça Login",
                               style: TextStyle(

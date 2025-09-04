@@ -1,5 +1,5 @@
 from config import init_supabase
-from models.usuario_endereço import Endereco, Usuario
+from models.usuario_endereco import  Usuario
 import bcrypt
 
 
@@ -10,26 +10,16 @@ def buscar_usuario_por_cpf_ou_email(usuario_dados : Usuario):
     data = response.data
     return data[0] if data else None
 
-def inserir_endereco(endereco_usuario : Endereco):
-    response = supabase.table("endereco").insert({
-        "logradouro": endereco_usuario.logradouro,
-        "numero": endereco_usuario.numero,
-        "bairro": endereco_usuario.bairro,
-        "fk_cidade": endereco_usuario.id_cidade,
-        "cep": endereco_usuario.cep
-    }).execute()
-    data = response.data
-    return data[0]["id_endereco"] if data else None
 
-
-def inserir_usuario( usuario_dados : Usuario, senha, id_endereco,):
+def inserir_usuario( usuario_dados : Usuario, senha, ):
     response = supabase.table("usuario").insert({
         "nome": usuario_dados.nome,
         "cpf": usuario_dados.cpf,
         "email": usuario_dados.email,
         "telefone": usuario_dados.telefone,
         "senha": senha,
-        "id_endereco": id_endereco
+        "cep" : usuario_dados.cep,
+        "fk_cidade" : usuario_dados.fk_cidade
     }).execute()
     return response.data
     
