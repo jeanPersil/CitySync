@@ -1,13 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // Referencia o corpo do documento para aplicar o tema
     const body = document.body;
+    const toggle = document.getElementById('dark-mode-toggle');
 
     const applyTheme = (theme) => {
         if (theme === 'dark') {
             body.classList.add('dark-mode');
+            toggle.checked = true;
         } else {
             body.classList.remove('dark-mode');
+            toggle.checked = false;
         }
     };
 
@@ -15,16 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('theme') || 'light';
     applyTheme(savedTheme);
 
-    const themeSelect = document.getElementById('theme');
-
-    if (themeSelect) {
-        themeSelect.value = savedTheme;
-
-        // Ouvir a mudança no select e salvar a nova preferência
-        themeSelect.addEventListener('change', (event) => {
-            const newTheme = event.target.value;
-            localStorage.setItem('theme', newTheme);
-            applyTheme(newTheme);
-        });
-    }
+    // Evento de clique no switch
+    toggle.addEventListener('change', () => {
+        const newTheme = toggle.checked ? 'dark' : 'light';
+        localStorage.setItem('theme', newTheme);
+        applyTheme(newTheme);
+    });
 });

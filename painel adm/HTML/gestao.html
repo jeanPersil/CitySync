@@ -14,7 +14,7 @@
     <div class="container-painel">
         <aside class="barra-lateral">
             <div class="sidebar-header">
-                <h2>CitySync</h2>
+                <h2><i class="fas fa-city"></i> CitySync</h2>
             </div>
             <nav class="sidebar-nav">
                 <a href="dashboard.html" class="nav-item">
@@ -34,105 +34,326 @@
                     <span>Configurações</span>
                 </a>
             </nav>
-            <div class="sidebar-footer">
-                <a href="index.html" class="botao-sair">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    <span>Sair</span>
-                </a>
+            <div class="barra-lateral-footer">
+                <div class="modo-toggle">
+                    <span>Modo Escuro</span>
+                    <label class="switch">
+                        <input type="checkbox" id="dark-mode-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="sidebar-footer">
+                    <a href="index.html" class="botao-sair">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Sair</span>
+                    </a>
+                </div>
             </div>
         </aside>
 
         <main class="conteudo-principal">
             <header class="main-header">
-                <h1>Gestão de Reports</h1>
-                <div class="user-profile">
-                    <i class="fas fa-user-circle profile-avatar"></i>
-                    <span class="profile-name">Iwin Lima</span>
+                <div class="header-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1>Gestão de Reports</h1>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Pesquisar reports...">
+                    </div>
+                    <div class="header-icons">
+                        <div class="notification-bell">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-count">3</span>
+                        </div>
+                        <div class="user-profile">
+                            <div class="avatar-container">
+                                <i class="fas fa-user-circle profile-avatar"></i>
+                            </div>
+                            <span class="profile-name">Iwin Lima</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
                 </div>
             </header>
             
-            <section class="secao-filtros">
-                <div class="search-field">
-                    <i class="fa-solid fa-search"></i>
-                    <input type="text" placeholder="Buscar por descrição...">
+            <div class="main-content">
+                <div class="estatisticas-rapidas">
+                    <div class="estatistica-card">
+                        <div class="estatistica-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="estatistica-info">
+                            <span class="estatistica-valor">265</span>
+                            <span class="estatistica-label">Total de Reports</span>
+                        </div>
+                    </div>
+                    <div class="estatistica-card">
+                        <div class="estatistica-icon pendente">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="estatistica-info">
+                            <span class="estatistica-valor">75</span>
+                            <span class="estatistica-label">Pendentes</span>
+                        </div>
+                    </div>
+                    <div class="estatistica-card">
+                        <div class="estatistica-icon andamento">
+                            <i class="fas fa-hourglass-half"></i>
+                        </div>
+                        <div class="estatistica-info">
+                            <span class="estatistica-valor">30</span>
+                            <span class="estatistica-label">Em Andamento</span>
+                        </div>
+                    </div>
+                    <div class="estatistica-card">
+                        <div class="estatistica-icon resolvido">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="estatistica-info">
+                            <span class="estatistica-valor">160</span>
+                            <span class="estatistica-label">Resolvidos</span>
+                        </div>
+                    </div>
                 </div>
-                <input type="text" class="filter-input" placeholder="Bairro">
-                <input type="date" class="filter-input">
-                <div class="select-field">
-                    <select>
-                        <option value="todos">Status: Todos</option>
-                        <option value="pendente">Pendente</option>
-                        <option value="andamento">Em andamento</option>
-                        <option value="resolvido">Resolvido</option>
-                    </select>
-                </div>
-                <button class="botao-primario">Filtrar</button>
-            </section>
 
-            <section class="secao-tabela">
-                <div class="container-tabela">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Problema</th>
-                                <th>Bairro</th>
-                                <th>Data</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>#2341</td>
-                                <td>Buraco na via</td>
-                                <td>Centro</td>
-                                <td>10/04/2024</td>
-                                <td><span class="status status-pending">Pendente</span></td>
-                                <td class="acoes">
-                                    <button class="botao-acao view"><i class="fas fa-eye"></i></button>
-                                    <button class="botao-acao edit"><i class="fas fa-edit"></i></button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>#2340</td>
-                                <td>Buraco na via</td>
-                                <td>Campo Limpo</td>
-                                <td>08/04/2024</td>
-                                <td><span class="status status-progress">Em andamento</span></td>
-                                <td class="acoes">
-                                    <button class="botao-acao view"><i class="fas fa-eye"></i></button>
-                                    <button class="botao-acao edit"><i class="fas fa-edit"></i></button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>#2339</td>
-                                <td>Semáforo quebrado</td>
-                                <td>Feira V</td>
-                                <td>01/04/2024</td>
-                                <td><span class="status status-resolved">Resolvido</span></td>
-                                <td class="acoes">
-                                    <button class="botao-acao view"><i class="fas fa-eye"></i></button>
-                                    <button class="botao-acao edit"><i class="fas fa-edit"></i></button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>#2338</td>
-                                <td>Vazamento de água</td>
-                                <td>Santa Mônica</td>
-                                <td>25/03/2024</td>
-                                <td><span class="status status-resolved">Resolvido</span></td>
-                                <td class="acoes">
-                                    <button class="botao-acao view"><i class="fas fa-eye"></i></button>
-                                    <button class="botao-acao edit"><i class="fas fa-edit"></i></button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+                <section class="secao-filtros">
+                    <div class="filtros-header">
+                        <h2>Filtros</h2>
+                        <div class="acoes-header">
+                            <button class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Novo Report
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="fas fa-download"></i> Exportar
+                            </button>
+                        </div>
+                    </div>
+                    
+                        <input type="text" class="filter-input" placeholder="Bairro">
+                        <input type="date" class="filter-input" placeholder="Data">
+                        <div class="select-field">
+                            <select>
+                                <option value="todos">Status: Todos</option>
+                                <option value="pendente">Pendente</option>
+                                <option value="andamento">Em andamento</option>
+                                <option value="resolvido">Resolvido</option>
+                                <option value="prioritario">Prioritário</option>
+                            </select>
+                        </div>
+                        <div class="select-field">
+                            <select>
+                                <option value="todos">Categoria: Todas</option>
+                                <option value="buraco">Buraco na via</option>
+                                <option value="iluminacao">Iluminação pública</option>
+                                <option value="lixo">Coleta de lixo</option>
+                                <option value="sinalizacao">Sinalização</option>
+                                <option value="outros">Outros</option>
+                            </select>
+                        </div>
+                        <div class="filtro-botoes">
+                            <button class="botao-primario">Aplicar Filtros</button>
+                            <button class="botao-secundario">Limpar</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="secao-tabela">
+                    <div class="tabela-header">
+                        <h3>Reports Recentes</h3>
+                        <div class="tabela-info">
+                            <span>Mostrando 4 de 20 resultados</span>
+                            <div class="tabela-controles">
+                                <button class="btn-icon"><i class="fas fa-chevron-left"></i></button>
+                                <span>Página 1 de 10</span>
+                                <button class="btn-icon"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="container-tabela">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="check-column">
+                                        <input type="checkbox" id="select-all">
+                                    </th>
+                                    <th>ID <i class="fas fa-sort"></i></th>
+                                    <th>Problema <i class="fas fa-sort"></i></th>
+                                    <th>Categoria</th>
+                                    <th>Bairro <i class="fas fa-sort"></i></th>
+                                    <th>Data <i class="fas fa-sort"></i></th>
+                                    <th>Prioridade</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="check-column">
+                                        <input type="checkbox" class="row-checkbox">
+                                    </td>
+                                    <td>#2341</td>
+                                    <td>Buraco na via</td>
+                                    <td>Infraestrutura</td>
+                                    <td>Centro</td>
+                                    <td>10/04/2024</td>
+                                    <td><span class="prioridade alta">Alta</span></td>
+                                    <td><span class="status status-pending">Pendente</span></td>
+                                    <td class="acoes">
+                                        <button class="botao-acao view" title="Visualizar"><i class="fas fa-eye"></i></button>
+                                        <button class="botao-acao edit" title="Editar"><i class="fas fa-edit"></i></button>
+                                        <button class="botao-acao delete" title="Excluir"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="check-column">
+                                        <input type="checkbox" class="row-checkbox">
+                                    </td>
+                                    <td>#2340</td>
+                                    <td>Buraco na via</td>
+                                    <td>Infraestrutura</td>
+                                    <td>Campo Limpo</td>
+                                    <td>08/04/2024</td>
+                                    <td><span class="prioridade media">Média</span></td>
+                                    <td><span class="status status-progress">Em andamento</span></td>
+                                    <td class="acoes">
+                                        <button class="botao-acao view" title="Visualizar"><i class="fas fa-eye"></i></button>
+                                        <button class="botao-acao edit" title="Editar"><i class="fas fa-edit"></i></button>
+                                        <button class="botao-acao delete" title="Excluir"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="check-column">
+                                        <input type="checkbox" class="row-checkbox">
+                                    </td>
+                                    <td>#2339</td>
+                                    <td>Semáforo quebrado</td>
+                                    <td>Sinalização</td>
+                                    <td>Feira V</td>
+                                    <td>01/04/2024</td>
+                                    <td><span class="prioridade alta">Alta</span></td>
+                                    <td><span class="status status-resolved">Resolvido</span></td>
+                                    <td class="acoes">
+                                        <button class="botao-acao view" title="Visualizar"><i class="fas fa-eye"></i></button>
+                                        <button class="botao-acao edit" title="Editar"><i class="fas fa-edit"></i></button>
+                                        <button class="botao-acao delete" title="Excluir"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="check-column">
+                                        <input type="checkbox" class="row-checkbox">
+                                    </td>
+                                    <td>#2338</td>
+                                    <td>Vazamento de água</td>
+                                    <td>Saneamento</td>
+                                    <td>Santa Mônica</td>
+                                    <td>25/03/2024</td>
+                                    <td><span class="prioridade urgente">Urgente</span></td>
+                                    <td><span class="status status-resolved">Resolvido</span></td>
+                                    <td class="acoes">
+                                        <button class="botao-acao view" title="Visualizar"><i class="fas fa-eye"></i></button>
+                                        <button class="botao-acao edit" title="Editar"><i class="fas fa-edit"></i></button>
+                                        <button class="botao-acao delete" title="Excluir"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="tabela-footer">
+                        <div class="resultados-info">
+                            <span>4 itens selecionados</span>
+                        </div>
+                        <div class="paginacao">
+                            <button class="btn-pagina"><i class="fas fa-chevron-left"></i></button>
+                            <button class="btn-pagina active">1</button>
+                            <button class="btn-pagina">2</button>
+                            <button class="btn-pagina">3</button>
+                            <span>...</span>
+                            <button class="btn-pagina">10</button>
+                            <button class="btn-pagina"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </section>
+            </div>
         </main>
     </div>
+
+    <!-- Modal de Visualização -->
+    <div class="modal" id="modal-view">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Detalhes do Report #2341</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-grid">
+                    <div class="modal-info">
+                        <h4>Informações do Report</h4>
+                        <div class="info-item">
+                            <span class="info-label">Problema:</span>
+                            <span class="info-value">Buraco na via</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Descrição:</span>
+                            <span class="info-value">Buraco grande na avenida principal, próximo ao semáforo</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Endereço:</span>
+                            <span class="info-value">Av. Principal, 123 - Centro</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Data de Criação:</span>
+                            <span class="info-value">10/04/2024 14:30</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Criado por:</span>
+                            <span class="info-value">João Silva</span>
+                        </div>
+                    </div>
+                    <div class="modal-status">
+                        <h4>Status e Atribuição</h4>
+                        <div class="status-info">
+                            <div class="info-item">
+                                <span class="info-label">Status:</span>
+                                <span class="status status-pending">Pendente</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Prioridade:</span>
+                                <span class="prioridade alta">Alta</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Atribuído a:</span>
+                                <span class="info-value">Ninguém</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Última atualização:</span>
+                                <span class="info-value">10/04/2024 14:30</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-imagens">
+                    <h4>Imagens do Problema</h4>
+                    <div class="imagens-grid">
+                        <div class="imagem-placeholder">
+                            <i class="fas fa-image"></i>
+                            <span>Imagem não disponível</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary">Fechar</button>
+                <button class="btn btn-primary">Atribuir a Mim</button>
+            </div>
+        </div>
+    </div>
+
     <script src="/Javascript/darkmode.js"></script>
 </body>
 </html>

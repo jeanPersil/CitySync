@@ -213,13 +213,6 @@ body{
   box-shadow:none;
 }
 
-.botao-google {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
 .divider, .separador{
     height:1px; 
     background:#e2e8f0;
