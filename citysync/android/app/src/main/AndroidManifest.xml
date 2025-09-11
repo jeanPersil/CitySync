@@ -1,19 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-
     <application
-    
-        android:label="citysync"
+        android:label="flutter_application_1"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
-
-            <meta-data 
-                android:name="com.google.android.geo.API_KEY"
-                android:value="AIzaSyAuFYpzu_RUWPhWgb2CTjJ55xVyVwF_Z_4"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"
