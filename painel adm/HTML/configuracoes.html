@@ -1,129 +1,162 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configurações • CitySync</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="/CSS/config.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configurações • CitySync</title>
+  <link rel="stylesheet" href="/painel adm/CSS/config.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="dashboard-container">
-        <aside class="barra-lateral">
-            <div class="sidebar-header">
-                <h2>CitySync</h2>
+  <div class="dashboard-container">
+
+    <!-- Sidebar -->
+    <aside class="barra-lateral">
+      <div class="barra-lateral-header">
+        <h2><i class="fas fa-city"></i> CitySync</h2>
+      </div>
+      <nav class="barra-lateral-nav">
+        <a href="dashboard.html" class="nav-item">
+          <i class="fa-solid fa-chart-line"></i><span>Dashboard</span>
+        </a>
+        <a href="gestao.html" class="nav-item">
+          <i class="fa-solid fa-file-alt"></i><span>Reports</span>
+        </a>
+        <a href="usuario.html" class="nav-item">
+          <i class="fa-solid fa-user"></i><span>Usuário</span>
+        </a>
+        <a href="configuracoes.html" class="nav-item active">
+          <i class="fa-solid fa-gear"></i><span>Configurações</span>
+        </a>
+      </nav>
+      <div class="barra-lateral-footer">
+        <div class="modo-toggle">
+          <span>Modo Escuro</span>
+          <label class="switch">
+            <input type="checkbox" id="dark-mode-toggle">
+            <span class="slider round"></span>
+          </label>
+        </div>
+        <a href="index.html" class="logout-btn">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span>Sair</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="conteudo-principal">
+
+      <!-- Header -->
+      <header class="main-header">
+        <div class="header-left">
+          <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1>Configurações</h1>
+        </div>
+        <div class="header-right">
+          <div class="notification-bell">
+            <i class="fas fa-bell"></i>
+            <span class="notification-count">1</span>
+          </div>
+          <div class="perfil-usuario">
+            <div class="avatar-container">
+              <i class="fas fa-user-circle profile-avatar"></i>
             </div>
-            <nav class="sidebar-nav">
-                <a href="dashboard.html" class="nav-item">
-                    <i class="fa-solid fa-chart-line"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="gestao.html" class="nav-item">
-                    <i class="fa-solid fa-file-alt"></i>
-                    <span>Reports</span>
-                </a>
-                <a href="usuario.html" class="nav-item">
-                    <i class="fa-solid fa-user"></i>
-                    <span>Usuário</span>
-                </a>
-                <a href="configuracoes.html" class="nav-item active">
-                    <i class="fa-solid fa-gear"></i>
-                    <span>Configurações</span>
-                </a>
-            </nav>
-            <div class="sidebar-footer">
-                <a href="index.html" class="botao-sair">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    <span>Sair</span>
-                </a>
-            </div>
-        </aside>
+            <span class="profile-name">Iwin Lima</span>
+          </div>
+        </div>
+      </header>
 
-        <main class="conteudo-principal">
-            <header class="main-header">
-                <h1>Configurações</h1>
-                <div class="user-profile">
-                    <i class="fas fa-user-circle profile-avatar"></i>
-                    <span class="profile-name">Iwin Lima</span>
-                </div>
-            </header>
+      <!-- Configurações -->
+      <div class="dashboard-content secao-configuracoes">
 
-            <section class="secao-configuracoes">
-                <div class="cartao-configuracao">
-                    <h3>Preferências do Sistema</h3>
-                    <div class="opcao-configuracao">
-                        <label for="lang">Idioma:</label>
-                        <select id="lang">
-                            <option value="pt">Português</option>
-                        </select>
-                    </div>
+        <!-- Preferências -->
+        <div class="cartao-configuracao">
+          <h3>Preferências do Sistema</h3>
+          <div class="opcao-configuracao">
+            <label for="lang">Idioma:</label>
+            <select id="lang">
+              <option value="pt">Português</option>
+            </select>
+          </div>
+          <div class="opcao-configuracao">
+            <label for="notify">Notificações:</label>
+            <label class="switch">
+              <input type="checkbox" id="notify" checked>
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <button class="action-btn">
+            <i class="fas fa-save"></i><span>Salvar Alterações</span>
+          </button>
+        </div>
 
-                    <div class="opcao-configuracao">
-                        <label for="notify">Notificações:</label>
-                        <label class="switch">
-                            <input type="checkbox" id="notify" checked>
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
+        <!-- Segurança -->
+        <div class="cartao-configuracao">
+          <h3>Segurança da Conta</h3>
+          <p class="subtitulo-cartao">Gerencie suas credenciais e configurações de segurança.</p>
+          <div class="opcao-configuracao">
+            <label for="2fa">Autenticação de 2 Fatores:</label>
+            <label class="switch">
+              <input type="checkbox" id="2fa">
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <button class="botao-acao"><i class="fas fa-key"></i> Alterar Senha</button>
+          <button class="botao-acao"><i class="fas fa-mobile-alt"></i> Gerenciar Dispositivos</button>
+        </div>
 
-                    <button class="botao-salvar">Salvar Alterações</button>
-                </div>
-                
-                <div class="cartao-configuracao">
-                    <h3>Segurança da Conta</h3>
-                    <p class="subtitulo-cartao">Gerencie suas credenciais e configurações de segurança.</p>
-                    <div class="opcao-configuracao">
-                        <label for="2fa">Autenticação de 2 Fatores:</label>
-                        <label class="switch">
-                            <input type="checkbox" id="2fa">
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                    <button class="botao-acao">Alterar Senha</button>
-                    <button class="botao-acao">Gerenciar Dispositivos</button>
-                </div>
+        <!-- Acesso -->
+        <div class="cartao-configuracao full-width">
+          <h3>Acesso e Permissões</h3>
+          <div class="tabela-configuracoes">
+            <table>
+              <thead>
+                <tr>
+                  <th>Usuário</th>
+                  <th>Função</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Iwin Lima</td>
+                  <td>Administrador</td>
+                  <td><span class="status status-ativo">Ativo</span></td>
+                  <td>
+                    <button class="botao-acao"><i class="fas fa-edit"></i></button>
+                    <button class="botao-acao"><i class="fas fa-trash-alt"></i></button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Jean Mago</td>
+                  <td>Moderador</td>
+                  <td><span class="status status-inativo">Inativo</span></td>
+                  <td>
+                    <button class="botao-acao"><i class="fas fa-edit"></i></button>
+                    <button class="botao-acao"><i class="fas fa-trash-alt"></i></button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-                <div class="cartao-configuracao full-width">
-                    <h3>Acesso e Permissões</h3>
-                    <div class="tabela-configuracoes">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Usuário</th>
-                                    <th>Função</th>
-                                    <th>Status</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Iwin Lima</td>
-                                    <td>Administrador</td>
-                                    <td><span class="status status-ativo">Ativo</span></td>
-                                    <td>
-                                        <button class="botao-acao"><i class="fas fa-edit"></i></button>
-                                        <button class="botao-acao"><i class="fas fa-trash-alt"></i></button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Jean Mago</td>
-                                    <td>Moderador</td>
-                                    <td><span class="status status-inativo">Inativo</span></td>
-                                    <td>
-                                        <button class="botao-acao"><i class="fas fa-edit"></i></button>
-                                        <button class="botao-acao"><i class="fas fa-trash-alt"></i></button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-        </main>
-    </div>
-    <script src="/Javascript/darkmode.js"></script>
+      </div>
+
+      <!-- Footer -->
+      <footer class="main-footer">
+        <p>© 2025 CitySync - Sistema de Gestão de Problemas Urbanos</p>
+        <p>v2.1.0 | Última atualização: 22/05/2025</p>
+      </footer>
+    </main>
+  </div>
+  <script src="/painel adm/Javascript/darkmode.js"></script>
 </body>
 </html>

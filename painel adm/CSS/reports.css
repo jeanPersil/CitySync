@@ -529,6 +529,7 @@ input:checked + .slider:before {
 
 .select-field {
     position: relative;
+    
 }
 
 .select-field select {
@@ -985,13 +986,15 @@ input[type="checkbox"] {
     
     .barra-lateral {
         position: fixed;
-        left: -280px;
+        top: 0;
+        left: -280px; /* escondida */
         height: 100%;
         width: 280px;
+        z-index: 1000;
     }
     
-    .barra-lateral.active {
-        left: 0;
+    .barra-lateral.open {
+        left: 0; /* aparece */
     }
     
     .search-box {

@@ -759,6 +759,76 @@ tr:hover {
   color: var(--text-secondary);
 }
 
+/* Adicione ao seu arquivo CSS existente */
+
+/* Tooltip */
+.tooltip {
+    position: fixed;
+    background: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+/* Toast message */
+.toast-message {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.toast-message.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Animações */
+.status-card,
+.tabela-recentes tbody tr,
+.activity-item {
+    opacity: 0;
+    transition: all 0.5s ease;
+}
+
+.status-card {
+    transform: translateY(20px);
+}
+
+.tabela-recentes tbody tr {
+    transform: translateX(-20px);
+}
+
+.activity-item {
+    transform: translateX(20px);
+}
+
+.bar {
+    transform: scaleY(0);
+    transform-origin: bottom;
+    opacity: 0;
+    transition: all 0.8s ease;
+}
+
+.pie {
+    opacity: 0;
+    transform: rotate(-90deg);
+    transition: all 1s ease;
+}
+
 /* Responsividade */
 @media (max-width: 1200px) {
   .secao-dupla {
