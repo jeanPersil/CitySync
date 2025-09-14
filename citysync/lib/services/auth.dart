@@ -3,7 +3,7 @@ import 'dart:convert';
 
 class AutenticacaoUsuario {
   Future<Map<String, dynamic>> login(String email, String senha) async {
-    final String _urlBase = "http://192.168.0.8:5000/login";
+    final String _urlBase = "http://192.168.0.16:5000/login";
     try {
       final resposta = await http.post(
         Uri.parse(_urlBase),
@@ -36,7 +36,7 @@ class AutenticacaoUsuario {
   }
 
   Future<Map<String, dynamic>> cadastrar(Map<String, dynamic> dados) async {
-    final String _urlBase = "http://192.168.0.8:5000/cadastrar";
+    final String _urlBase = "http://192.168.0.16:5000/cadastrar";
     try {
       final resposta = await http.post(
         Uri.parse(_urlBase),
