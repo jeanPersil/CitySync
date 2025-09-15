@@ -6,9 +6,13 @@ import bcrypt
 supabase = init_supabase()
 
 def buscar_usuario_por_cpf_ou_email(usuario_dados : Usuario):
-    response = supabase.table("usuario").select("id_usuario").or_(f"cpf.eq.{usuario_dados.cpf},email.eq.{usuario_dados.email}").execute()
+   try:
+    response = supabase.table("users").select("id").or_(f"cpf.eq.{usuario_dados.cpf},email.eq.{usuario_dados.email}").execute()
     data = response.data
     return data[0] if data else None
+    
+   except Exception as e:
+       return {"erro" : str(e)}
 
 
 def cadastrar_usuario_supa(usuario_dados : Usuario):
@@ -16,26 +20,26 @@ def cadastrar_usuario_supa(usuario_dados : Usuario):
         response = supabase.auth.sign_up({
             "email": usuario_dados.email,
             "password": usuario_dados.senha
-            
         })
 
         user = response.user
-        if user:
-            supabase.table("users").insert({
-            "id": user.id,
-            "nome": usuario_dados.nome,
-            "email": usuario_dados.email,
-            "cpf": usuario_dados.cpf,
-            "telefone": usuario_dados.telefone,
-            "cep": usuario_dados.cep,
-            "fk_cidade" : usuario_dados.fk_cidade,
-            "role": "usuario"
-            }).execute()
-            return {"mensagem": "Usuario cadastrado com sucesso"}, 201
-        return {"erro x": response.error.message}, 400
+
+        supabase.table("users").insert({
+        "id": user.id,
+        "nome": usuario_dados.nome,
+        "email": usuario_dados.email,
+        "cpf": usuario_dados.cpf,
+        "telefone": usuario_dados.telefone,
+        "cep": usuario_dados.cep,
+        "fk_cidade" : usuario_dados.fk_cidade,
+        "role": "usuario"
+        }).execute()
+
+        return True
+
 
     except Exception as e:
-        return {"erro": str(e)}
+        return {"erro x": str(e)}, 
 
 
 def login_usuario_supa(email, senha):

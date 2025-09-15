@@ -28,8 +28,8 @@ def cadastrar_user():
     if not usuario.validar_cep():
         return jsonify({"erro" : "CEP invalido"}), 401
     
-    resposta = auth_services.cadastrar_user(usuario)
-    return jsonify(resposta)
+    resposta, status = auth_services.cadastrar_user(usuario)
+    return jsonify(resposta), status
 
 
 @auth_bp.route('/login_user', methods=["POST"])
@@ -42,13 +42,6 @@ def login_user():
     response = auth_repository.login_usuario_supa(email, senha)
 
     return jsonify(response)
-
-
-@auth_bp.route('/login', methods=['POST'])
-def login_usuario():
-    dados = request.json  
-    resultado, status = auth_services.realizar_login(dados)
-    return jsonify(resultado), status
 
 
 @auth_bp.route("/login_admin", methods=['POST'])
