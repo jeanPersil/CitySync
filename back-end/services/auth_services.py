@@ -3,6 +3,32 @@ from models.usuario_endereco import Usuario
 import bcrypt
 
 
+def cadastrar_user(usuario_dados: Usuario):
+    try:
+
+        usuario_existente = auth_repository.buscar_usuario_por_cpf_ou_email(usuario_dados)
+        
+        if usuario_existente:
+            return {"erro" : "Usuario"}
+        response = auth_repository.cadastrar_usuario_supa(usuario_dados)
+        return response
+ 
+    except Exception as e:
+        return {'erro': 'Erro ao cadastrar usuário', 'detalhes': str(e)}, 500
+    
+
+def realizar_login_supa(email, senha):
+
+     try:
+        
+        response = auth_repository.login_usuario_supa(email, senha)
+        
+        return response
+ 
+     except Exception as e:
+        return {'erro': 'Erro ao cadastrar usuário', 'detalhes': str(e)}, 500
+   
+
 def cadastrar_usuario(usuario : Usuario):
     try:
         
@@ -21,8 +47,7 @@ def cadastrar_usuario(usuario : Usuario):
         return {'mensagem': 'Usuário cadastrado com sucesso!'}, 200
 
     except Exception as e:
-        return {'erro': 'Erro ao cadastrar usuário', 'detalhes': str(e)}, 500
-
+        return {'erro': 'Erro ao cadastrar usuário', 'detalhes': str(e)}, 500 
 
 def realizar_login(dados):
 
@@ -51,4 +76,4 @@ def realizar_login_admin(email, senha):
 
     except Exception as e:
         return {"erro": "Falha interna"}, 500
-
+    
