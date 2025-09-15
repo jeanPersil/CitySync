@@ -42,19 +42,25 @@ def cadastrar_usuario_supa(usuario_dados : Usuario):
         return {"erro x": str(e)}, 
 
 
-def login_usuario_supa(email, senha):
+def login_usuario_supa(email: str, senha: str):
     try:
-        print(f"email: {email}, senha {senha}")
-        response = supabase.auth.sign_in_with_password({"email" : email, "password" : senha})
+        response = supabase.auth.sign_in_with_password({
+            "email": email,
+            "password": senha
+        })
 
-        if response.user: 
-            user_data = response.user.model_dump()
-            return {"user" : user_data}, 200
-        
-        return {"erro" : "Usuario ou senha inválidos"}, 401
+        if response.user:
+            nome_user = supabase.table("users").select("nome").eq("id", response.user.id).execute()
+            data = nome_user.data
+            nome = data[0]["nome"]
 
+            return {"user_id": response.user.id, "nome_usuario" : nome}
+        return False
     except Exception as e:
-        return {"erro x": str(e)}, 500
+        if "Invalid login credentials" in str(e):
+            return {"erro": "Usuário ou senha incorretos"}, 401        
+        
+        return {"erro": str(e)}, 500
 
 
 def inserir_usuario( usuario_dados : Usuario, senha, ):

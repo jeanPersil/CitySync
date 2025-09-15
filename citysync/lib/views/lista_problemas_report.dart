@@ -11,7 +11,7 @@ class ProblemasReport extends StatefulWidget {
   });
 
   final String nomeUsuario;
-  final int usuarioID;
+  final String usuarioID;
 
   @override
   State<ProblemasReport> createState() => _ProblemasReportState();
@@ -60,36 +60,34 @@ class _ProblemasReportState extends State<ProblemasReport>
   // Função para obter cores baseadas no tema
   Color _getBackgroundColor(BuildContext context) {
     final theme = Theme.of(context);
-    return theme.brightness == Brightness.dark 
-        ? Colors.grey[900]! 
+    return theme.brightness == Brightness.dark
+        ? Colors.grey[900]!
         : const Color(0xFF0A1D3D);
   }
 
   Color _getAppBarColor(BuildContext context) {
     final theme = Theme.of(context);
-    return theme.brightness == Brightness.dark 
-        ? Colors.grey[850]! 
+    return theme.brightness == Brightness.dark
+        ? Colors.grey[850]!
         : const Color(0xFF1E3A5F);
   }
 
   Color _getCardColor(BuildContext context) {
     final theme = Theme.of(context);
-    return theme.brightness == Brightness.dark 
-        ? Colors.grey[800]! 
+    return theme.brightness == Brightness.dark
+        ? Colors.grey[800]!
         : const Color(0xFF1E3A5F).withOpacity(0.8);
   }
 
   Color _getTextColor(BuildContext context) {
     final theme = Theme.of(context);
-    return theme.brightness == Brightness.dark 
-        ? Colors.white 
-        : Colors.white;
+    return theme.brightness == Brightness.dark ? Colors.white : Colors.white;
   }
 
   Color _getSecondaryTextColor(BuildContext context) {
     final theme = Theme.of(context);
-    return theme.brightness == Brightness.dark 
-        ? Colors.white70 
+    return theme.brightness == Brightness.dark
+        ? Colors.white70
         : Colors.white70;
   }
 
@@ -153,8 +151,8 @@ class _ProblemasReportState extends State<ProblemasReport>
                 color: _getTextColor(context).withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.refresh, 
-                  color: _getTextColor(context), size: 22),
+              child:
+                  Icon(Icons.refresh, color: _getTextColor(context), size: 22),
             ),
             onPressed: () {
               setState(() {});
@@ -355,8 +353,8 @@ class _ProblemasReportState extends State<ProblemasReport>
                             end: 1.0,
                           ).animate(CurvedAnimation(
                             parent: _animationController,
-                            curve:
-                                Interval(0.1 * index, 1.0, curve: Curves.easeIn),
+                            curve: Interval(0.1 * index, 1.0,
+                                curve: Curves.easeIn),
                           )),
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 300),

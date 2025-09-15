@@ -12,7 +12,7 @@ class TelaReport extends StatefulWidget {
   const TelaReport(
       {super.key, required this.usuarioId, required this.categoria});
 
-  final int usuarioId;
+  final String usuarioId;
   final String categoria;
 
   @override

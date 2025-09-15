@@ -7,7 +7,7 @@ class Telaprincipal extends StatefulWidget {
       {super.key, required this.nomeUsuario, required this.usuarioID});
 
   final String nomeUsuario;
-  final int usuarioID;
+  final String usuarioID;
 
   @override
   State<Telaprincipal> createState() => _TelaprincipalState();

@@ -20,13 +20,14 @@ def cadastrar_user(usuario_dados: Usuario):
     
 
 def realizar_login_supa(email, senha):
-
      try:
-        
         response = auth_repository.login_usuario_supa(email, senha)
+
+        if not response:
+            return {"Erro" : "Usuario ou senha invalido"}
         
-        return response
- 
+        return response, 200
+        
      except Exception as e:
         return {'erro': 'Erro ao cadastrar usuário', 'detalhes': str(e)}, 500
    

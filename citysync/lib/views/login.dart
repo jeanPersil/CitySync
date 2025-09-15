@@ -87,8 +87,8 @@ class _TelaLoginState extends State<TelaLogin> with TickerProviderStateMixin {
         context,
         MaterialPageRoute(
           builder: (_) => Homepage(
-            usuarioNome: resultado['usuario']['nome'],
-            usuarioID: resultado['usuario']['id'],
+            usuarioNome: resultado['nome_usuario'],
+            usuarioID: resultado['user_id'],
           ),
         ),
       );
