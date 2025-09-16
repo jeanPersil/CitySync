@@ -9,6 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Adicionando Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -134,35 +136,14 @@
           <div class="chart-container main-chart">
             <div class="chart-header">
               <h3>Relatórios por Categoria</h3>
-              <select class="chart-filter">
-                <option>Últimos 7 dias</option>
-                <option>Últimos 30 dias</option>
-                <option>Este mês</option>
+              <select class="chart-filter" id="periodo-select">
+                <option value="7">Últimos 7 dias</option>
+                <option value="30">Últimos 30 dias</option>
+                <option value="90">Últimos 3 meses</option>
               </select>
             </div>
             <div class="chart-wrapper">
-              <div class="bar-chart">
-                <div class="bar" style="--height: 70%; --color: var(--accent-blue)">
-                  <span class="bar-value">42</span>
-                  <span class="bar-label">Buraco</span>
-                </div>
-                <div class="bar" style="--height: 85%; --color: var(--accent-green)">
-                  <span class="bar-value">51</span>
-                  <span class="bar-label">Iluminação</span>
-                </div>
-                <div class="bar" style="--height: 45%; --color: var(--accent-orange)">
-                  <span class="bar-value">27</span>
-                  <span class="bar-label">Limpeza</span>
-                </div>
-                <div class="bar" style="--height: 60%; --color: var(--accent-red)">
-                  <span class="bar-value">36</span>
-                  <span class="bar-label">Sinalização</span>
-                </div>
-                <div class="bar" style="--height: 30%; --color: var(--accent-purple)">
-                  <span class="bar-value">18</span>
-                  <span class="bar-label">Outros</span>
-                </div>
-              </div>
+              <canvas id="categoriaChart"></canvas>
             </div>
           </div>
 
@@ -170,26 +151,11 @@
             <div class="chart-header">
               <h3>Status de Resolução</h3>
             </div>
-            <div class="pie-chart">
-              <div class="pie" style="--percentage: 60; --color: var(--accent-green)"></div>
-              <div class="pie-info">
-                <span class="pie-value">60%</span>
-                <span class="pie-label">Resolvidos</span>
-              </div>
+            <div class="chart-wrapper">
+              <canvas id="statusChart"></canvas>
             </div>
-            <div class="chart-legend">
-              <div class="legend-item">
-                <span class="legend-color" style="background-color: var(--accent-green)"></span>
-                <span>Resolvidos (160)</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-color" style="background-color: var(--accent-orange)"></span>
-                <span>Em Andamento (30)</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-color" style="background-color: var(--accent-blue)"></span>
-                <span>Abertos (75)</span>
-              </div>
+            <div class="chart-legend" id="pieLegend">
+              <!-- A legenda será gerada pelo JavaScript -->
             </div>
           </div>
         </section>
@@ -216,14 +182,14 @@
                   <td>Buraco na via</td>
                   <td>Av. Principal, 123</td>
                   <td><span class="status-badge em-andamento">Em Andamento</span></td>
-                  <td>20/05/2025</td>
+                  <td>20/07/2025</td>
                 </tr>
                 <tr>
                   <td>#12344</td>
                   <td>Lâmpada queimada</td>
                   <td>Rua das Flores, 45</td>
                   <td><span class="status-badge aberto">Aberto</span></td>
-                  <td>19/05/2025</td>
+                  <td>19/09/2025</td>
                 </tr>
                 <tr>
                   <td>#12343</td>
@@ -237,14 +203,14 @@
                   <td>Sinalização apagada</td>
                   <td>Av. Secundária, 301</td>
                   <td><span class="status-badge resolvido">Resolvido</span></td>
-                  <td>17/05/2025</td>
+                  <td>17/08/2025</td>
                 </tr>
                 <tr>
                   <td>#12341</td>
                   <td>Vazamento de água</td>
                   <td>Rua Nova, 78</td>
                   <td><span class="status-badge prioritario">Prioritário</span></td>
-                  <td>16/05/2025</td>
+                  <td>16/09/2025</td>
                 </tr>
               </tbody>
             </table>
@@ -254,10 +220,7 @@
             <div class="quick-actions">
               <h3>Ações Rápidas</h3>
               <div class="action-buttons">
-                <button class="action-btn">
-                  <i class="fas fa-plus"></i>
-                  <span>Novo Report</span>
-                </button>
+
                 <button class="action-btn">
                   <i class="fas fa-download"></i>
                   <span>Exportar Dados</span>
@@ -320,11 +283,12 @@
 
       <footer class="main-footer">
         <p>© 2025 CitySync - Sistema de Gestão de Problemas Urbanos</p>
-        <p>v2.1.0 | Última atualização: 22/05/2023</p>
+        <p>v2.1.0 | Última atualização: 16/09/2025</p>
       </footer>
     </main>
   </div>
   <script src="/painel adm/Javascript/darkmode.js"></script>
   <script src="/painel adm/Javascript/dashboard.js"></script>
+  <script src="/painel adm/Javascript/charts.js"></script>
 </body>
 </html>

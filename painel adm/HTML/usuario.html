@@ -117,10 +117,6 @@
                 <label for="email">E-mail:</label>
                 <input type="email" id="email" value="iwin@email.com">
               </div>
-              <div class="form-group">
-                <label for="password">Senha:</label>
-                <input type="password" id="password" value="********">
-              </div>
               <button type="submit" class="action-btn"><i class="fas fa-save"></i> Salvar Alterações</button>
             </form>
           </div>
@@ -133,24 +129,6 @@
             </ul>
           </div>
 
-          <div class="tab-content" id="config">
-            <div class="opcao-configuracao">
-              <label for="notify">Notificações:</label>
-              <label class="switch">
-                <input type="checkbox" id="notify" checked>
-                <span class="slider round"></span>
-              </label>
-            </div>
-            <div class="opcao-configuracao">
-              <label for="2fa">Autenticação 2 Fatores:</label>
-              <label class="switch">
-                <input type="checkbox" id="2fa">
-                <span class="slider round"></span>
-              </label>
-            </div>
-          </div>
-        </section>
-      </div>
 
       <!-- Footer -->
       <footer class="main-footer">
@@ -160,18 +138,6 @@
   </div>
 
   <script src="/painel adm/Javascript/darkmode.js"></script>
-  <script>
-    // Tabs
-    const tabs = document.querySelectorAll(".tab");
-    const contents = document.querySelectorAll(".tab-content");
-    tabs.forEach(tab => {
-      tab.addEventListener("click", () => {
-        tabs.forEach(t => t.classList.remove("active"));
-        tab.classList.add("active");
-        contents.forEach(c => c.classList.remove("active"));
-        document.getElementById(tab.dataset.tab).classList.add("active");
-      });
-    });
-  </script>
+  <script src="/painel adm/Javascript/usuario.js"></script>
 </body>
 </html>

@@ -421,6 +421,7 @@ input:checked + .slider:before {
 .estatistica-valor {
     font-size: 2rem;
     font-weight: 700;
+    color: var(--text-primary); /* Adicionado para garantir cor correta no modo escuro */
 }
 
 .estatistica-label {
@@ -446,6 +447,7 @@ input:checked + .slider:before {
 .filtros-header h2 {
     font-size: 1.5rem;
     font-weight: 600;
+    color: var(--text-primary); /* Adicionado para garantir cor correta no modo escuro */
 }
 
 .acoes-header {
@@ -600,6 +602,7 @@ body.dark-mode .select-field select {
 
 .tabela-header h3 {
     font-weight: 600;
+    color: var(--text-primary); /* Adicionado para garantir cor correta no modo escuro */
 }
 
 .tabela-info {
@@ -648,6 +651,7 @@ th, td {
     padding: 15px 20px;
     text-align: left;
     transition: border-color 0.3s;
+    color: var(--text-primary); /* Adicionado para garantir cor correta no modo escuro */
 }
 
 thead th {
@@ -856,6 +860,7 @@ input[type="checkbox"] {
 
 .modal-header h3 {
     font-weight: 600;
+    color: var(--text-primary); /* Adicionado para garantir cor correta no modo escuro */
 }
 
 .modal-close {
@@ -903,6 +908,7 @@ input[type="checkbox"] {
 
 .info-value {
     font-weight: 500;
+    color: var(--text-primary); /* Adicionado para garantir cor correta no modo escuro */
 }
 
 .modal-imagens {
