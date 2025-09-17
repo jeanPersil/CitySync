@@ -23,9 +23,6 @@ def realizar_login_supa(email, senha):
      try:
         response = auth_repository.login_usuario_supa(email, senha)
 
-        if not response:
-            return {"Erro" : "Usuario ou senha invalido"}
-        
         return response, 200
         
      except Exception as e:

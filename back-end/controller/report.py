@@ -4,32 +4,35 @@ from models.report import Report
 
 report_bp = Blueprint('report', __name__)
 
-@report_bp.route("/efetuar_report", methods=['POST']) 
-def efetuar_report():
+
+@report_bp.route("/efetuar_report_supa", methods=['POST'])
+def efetuar_report_supa():
     dados = request.json
+    required_fields = ['endereco', 'categoria', 'id_usuario', 'descricao']
 
-    if not dados:
-        return jsonify({"erro", "Dados não enviados"}), 400
+    if not dados or not all(field in dados and dados[field] for field in required_fields):
+        return jsonify({"erro": "Dados incompletos"}), 400
 
-    report = Report(
-        None,
-        dados['endereco'],
-        dados['categoria'],
-        None,
-        dados['id_usuario'],
-        dados['descricao'],
-        dados['url_imagem'],
-    )
+    endereco = dados['endereco']
+    categoria = dados['categoria']
+    id_usuario = dados['id_usuario']
+    descricao = dados['descricao']
+    url_imagem = dados['url_imagem']
 
-    if not report.verificar_campos_obrigatorios():
-        return jsonify ({'erro' : 'Dados do report incompletos'}), 400
+    response, status = report_services.efetuar_report_supa(endereco, categoria, id_usuario, descricao, url_imagem)
+    return jsonify(response), status
 
+
+
+@report_bp.route("/listar_reports_app/<string:id_usuario>", methods=['GET'])  
+def listar_reports(id_usuario):
     try:
-        report_services.efetuar_report(report)
-        return jsonify({'status': 'successo', 'mensagem': 'Reporte realizado com #sucesso!'}), 201 
- 
+        reports = report_services.listar_reports_do_usuario(id_usuario)
+        return jsonify({"reports": reports}), 200
     except Exception as e:
-        return jsonify({'erro': str(e)}), 500
+        return jsonify({"erro": "Falha ao buscar relatórios", "detalhes": str(e)}), 500
+
+
 
 @report_bp.route("/editar_report", methods=['POST'])
 def editar_report():
@@ -42,16 +45,7 @@ def editar_report():
         return jsonify(resposta), status
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
-    
-@report_bp.route("/listar_reports/<int:id_usuario>", methods=['GET'])  
-def listar_reports(id_usuario):
-    if id_usuario <= 0:
-        return jsonify({"erro": "Nenhum usuario encontrado"}), 400
-    try:
-        reports = report_services.listar_reports_do_usuario(id_usuario)
-        return jsonify({"reports": reports}), 200
-    except Exception as e:
-        return jsonify({"erro": "Falha ao buscar relatórios", "detalhes": str(e)}), 500
+
 
 
 @report_bp.route("/listar_reports_admin", methods=['POST'])

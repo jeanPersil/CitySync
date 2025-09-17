@@ -7,6 +7,18 @@ def efetuar_report(report : Report):
     except Exception as e:
        return ({'erro' : 'Falha ao reportar', 'detalhes' : str(e)})
     
+def efetuar_report_supa(endereco, fk_categoria, fk_usuario, descricao, url_imagem):
+    try:
+       response = report_repository.inserir_report_supa(endereco, fk_categoria, fk_usuario, descricao, url_imagem)
+
+       if not response:
+           return {"mensagem" : "erro ao efetuar report"}, 400
+        
+       return {"mensagem" : "Report feito com sucesso!"}, 200
+        
+    except Exception as e:
+       return ({'erro' : 'Falha ao reportar', 'detalhes' : str(e)})
+    
 
 def editar_report(report_id, novo_status):
     try:
@@ -28,7 +40,7 @@ def listar_reports_do_usuario(id_usuario):
             "endereco": linha.get("endereco", ""),
             "categoria": linha.get("nome_categoria", ""),
             "status": linha.get("nome_status", ""),
-            "id_usuario": linha.get("usuario_id", 0),
+            "id_usuario": linha.get("fk_usuario", 0),
             "url_imagem": linha.get("url_imagem", ""),
             "data_report": linha.get("data_criacao", "")
         } for linha in resultados]
@@ -36,7 +48,7 @@ def listar_reports_do_usuario(id_usuario):
     except Exception as e:
         raise Exception(f"Erro ao listar reports do usuário: {str(e)}")
 
-
+    
 def listar_reports_admin(bairro, status, data, categoria):
    try: 
     reports = report_repository.buscar_todos_reports(bairro=bairro, status=status, data=data, categoria=categoria)

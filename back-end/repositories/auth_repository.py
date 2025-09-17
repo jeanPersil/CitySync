@@ -2,7 +2,6 @@ from config import init_supabase
 from models.usuario_endereco import  Usuario
 import bcrypt
 
-
 supabase = init_supabase()
 
 def buscar_usuario_por_cpf_ou_email(usuario_dados : Usuario):
@@ -54,7 +53,7 @@ def login_usuario_supa(email: str, senha: str):
             data = nome_user.data
             nome = data[0]["nome"]
 
-            return {"user_id": response.user.id, "nome_usuario" : nome}
+            return {"user_id": response.user.id, "nome_usuario" : nome}, 200
         return False
     except Exception as e:
         if "Invalid login credentials" in str(e):
@@ -62,30 +61,6 @@ def login_usuario_supa(email: str, senha: str):
         
         return {"erro": str(e)}, 500
 
-
-def inserir_usuario( usuario_dados : Usuario, senha, ):
-    response = supabase.table("usuario").insert({
-        "nome": usuario_dados.nome,
-        "cpf": usuario_dados.cpf,
-        "email": usuario_dados.email,
-        "telefone": usuario_dados.telefone,
-        "senha": senha,
-        "cep" : usuario_dados.cep,
-        "fk_cidade" : usuario_dados.fk_cidade
-    }).execute()
-    return response.data
-
-    
-def realizar_login(email, senha_digitada):
-    response = supabase.table("usuario").select("id_usuario, nome, senha").eq("email", email).execute()
-    usuario = response.data
-    if not usuario:
-        return None
-    usuario = usuario[0]
-    if bcrypt.checkpw(senha_digitada.encode('utf-8'), usuario["senha"].encode('utf-8')):
-        return {"id_usuario": usuario["id_usuario"], "nome": usuario["nome"]}
-    else:
-        return None
 
 def realizar_login_admin(email, senha):
     try:

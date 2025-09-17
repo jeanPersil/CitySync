@@ -39,9 +39,9 @@ def login_user():
     email = dados['email']
     senha = dados['senha']
 
-    response = auth_repository.login_usuario_supa(email, senha)
-
-    return jsonify(response)
+    response, status = auth_repository.login_usuario_supa(email, senha)
+    
+    return jsonify(response), status
 
 
 @auth_bp.route("/login_admin", methods=['POST'])
