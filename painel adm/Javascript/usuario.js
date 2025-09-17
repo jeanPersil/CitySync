@@ -1,5 +1,3 @@
-// usuario.js - Script para a página de perfil do usuário
-
 // ===== CONSTANTES =====
 const CONFIG = {
     ANIMACAO_ENTRADA: 300,
@@ -85,17 +83,17 @@ function configurarEventListeners() {
         elementos.menuToggle.addEventListener('click', toggleMenuLateral);
     }
     
-    // Dark mode toggle
+     
     if (elementos.darkModeToggle) {
         elementos.darkModeToggle.addEventListener('change', toggleModoEscuro);
     }
     
-    // Tabs
+    
     elementos.tabs.forEach(tab => {
         tab.addEventListener('click', () => alternarAba(tab.dataset.tab));
     });
     
-    // Formulário de edição
+    
     if (elementos.formEdicao) {
         elementos.formEdicao.addEventListener('submit', salvarDadosUsuario);
     }
@@ -110,16 +108,16 @@ function configurarEventListeners() {
             elementos.avatar.style.transform = 'scale(1)';
         });
         
-        // Clique para alterar avatar (simulação)
+        
         elementos.avatar.addEventListener('click', simularAlteracaoAvatar);
     }
     
-    // Notificação
+    
     if (elementos.notificationBell) {
         elementos.notificationBell.addEventListener('click', mostrarNotificacoes);
     }
     
-    // Evento de redimensionamento
+    
     window.addEventListener('resize', debounce(handleResize, 250));
 }
 
@@ -154,17 +152,17 @@ function toggleModoEscuro() {
 
 // ===== ALTERNAR ENTRE ABAS =====
 function alternarAba(abaId) {
-    // Remover classe active de todas as tabs
+    
     elementos.tabs.forEach(tab => {
         tab.classList.remove('active');
     });
     
-    // Ocultar todos os conteúdos
+    
     elementos.tabContents.forEach(content => {
         content.classList.remove('active');
     });
     
-    // Ativar tab clicada e mostrar conteúdo correspondente
+    
     const tabAtiva = document.querySelector(`[data-tab="${abaId}"]`);
     const conteudoAtivo = document.getElementById(abaId);
     
@@ -193,11 +191,11 @@ function salvarDadosUsuario(e) {
         return;
     }
     
-    // Atualizar estado
+    
     estado.dadosUsuario.nome = novoNome;
     estado.dadosUsuario.email = novoEmail;
     
-    // Salvar no localStorage
+    
     localStorage.setItem(
         CONFIG.LOCAL_STORAGE_KEYS.DADOS_USUARIO, 
         JSON.stringify(estado.dadosUsuario)
@@ -217,23 +215,23 @@ function validarEmail(email) {
 
 // ===== ATUALIZAR INTERFACE COM DADOS DO USUÁRIO =====
 function atualizarInterfaceUsuario() {
-    // Atualizar elementos na página
+    
     document.getElementById('name').value = estado.dadosUsuario.nome;
     document.getElementById('email').value = estado.dadosUsuario.email;
     
-    // Atualizar nome no cabeçalho
+    
     const elementoNome = document.querySelector('.profile-name');
     if (elementoNome) {
         elementoNome.textContent = estado.dadosUsuario.nome;
     }
     
-    // Atualizar nome no card de perfil
+    
     const elementoNomePerfil = document.querySelector('.profile-card h2');
     if (elementoNomePerfil) {
         elementoNomePerfil.textContent = estado.dadosUsuario.nome;
     }
     
-    // Atualizar cargo no card de perfil
+    
     const elementoCargo = document.querySelector('.profile-card .role');
     if (elementoCargo) {
         elementoCargo.textContent = estado.dadosUsuario.cargo;
@@ -247,7 +245,7 @@ function simularAlteracaoAvatar() {
 
 // ===== MOSTRAR NOTIFICAÇÕES =====
 function mostrarNotificacoes() {
-    // Simulação - em uma aplicação real, isso mostraria notificações reais
+    
     const countElement = document.querySelector('.notification-count');
     if (countElement && countElement.textContent !== '0') {
         countElement.textContent = '0';
@@ -328,14 +326,14 @@ function mostrarNotificacao(mensagem, tipo = 'info') {
     
     document.body.appendChild(toast);
     
-    // Trigger reflow
+    
     toast.offsetHeight;
     
-    // Mostrar toast
+    
     toast.style.opacity = '1';
     toast.style.transform = 'translateY(0)';
     
-    // Remover após delay
+    
     setTimeout(() => {
         toast.style.opacity = '0';
         toast.style.transform = 'translateY(20px)';

@@ -161,6 +161,7 @@
   font-size: 0.8rem;
   color: var(--text-secondary);
 }
+
 .text-green { color: var(--accent-green); }
 .text-blue { color: var(--accent-blue); }
 .text-purple { color: var(--accent-purple); }

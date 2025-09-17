@@ -1,4 +1,4 @@
-// Atualiza o ano no rodapé
+
 document.getElementById('ano').textContent = new Date().getFullYear();
 
 // Função para verificar credenciais (simulação)
@@ -6,7 +6,7 @@ function verificarCredenciais(email, senha) {
   return email === 'admin@gmail.com' && senha === 'admin123';
 }
 
-// Função para preencher o email se "lembrar-me" estiver marcado
+
 function verificarCredenciaisSalvas() {
   const emailSalvo = localStorage.getItem('emailLembrado');
   const lembrarSalvo = localStorage.getItem('lembrarUsuario');
@@ -17,7 +17,7 @@ function verificarCredenciaisSalvas() {
   }
 }
 
-// Função para alternar a visibilidade da senha (CORRIGIDA)
+
 function toggleSenha() {
   const senhaInput = document.getElementById('senha');
   const icone = document.getElementById('iconeSenha');
@@ -65,11 +65,10 @@ function handleLogin(event) {
     
     const style = document.createElement('style');
     style.textContent = `
-      @keyframes spin { to { transform: rotate(360deg); } }
-    `;
+      @keyframes spin { to { transform: rotate(360deg); } }`;
     document.head.appendChild(style);
 
-    // Salvar email se "lembrar-me" estiver marcado
+    
     if (lembrar) {
       localStorage.setItem('emailLembrado', email);
       localStorage.setItem('lembrarUsuario', 'true');
@@ -78,7 +77,7 @@ function handleLogin(event) {
       localStorage.removeItem('lembrarUsuario');
     }
     
-    // Redirecionar após delay
+    
     setTimeout(() => {
       window.location.href = 'dashboard.html';
     }, 1000);
@@ -122,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
   addFieldInteractions();
   document.getElementById('loginForm').addEventListener('submit', handleLogin);
 
-  // Configurar o toggle do olho (CORREÇÃO)
+  
   const toggleSenhaBtn = document.querySelector('.toggle-senha');
   if (toggleSenhaBtn) {
     toggleSenhaBtn.addEventListener('click', toggleSenha);

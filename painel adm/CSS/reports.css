@@ -1,4 +1,8 @@
-/* Paleta de Cores e Tipografia */
+/*==================================
+  1. ESTILOS GLOBAIS E VARIÁVEIS
+==================================*/
+
+/* Paleta de Cores e Tipografia (Modo Claro) */
 :root {
     --bg-main: #f0f2f5;
     --bg-card: #ffffff;
@@ -29,7 +33,7 @@
     --priority-medium-text: #0ea5e9;
 }
 
-/* Paleta de Cores Modo Escuro */
+/* Paleta de Cores (Modo Escuro) */
 body.dark-mode {
     --bg-main: #121212;
     --bg-card: #1e1e1e;
@@ -79,6 +83,10 @@ body {
     display: flex;
     min-height: 100vh;
 }
+
+/*==================================
+  2. ESTRUTURA DO LAYOUT
+==================================*/
 
 /* Barra Lateral */
 .barra-lateral {
@@ -235,6 +243,19 @@ input:checked + .slider:before {
     overflow-x: hidden;
 }
 
+.main-content {
+    flex: 1;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/*==================================
+  3. COMPONENTES DA PÁGINA
+==================================*/
+
+/* Cabeçalho Principal */
 .main-header {
     display: flex;
     justify-content: space-between;
@@ -355,14 +376,6 @@ input:checked + .slider:before {
     font-weight: 600;
 }
 
-.main-content {
-    flex: 1;
-    padding: 30px;
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-}
-
 /* Estatísticas Rápidas */
 .estatisticas-rapidas {
     display: grid;
@@ -421,7 +434,7 @@ input:checked + .slider:before {
 .estatistica-valor {
     font-size: 2rem;
     font-weight: 700;
-    color: var(--text-primary); /* Adicionado para garantir cor correta no modo escuro */
+    color: var(--text-primary);
 }
 
 .estatistica-label {
@@ -447,7 +460,7 @@ input:checked + .slider:before {
 .filtros-header h2 {
     font-size: 1.5rem;
     font-weight: 600;
-    color: var(--text-primary); /* Adicionado para garantir cor correta no modo escuro */
+    color: var(--text-primary);
 }
 
 .acoes-header {
@@ -510,7 +523,8 @@ input:checked + .slider:before {
     width: 100%;
 }
 
-.filter-input, .select-field select {
+.filter-input,
+.select-field select {
     height: 45px;
     padding: 0 15px;
     border-radius: 8px;
@@ -531,7 +545,6 @@ input:checked + .slider:before {
 
 .select-field {
     position: relative;
-    
 }
 
 .select-field select {
@@ -602,7 +615,7 @@ body.dark-mode .select-field select {
 
 .tabela-header h3 {
     font-weight: 600;
-    color: var(--text-primary); /* Adicionado para garantir cor correta no modo escuro */
+    color: var(--text-primary);
 }
 
 .tabela-info {
@@ -651,7 +664,7 @@ th, td {
     padding: 15px 20px;
     text-align: left;
     transition: border-color 0.3s;
-    color: var(--text-primary); /* Adicionado para garantir cor correta no modo escuro */
+    color: var(--text-primary);
 }
 
 thead th {
@@ -813,7 +826,10 @@ input[type="checkbox"] {
     border-color: var(--accent-blue);
 }
 
-/* Modal */
+/*==================================
+  4. MODAL
+==================================*/
+
 .modal {
     display: none;
     position: fixed;
@@ -860,7 +876,7 @@ input[type="checkbox"] {
 
 .modal-header h3 {
     font-weight: 600;
-    color: var(--text-primary); /* Adicionado para garantir cor correta no modo escuro */
+    color: var(--text-primary);
 }
 
 .modal-close {
@@ -887,7 +903,9 @@ input[type="checkbox"] {
     margin-bottom: 25px;
 }
 
-.modal-info h4, .modal-status h4, .modal-imagens h4 {
+.modal-info h4,
+.modal-status h4,
+.modal-imagens h4 {
     margin-bottom: 15px;
     font-weight: 600;
     color: var(--text-primary);
@@ -908,7 +926,7 @@ input[type="checkbox"] {
 
 .info-value {
     font-weight: 500;
-    color: var(--text-primary); /* Adicionado para garantir cor correta no modo escuro */
+    color: var(--text-primary);
 }
 
 .modal-imagens {
@@ -945,7 +963,11 @@ input[type="checkbox"] {
     border-top: 1px solid var(--border-color);
 }
 
-/* Responsividade */
+/*==================================
+  5. RESPONSIVIDADE
+==================================*/
+
+/* Telas Maiores (até 1200px) */
 @media (max-width: 1200px) {
     .barra-lateral {
         width: 80px;
@@ -985,6 +1007,7 @@ input[type="checkbox"] {
     }
 }
 
+/* Telas de Tablet (até 992px) */
 @media (max-width: 992px) {
     .menu-toggle {
         display: block;
@@ -1022,6 +1045,7 @@ input[type="checkbox"] {
     }
 }
 
+/* Telas de Tablet (até 768px) */
 @media (max-width: 768px) {
     .main-content {
         padding: 20px;
@@ -1061,6 +1085,7 @@ input[type="checkbox"] {
     }
 }
 
+/* Telas de Celular (até 576px) */
 @media (max-width: 576px) {
     .acoes-header {
         flex-direction: column;

@@ -1,5 +1,3 @@
-// configuracoes.js - Script para a página de configurações
-
 // ===== CONSTANTES =====
 const CONFIG = {
     LOCAL_STORAGE_KEYS: {
@@ -141,7 +139,7 @@ function configurarEventListeners() {
     
     // Botões de edição e exclusão na tabela
     elementos.editButtons.forEach((btn, index) => {
-        if (index > 1) { // Ignorar os primeiros dois botões (não são da tabela)
+        if (index > 1) { 
             btn.addEventListener('click', () => editarUsuario(index - 2));
         }
     });
@@ -204,7 +202,7 @@ function atualizarInterfaceSeguranca() {
 function salvarPreferencias(e) {
     if (e) e.preventDefault();
     
-    // Salvar no localStorage
+    
     localStorage.setItem(
         CONFIG.LOCAL_STORAGE_KEYS.CONFIG_PREFERENCES, 
         JSON.stringify(estado.preferencias)
@@ -215,7 +213,7 @@ function salvarPreferencias(e) {
         JSON.stringify(estado.seguranca)
     );
     
-    // Mostrar feedback
+    
     mostrarNotificacao('Configurações salvas com sucesso!', 'sucesso');
 }
 
@@ -249,7 +247,7 @@ function mostrarModal2FA() {
     
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     
-    // Configurar eventos do modal
+    
     document.getElementById('confirmar2FA').addEventListener('click', () => {
         estado.seguranca.doisFatores = true;
         elementos.twoFAToggle.checked = true;
@@ -292,7 +290,7 @@ function mostrarModalAlteracaoSenha() {
     
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     
-    // Configurar eventos do modal
+    
     document.getElementById('confirmarSenha').addEventListener('click', () => {
         const senhaAtual = document.getElementById('senhaAtual').value;
         const novaSenha = document.getElementById('novaSenha').value;
@@ -313,7 +311,7 @@ function mostrarModalAlteracaoSenha() {
             return;
         }
         
-        // Simular alteração de senha
+        
         document.getElementById('modalSenha').remove();
         mostrarNotificacao('Senha alterada com sucesso!', 'sucesso');
     });
@@ -358,9 +356,9 @@ function excluirUsuario(index) {
         
         document.body.insertAdjacentHTML('beforeend', modalHTML);
         
-        // Configurar eventos do modal
+        
         document.getElementById('confirmarExclusao').addEventListener('click', () => {
-            // Simular exclusão
+            
             linhas[index].remove();
             document.getElementById('modalExcluir').remove();
             mostrarNotificacao('Usuário excluído com sucesso!', 'sucesso');
@@ -417,7 +415,7 @@ function mostrarModalEdicaoUsuario(linha) {
         const novaFuncao = document.getElementById('editFuncao').value;
         const novoStatus = document.getElementById('editStatus').checked;
         
-        // Atualizar linha da tabela
+        
         linha.querySelector('td:first-child').textContent = novoNome;
         linha.querySelector('td:nth-child(2)').textContent = novaFuncao;
         
@@ -433,7 +431,7 @@ function mostrarModalEdicaoUsuario(linha) {
         document.getElementById('modalEdicao').remove();
     });
     
-    // Atualizar texto do status quando alternar
+    
     document.getElementById('editStatus').addEventListener('change', function() {
         document.querySelector('#modalEdicao span').textContent = this.checked ? 'Ativo' : 'Inativo';
     });
@@ -480,14 +478,14 @@ function mostrarNotificacao(mensagem, tipo = 'info') {
     
     document.body.appendChild(toast);
     
-    // Trigger reflow
+   
     toast.offsetHeight;
     
-    // Mostrar toast
+    
     toast.style.opacity = '1';
     toast.style.transform = 'translateY(0)';
     
-    // Remover após delay
+    
     setTimeout(() => {
         toast.style.opacity = '0';
         toast.style.transform = 'translateY(20px)';

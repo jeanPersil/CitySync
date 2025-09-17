@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.barra-lateral').classList.toggle('open');
 });
 
-// Adicione também este evento para fechar o menu ao clicar fora:
+
     document.addEventListener('click', (e) => {
         const sidebar = document.querySelector('.barra-lateral');
         const menuToggle = document.getElementById('menuToggle');
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        // Verificar se o clique foi no botão de fechar modal
+        
         if (event.target === domElements.modalView || 
             event.target === domElements.modalClose || 
             event.target === domElements.modalSecondaryBtn) {
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const neighborhood = row.cells[4].textContent;
         const date = row.cells[5].textContent;
         
-        // Obter prioridade e status das células
+        
         const priorityElement = row.cells[6].querySelector('.prioridade');
         const statusElement = row.cells[7].querySelector('.status');
         
@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const priorityClass = priorityElement ? priorityElement.className : '';
         const statusClass = statusElement ? statusElement.className : '';
 
-        // Preencher o modal com os dados
+        
         document.querySelector('#modal-view h3').textContent = `Detalhes do Report ${reportId}`;
 
         const modal = domElements.modalView;
@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Lógica dos Botões de Ação da Tabela ---
-    // Adicionar event listeners para os botões de editar
+    
     document.addEventListener('click', function(event) {
         // Verificar se o clique foi em um botão de editar
         if (event.target.closest('.botao-acao.edit')) {
@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.tabela-info span').textContent = `Mostrando ${domElements.tableRows.length} de ${domElements.tableRows.length} resultados`;
     });
 
-    // Função debounce para pesquisa
+    
     function debounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {

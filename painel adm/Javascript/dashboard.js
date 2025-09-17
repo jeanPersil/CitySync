@@ -1,4 +1,3 @@
-// dashboard.js - Script melhorado para o painel administrativo
 
 // ===== CONSTANTES E CONFIGURAÇÕES =====
 const CONFIG = {

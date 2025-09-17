@@ -1,5 +1,3 @@
-// charts.js - Script para inicialização e controle dos gráficos
-
 // Constantes para cores dos gráficos
 const CHART_COLORS = {
     blue: 'rgba(52, 152, 219, 1)',
@@ -22,7 +20,7 @@ let categoriaChart, statusChart;
 
 // Inicialização dos gráficos
 document.addEventListener('DOMContentLoaded', function() {
-    // Aguardar um pouco para garantir que o DOM esteja totalmente pronto
+    
     setTimeout(initCharts, 100);
 });
 
@@ -35,7 +33,7 @@ function initCharts() {
 
 // Configurar event listeners para os gráficos
 function configurarEventListenersGraficos() {
-    // Listener para o filtro de período
+    
     const periodoSelect = document.getElementById('periodo-select');
     if (periodoSelect) {
         periodoSelect.addEventListener('change', function() {
@@ -45,7 +43,7 @@ function configurarEventListenersGraficos() {
     
     // Listener para mudança de modo escuro
     document.addEventListener('modoEscuroAlterado', function(e) {
-        // Recriar os gráficos para aplicar as cores do tema
+        
         setTimeout(function() {
             if (categoriaChart) {
                 categoriaChart.destroy();
@@ -154,11 +152,11 @@ function criarGraficoCategorias() {
         }
     });
     
-    // Aplicar tema escuro se necessário
+    
     aplicarTemaEscuroGrafico(categoriaChart);
 }
 
-// Criar gráfico de pizza para status
+
 function criarGraficoStatus() {
     const ctx = document.getElementById('statusChart').getContext('2d');
     
@@ -219,14 +217,14 @@ function criarGraficoStatus() {
         }
     });
     
-    // Criar legenda personalizada
+    
     criarLegendaPersonalizada();
     
-    // Aplicar tema escuro se necessário
+    
     aplicarTemaEscuroGrafico(statusChart);
 }
 
-// Criar legenda personalizada para o gráfico de pizza
+
 function criarLegendaPersonalizada() {
     const legendContainer = document.getElementById('pieLegend');
     if (!legendContainer) return;
@@ -254,7 +252,7 @@ function criarLegendaPersonalizada() {
 
 // Obter dados para o gráfico de categorias baseado no período
 function obterDadosCategorias(dias) {
-    // Dados de exemplo - em uma aplicação real, isso viria de uma API
+    
     const dadosPorPeriodo = {
         7: {
             labels: ['Buraco', 'Iluminação', 'Limpeza', 'Sinalização', 'Outros'],
@@ -275,7 +273,7 @@ function obterDadosCategorias(dias) {
 
 // Atualizar gráfico de categorias com base no período selecionado
 function atualizarGraficoCategorias(dias) {
-    // Mostrar estado de carregamento
+    
     const chartContainer = document.querySelector('.main-chart');
     chartContainer.classList.add('loading');
     
@@ -287,7 +285,7 @@ function atualizarGraficoCategorias(dias) {
         categoriaChart.data.datasets[0].data = novosDados.valores;
         categoriaChart.update();
         
-        // Remover estado de carregamento
+        
         chartContainer.classList.remove('loading');
         
         // Disparar evento personalizado
