@@ -1,41 +1,33 @@
 from repositories import auth_repository
 from models.usuario_endereco import Usuario
-import bcrypt
 
 
-def cadastrar_usuario(usuario : Usuario):
+def cadastrar_user(usuario_dados: Usuario):
     try:
+
+        usuario_existente = auth_repository.buscar_usuario_por_cpf_ou_email(usuario_dados)
         
-        usuario_existente = auth_repository.buscar_usuario_por_cpf_ou_email(usuario)
         if usuario_existente:
-            return {'erro': 'Usuário já cadastrado.'}, 400
+            return {"erro" : "Usuário já cadastrado com este CPF ou e-mail"}, 401
         
-        #criptografando a senha
-        senha = usuario.senha
-        senha_bytes = senha.encode('utf-8')
-        senha_hash = bcrypt.hashpw(senha_bytes, bcrypt.gensalt())
-
-        #cadastrando usuario no banco com senha criptografada + id de endereço
-        auth_repository.inserir_usuario(usuario, senha_hash.decode('utf-8'))
-
-        return {'mensagem': 'Usuário cadastrado com sucesso!'}, 200
-
+        response = auth_repository.cadastrar_usuario_supa(usuario_dados)
+        
+        if response:
+            return {"mensagem" : "Usuario cadastrado com sucesso!"}, 200
+ 
     except Exception as e:
         return {'erro': 'Erro ao cadastrar usuário', 'detalhes': str(e)}, 500
+    
 
+def realizar_login_supa(email, senha):
+     try:
+        response = auth_repository.login_usuario_supa(email, senha)
 
-def realizar_login(dados):
-
-    try:
-        resultado = auth_repository.realizar_login(dados['email'], dados['senha'])
-        if resultado:
-            return {"usuario" : {"id": resultado["id_usuario"], "nome": resultado["nome"]}}, 200
-        else:
-            return{"erro": "Usuário ou senha inválido."}, 401
-
-    except Exception as e:
-        return {'erro': str(e)}, 500
-
+        return response, 200
+        
+     except Exception as e:
+        return {'erro': 'Erro ao cadastrar usuário', 'detalhes': str(e)}, 500
+   
 
 def realizar_login_admin(email, senha):
     try:
@@ -51,4 +43,4 @@ def realizar_login_admin(email, senha):
 
     except Exception as e:
         return {"erro": "Falha interna"}, 500
-
+    

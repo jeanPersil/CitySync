@@ -14,6 +14,22 @@ def inserir_report(report : Report):
         return True if response.data else False
     except Exception as e:
          return {"erro" : "falha ao reportar o problema", 'detalhes' : str(e)}
+
+
+def inserir_report_supa(endereco, fk_categoria, fk_usuario, descricao, url_imagem):
+    try:
+        response = supabase.table("reportes").insert({
+            "endereco" : endereco,
+            "fk_categoria" : fk_categoria,
+            "fk_usuario" : fk_usuario,
+            "descricao" : descricao,
+            "url_imagem" : url_imagem
+        }).execute()
+
+        return True if response.data else False
+
+    except Exception as e:
+        return  {"erro" : "falha ao reportar o problema", 'detalhes' : str(e)}
     
 
 def editar_status_report(report_id, novo_status):
@@ -25,7 +41,7 @@ def editar_status_report(report_id, novo_status):
 
 def buscar_reports_por_usuario(usuario_id):
     try:
-        response = supabase.table("listar_problemas").select("*").eq("usuario_id", usuario_id).execute()
+        response = supabase.table("listar_reportes").select("*").eq("fk_usuario", usuario_id).execute()
         return response.data
     except Exception as e:
         return {"erro": "Falha ao buscar reports", "detalhes": str(e)}

@@ -1,3 +1,4 @@
+import 'package:citysync/views/modificarSenha/esqueceu_senha.dart';
 import 'package:flutter/material.dart';
 import 'package:citysync/home_page.dart';
 import 'package:citysync/services/auth.dart';
@@ -10,8 +11,7 @@ class TelaLogin extends StatefulWidget {
   State<TelaLogin> createState() => _TelaLoginState();
 }
 
-class _TelaLoginState extends State<TelaLogin>
-    with TickerProviderStateMixin {
+class _TelaLoginState extends State<TelaLogin> with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
@@ -30,20 +30,14 @@ class _TelaLoginState extends State<TelaLogin>
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 3),
-    )..repeat(reverse: true);
+      duration: const Duration(milliseconds: 1000),
+    );
 
     _scaleAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: Curves.easeInOut,
       ),
-    );
-
-    // Animação de entrada dos elementos
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1000),
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -67,6 +61,7 @@ class _TelaLoginState extends State<TelaLogin>
   @override
   void dispose() {
     _animationController.dispose();
+
     _emailController.dispose();
     _senhaController.dispose();
     super.dispose();
@@ -93,8 +88,8 @@ class _TelaLoginState extends State<TelaLogin>
         context,
         MaterialPageRoute(
           builder: (_) => Homepage(
-            usuarioNome: resultado['usuario']['nome'],
-            usuarioID: resultado['usuario']['id'],
+            usuarioNome: resultado['nome_usuario'],
+            usuarioID: resultado['user_id'],
           ),
         ),
       );
@@ -137,7 +132,6 @@ class _TelaLoginState extends State<TelaLogin>
                         child: Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                        
                           ),
                           child: Image.asset(
                             "assets/images/logo.png",
@@ -211,7 +205,16 @@ class _TelaLoginState extends State<TelaLogin>
                   ),
                 ),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 10),
+              TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Esqueceu_senha_view()));
+                  },
+                  child: Text('Esqueceu a senha?',
+                      style: TextStyle(color: Colors.white70))),
               // Texto e botão de cadastro
               SlideTransition(
                 position: _slideAnimation,
@@ -318,7 +321,8 @@ class _TelaLoginState extends State<TelaLogin>
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: Colors.redAccent, width: 2),
           ),
-          contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
         ),
       ),
     );
@@ -334,7 +338,8 @@ class _TelaLoginState extends State<TelaLogin>
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF20C997).withOpacity(_isLoading ? 0.3 : 0.6),
+              color:
+                  const Color(0xFF20C997).withOpacity(_isLoading ? 0.3 : 0.6),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),

@@ -6,14 +6,13 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:image_picker_web/image_picker_web.dart';
 import 'package:citysync/Tema/color_extension.dart';
 
 class TelaReport extends StatefulWidget {
   const TelaReport(
       {super.key, required this.usuarioId, required this.categoria});
 
-  final int usuarioId;
+  final String usuarioId;
   final String categoria;
 
   @override
@@ -39,13 +38,7 @@ class TelaReportState extends State<TelaReport> {
   Future<void> pickImage() async {
     if (kIsWeb) {
       // Web
-      final media = await ImagePickerWeb.getImageInfo;
-      if (media != null) {
-        setState(() {
-          imageBytes = media.data;
-          imageName = media.fileName ?? 'imagem_web.png';
-        });
-      }
+      print("testando");
     } else {
       // Mobile
       final picker = ImagePicker();
@@ -121,8 +114,7 @@ class TelaReportState extends State<TelaReport> {
 
   void _reportarProblema() async {
     if (addressController.text.isNotEmpty &&
-        problemController.text.isNotEmpty)
-         {
+        problemController.text.isNotEmpty) {
       final resultado = await ReportApiService().enviarReport(
         endereco: addressController.text,
         categoriaId: mapearCategoriaId(widget.categoria),
@@ -212,9 +204,7 @@ class TelaReportState extends State<TelaReport> {
                   _buildSectionTitle("Descrição (opcional)", isDark),
                   _buildTextField(
                       descriptionController, "Descreva o problema...", isDark),
-
                   const SizedBox(height: 10),
-
                   GestureDetector(
                     onTap:
                         pickImage, // Tocar aqui para tirar ou selecionar uma nova imagem
@@ -261,20 +251,14 @@ class TelaReportState extends State<TelaReport> {
                       ),
                     ),
                   ),
-
-                 
-                  if (imageName !=
-                      null) 
+                  if (imageName != null)
                     Padding(
-                      padding: const EdgeInsets.only(
-                          top: 10), 
+                      padding: const EdgeInsets.only(top: 10),
                       child: ElevatedButton(
-                        onPressed:
-                            _abrirVisualizacaoImagem, 
+                        onPressed: _abrirVisualizacaoImagem,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
-                          foregroundColor:
-                              Colors.black, 
+                          foregroundColor: Colors.black,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -283,7 +267,6 @@ class TelaReportState extends State<TelaReport> {
                       ),
                     ),
                   const SizedBox(height: 20),
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [

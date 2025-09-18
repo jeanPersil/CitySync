@@ -4,8 +4,7 @@ from validate_docbr import CPF
 validarCpf = CPF()
 
 class Usuario:
-    def __init__(self, id, nome, cpf, email, telefone, senha, cep, fk_cidade):
-        self.id = id
+    def __init__(self, nome, cpf, email, telefone, senha, cep, fk_cidade):
         self.nome = nome
         self.cpf = cpf
         self.email = email

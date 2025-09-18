@@ -24,7 +24,7 @@ int mapearCategoriaId(String nome) {
   }
 }
 
-void mostrarModal(BuildContext context, int id_usuario) {
+void mostrarModal(BuildContext context, String id_usuario) {
   String? categoriaSelecionada;
   final isDark = Theme.of(context).brightness == Brightness.dark;
 

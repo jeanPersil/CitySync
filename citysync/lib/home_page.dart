@@ -8,7 +8,7 @@ class Homepage extends StatefulWidget {
   Homepage({super.key, required this.usuarioNome, required this.usuarioID});
 
   final String usuarioNome;
-  final int usuarioID;
+  final String usuarioID;
 
   @override
   State<Homepage> createState() => _HomepageState();
@@ -28,8 +28,8 @@ class _HomepageState extends State<Homepage> {
   Widget build(BuildContext context) {
     final brightness = Theme.of(context).brightness;
 
-    
-    final backgroundColor = brightness == Brightness.light ? Color(0xFF1E3A5F): Colors.grey[900];
+    final backgroundColor =
+        brightness == Brightness.light ? Color(0xFF1E3A5F) : Colors.grey[900];
 
     return Scaffold(
       body: PageView(
