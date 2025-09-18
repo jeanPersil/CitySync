@@ -1,3 +1,4 @@
+import 'package:citysync/views/modificarSenha/esqueceu_senha.dart';
 import 'package:flutter/material.dart';
 import 'package:citysync/home_page.dart';
 import 'package:citysync/services/auth.dart';
@@ -206,7 +207,12 @@ class _TelaLoginState extends State<TelaLogin> with TickerProviderStateMixin {
               ),
               const SizedBox(height: 10),
               TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Esqueceu_senha_view()));
+                  },
                   child: Text('Esqueceu a senha?',
                       style: TextStyle(color: Colors.white70))),
               // Texto e botão de cadastro
