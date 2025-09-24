@@ -1,5 +1,6 @@
 import 'package:citysync/model/modelReport.dart';
 import 'package:citysync/services/reports.dart';
+import 'package:citysync/views/reportCompleto.dart';
 import 'package:citysync/widgets/cardProblema.dart';
 import 'package:flutter/material.dart';
 
@@ -361,7 +362,22 @@ class _ProblemasReportState extends State<ProblemasReport>
                             curve: Curves.easeOut,
                             margin: const EdgeInsets.symmetric(
                                 vertical: 8, horizontal: 4),
-                            child: CardPRoblema(report: report),
+                            child: InkWell(
+                              onTap: () {
+                                // Navega para a tela ReportCompleto
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ReportCompleto(
+                                      report: report,
+                                    ),
+                                  ),
+                                );
+                              },
+                              borderRadius: BorderRadius.circular(
+                                  12), // Opcional: para matchar o borderRadius do card
+                              child: CardPRoblema(report: report),
+                            ),
                           ),
                         ),
                       );

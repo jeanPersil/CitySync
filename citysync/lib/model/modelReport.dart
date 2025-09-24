@@ -6,6 +6,7 @@ class Report {
   final String idUsuario;
   final String urlImagem;
   final String dataCriacao;
+  final String descricao;
 
   Report({
     required this.id,
@@ -15,6 +16,7 @@ class Report {
     required this.idUsuario,
     required this.urlImagem,
     required this.dataCriacao,
+    required this.descricao,
   });
 
   factory Report.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class Report {
       idUsuario: json['id_usuario'] ?? '',
       urlImagem: json['url_imagem'] ?? '',
       dataCriacao: json['data_report'] ?? '',
+      descricao: json['descricao'] ?? '',
     );
   }
 }
