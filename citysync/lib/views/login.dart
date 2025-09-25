@@ -83,20 +83,17 @@ class _TelaLoginState extends State<TelaLogin> with TickerProviderStateMixin {
       _isLoading = false;
     });
 
-    if (resultado["sucesso"]) {
+    if (resultado == null) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => Homepage(
-            usuarioNome: resultado['nome_usuario'],
-            usuarioID: resultado['user_id'],
-          ),
+          builder: (_) => Homepage(),
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(resultado["mensagem"]),
+          content: Text(resultado),
           backgroundColor: Colors.redAccent,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(

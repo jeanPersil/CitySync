@@ -4,42 +4,28 @@ import 'package:supabase/supabase.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AutenticacaoUsuario {
-  Future<Map<String, dynamic>> login(String email, String senha) async {
-    final String _urlBase = "http://192.168.0.16:5000/login_user";
-    try {
-      final resposta = await http.post(
-        Uri.parse(_urlBase),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "email": email,
-          "senha": senha,
-        }),
-      );
+  Future<String?> login(String email, String senha) async {
+    final supabase = Supabase.instance.client;
 
-      if (resposta.statusCode == 200) {
-        final dados = jsonDecode(resposta.body);
-        return {
-          "sucesso": true,
-          "user_id": dados["user_id"],
-          "nome_usuario": dados["nome_usuario"],
-        };
-      } else {
-        final erro = jsonDecode(resposta.body);
-        return {
-          "sucesso": false,
-          "mensagem": erro["erro"] ?? "Erro desconhecido",
-        };
+    try {
+      await supabase.auth.signInWithPassword(password: senha, email: email);
+      return null;
+    } on AuthException catch (e) {
+      switch (e.statusCode) {
+        case '400':
+          return "E-mail ou senha inválidos";
+        case '429':
+          return "Muitas tentativas. Tente novamente em alguns minutos";
+        default:
+          return "Ocorreu um erro de autenticação: ${e.message}";
       }
     } catch (e) {
-      return {
-        "sucesso": false,
-        "mensagem": "Erro de conexão: $e",
-      };
+      return "Ocorreu um erro inesperado. Por favor, verifique sua conexão com a internet.";
     }
   }
 
   Future<Map<String, dynamic>> cadastrar(Map<String, dynamic> dados) async {
-    final String _urlBase = "http://192.168.0.16:5000/cadastrar_user";
+    final String _urlBase = "http://192.168.0.20:5000/cadastrar_user";
     try {
       final resposta = await http.post(
         Uri.parse(_urlBase),
@@ -86,9 +72,8 @@ class AutenticacaoUsuario {
         await supabase.auth.updateUser(UserAttributes(password: newPassword));
         return "Senha alterada com sucesso!";
       }
-      
-      return "Token inválido ou expirado";
 
+      return "Token inválido ou expirado";
     } catch (error) {
       final errorMsg = error.toString();
       if (errorMsg.contains("Invalid token") || errorMsg.contains("expired")) {
