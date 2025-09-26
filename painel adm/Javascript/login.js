@@ -1,4 +1,7 @@
 
+
+import { mostrarNotificacao } from './utils.js'; // Importa a função de notificação
+
 document.getElementById('ano').textContent = new Date().getFullYear();
 
 // Função para verificar credenciais (simulação)
@@ -6,17 +9,15 @@ function verificarCredenciais(email, senha) {
   return email === 'admin@gmail.com' && senha === 'admin123';
 }
 
-
 function verificarCredenciaisSalvas() {
   const emailSalvo = localStorage.getItem('emailLembrado');
   const lembrarSalvo = localStorage.getItem('lembrarUsuario');
-  
+
   if (emailSalvo && lembrarSalvo === 'true') {
     document.getElementById('email').value = emailSalvo;
     document.getElementById('lembrar').checked = true;
   }
 }
-
 
 function toggleSenha() {
   const senhaInput = document.getElementById('senha');
@@ -36,79 +37,70 @@ function toggleSenha() {
 // Função para lidar com o envio do formulário
 function handleLogin(event) {
   event.preventDefault();
-  
+
   const email = document.getElementById('email').value;
   const senha = document.getElementById('senha').value;
   const lembrar = document.getElementById('lembrar').checked;
   const botao = document.querySelector('.botao');
-  
+
   if (!email || !senha) {
-    alert('Por favor, preencha todos os campos.');
+    mostrarNotificacao('Por favor, preencha todos os campos.', 'erro');
     return;
   }
-  
-  if (verificarCredenciais(email, senha)) {
-    // Mostrar loading no botão
-    botao.innerHTML = 'Entrando... <span class="spinner"></span>';
-    botao.disabled = true;
 
-    const spinner = botao.querySelector('.spinner');
-    spinner.style.cssText = `
-      display: inline-block;
-      width: 12px;
-      height: 12px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-radius: 50%;
-      border-top-color: #fff;
-      animation: spin 1s ease-in-out infinite;
-    `;
-    
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes spin { to { transform: rotate(360deg); } }`;
-    document.head.appendChild(style);
+  // Adiciona classes para o estado de carregamento
+  botao.classList.add('carregando');
+  botao.disabled = true;
+  botao.innerHTML = '<span class="botao-loading"><i class="fas fa-spinner fa-spin"></i></span>';
 
-    
-    if (lembrar) {
-      localStorage.setItem('emailLembrado', email);
-      localStorage.setItem('lembrarUsuario', 'true');
-    } else {
-      localStorage.removeItem('emailLembrado');
-      localStorage.removeItem('lembrarUsuario');
-    }
-    
-    
-    setTimeout(() => {
+
+  setTimeout(() => { // Simula um atraso de rede
+    if (verificarCredenciais(email, senha)) {
+      if (lembrar) {
+        localStorage.setItem('emailLembrado', email);
+        localStorage.setItem('lembrarUsuario', 'true');
+      } else {
+        localStorage.removeItem('emailLembrado');
+        localStorage.removeItem('lembrarUsuario');
+      }
+
+      mostrarNotificacao('Login realizado com sucesso!', 'sucesso');
       window.location.href = 'dashboard.html';
-    }, 1000);
-    
-  } else {
-    alert('Credenciais inválidas. Tente novamente.');
-    document.getElementById('senha').value = '';
-    document.getElementById('senha').focus();
-  }
+
+    } else {
+      mostrarNotificacao('Credenciais inválidas. Tente novamente.', 'erro');
+      document.getElementById('senha').value = '';
+      document.getElementById('senha').focus();
+
+      // Remove classes de carregamento e restaura o botão
+      botao.classList.remove('carregando');
+      botao.disabled = false;
+      botao.innerHTML = 'Entrar'; // Restaura o texto original do botão
+    }
+  }, 1000); // Atraso de 1 segundo
 }
 
 // Adicionar efeitos de interação aos campos
 function addFieldInteractions() {
   const campos = document.querySelectorAll('.campo input');
-  
+
   campos.forEach(campo => {
     campo.addEventListener('focus', function() {
-      this.parentElement.style.transform = 'translateY(-2px)';
-      this.parentElement.style.transition = 'transform 0.2s ease';
+      // A transformação translateY já é tratada pelo CSS :focus com box-shadow
+      // this.parentElement.style.transform = 'translateY(-2px)';
+      // this.parentElement.style.transition = 'transform 0.2s ease';
     });
-    
+
     campo.addEventListener('blur', function() {
-      this.parentElement.style.transform = 'translateY(0)';
+      // this.parentElement.style.transform = 'translateY(0)';
     });
-    
+
     if (campo.type === 'email') {
       campo.addEventListener('blur', function() {
         if (this.value && !this.validity.valid) {
           this.style.borderColor = '#ef4444';
         } else {
-          this.style.borderColor = '#cbd5e1';
+          this.style.borderColor = 'var(--border-color, #cbd5e1)'; // Usa variável CSS
         }
       });
     }
@@ -121,7 +113,6 @@ document.addEventListener('DOMContentLoaded', function() {
   addFieldInteractions();
   document.getElementById('loginForm').addEventListener('submit', handleLogin);
 
-  
   const toggleSenhaBtn = document.querySelector('.toggle-senha');
   if (toggleSenhaBtn) {
     toggleSenhaBtn.addEventListener('click', toggleSenha);

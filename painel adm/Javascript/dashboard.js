@@ -1,4 +1,7 @@
 
+
+import { toggleMenuLateral, toggleModoEscuro, mostrarNotificacao, debounce } from './utils.js';
+
 // ===== CONSTANTES E CONFIGURAÇÕES =====
 const CONFIG = {
     ATUALIZACAO_TEMPO_REAL: 15000, // 15 segundos
@@ -20,7 +23,8 @@ let elementos = {
     viewAllBtn: null,
     actionButtons: null,
     statusBadges: null,
-    overlay: null
+    overlay: null,
+    cardsStatus: null // Adicionado
 };
 
 // ===== ESTADO DA APLICAÇÃO =====
@@ -34,9 +38,9 @@ let estado = {
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', function() {
     inicializarElementos();
+    criarOverlay();
     carregarPreferencias();
     inicializarAplicacao();
-    configurarServiceWorker();
 });
 
 function inicializarElementos() {
@@ -47,24 +51,21 @@ function inicializarElementos() {
         searchInput: document.querySelector('.search-box input'),
         chartFilter: document.querySelector('.chart-filter'),
         viewAllBtn: document.querySelector('.view-all'),
-        actionButtons: document.querySelectorAll('.action-btn'),
+        actionButtons: document.querySelectorAll('.action-buttons .action-btn'), // Seleção mais específica
         statusBadges: document.querySelectorAll('.status-badge'),
         cardsStatus: document.querySelectorAll('.status-card')
     };
-    
-    // Criar overlay se não existir
-    criarOverlay();
 }
 
 function criarOverlay() {
     elementos.overlay = document.createElement('div');
     elementos.overlay.className = 'overlay';
     document.body.appendChild(elementos.overlay);
-    
+
     // Fechar menu ao clicar no overlay
     elementos.overlay.addEventListener('click', function() {
         if (estado.menuAberto && window.innerWidth < 992) {
-            toggleMenuLateral();
+            estado.menuAberto = toggleMenuLateral(elementos.barraLateral, elementos.menuToggle, elementos.overlay, estado.menuAberto);
         }
     });
 }
@@ -73,13 +74,13 @@ function carregarPreferencias() {
     // Carregar preferência do modo escuro
     const darkModeSalvo = localStorage.getItem(CONFIG.LOCAL_STORAGE_KEYS.MODO_ESCURO);
     estado.modoEscuroAtivo = darkModeSalvo === 'true';
-    
+
     if (estado.modoEscuroAtivo) {
         document.body.classList.add('dark-mode');
-        elementos.darkModeToggle.checked = true;
+        if (elementos.darkModeToggle) elementos.darkModeToggle.checked = true;
     }
 
-    // Carregar preferência do menu lateral - ATUALIZADO
+    // Carregar preferência do menu lateral
     const menuAbertoSalvo = localStorage.getItem(CONFIG.LOCAL_STORAGE_KEYS.MENU_ABERTO);
     if (menuAbertoSalvo !== null && window.innerWidth < 992) {
         estado.menuAberto = menuAbertoSalvo === 'true';
@@ -90,31 +91,32 @@ function carregarPreferencias() {
             elementos.barraLateral.style.transform = 'translateX(0)';
             elementos.menuToggle.innerHTML = '<i class="fas fa-times"></i>';
         }
+    } else if (window.innerWidth >= 992) {
+        estado.menuAberto = true; // Menu sempre aberto em telas grandes
     }
-    
-    // Verificar tamanho da tela ao carregar
+
     verificarTamanhoTela();
 }
 
 function inicializarAplicacao() {
-    inicializarGraficos();
+    // A inicialização dos gráficos agora é feita em charts.js
+    // inicializarGraficos(); // Removido
     inicializarTooltips();
     configurarEventListeners();
     animarElementos();
     iniciarAtualizacaoTempoReal();
     configurarObservadorIntersecao();
+    configurarServiceWorker();
 }
 
 // ===== VERIFICAR TAMANHO DA TELA E AJUSTAR MENU =====
 function verificarTamanhoTela() {
     if (window.innerWidth >= 992) {
-        // Em telas grandes, garantir que o menu esteja visível
         elementos.barraLateral.style.transform = 'translateX(0)';
         elementos.overlay.classList.remove('active');
         estado.menuAberto = true;
         elementos.menuToggle.style.display = 'none';
     } else {
-        // Em telas pequenas, usar estado salvo ou padrão (fechado)
         elementos.menuToggle.style.display = 'block';
         if (!estado.menuAberto) {
             elementos.barraLateral.style.transform = 'translateX(-100%)';
@@ -128,16 +130,10 @@ function verificarTamanhoTela() {
     }
 }
 
-function inicializarGraficos() {
-}
-
-function animarGraficoPizza() {
-}
-
 // ===== INICIALIZAR TOOLTIPS =====
 function inicializarTooltips() {
     const tooltipElements = document.querySelectorAll('[data-tooltip]');
-    
+
     tooltipElements.forEach(element => {
         element.addEventListener('mouseenter', mostrarTooltip);
         element.addEventListener('mouseleave', esconderTooltip);
@@ -155,13 +151,13 @@ function mostrarTooltip(e) {
     tooltip.textContent = tooltipTexto;
     tooltip.setAttribute('role', 'tooltip');
     document.body.appendChild(tooltip);
-    
+
     const rect = this.getBoundingClientRect();
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    
+
     tooltip.style.top = `${rect.top + scrollTop - tooltip.offsetHeight - 10}px`;
     tooltip.style.left = `${rect.left + rect.width / 2 - tooltip.offsetWidth / 2}px`;
-    
+
     this._tooltipElement = tooltip;
 }
 
@@ -176,17 +172,23 @@ function esconderTooltip() {
 function configurarEventListeners() {
     // Menu toggle
     if (elementos.menuToggle) {
-        elementos.menuToggle.addEventListener('click', toggleMenuLateral);
+        elementos.menuToggle.addEventListener('click', () => {
+            estado.menuAberto = toggleMenuLateral(elementos.barraLateral, elementos.menuToggle, elementos.overlay, estado.menuAberto);
+        });
         elementos.menuToggle.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') toggleMenuLateral();
+            if (e.key === 'Enter' || e.key === ' ') {
+                estado.menuAberto = toggleMenuLateral(elementos.barraLateral, elementos.menuToggle, elementos.overlay, estado.menuAberto);
+            }
         });
     }
-    
+
     // Dark mode toggle
     if (elementos.darkModeToggle) {
-        elementos.darkModeToggle.addEventListener('change', toggleModoEscuro);
+        elementos.darkModeToggle.addEventListener('change', () => {
+            estado.modoEscuroAtivo = toggleModoEscuro(estado.modoEscuroAtivo);
+        });
     }
-    
+
     // Search input
     if (elementos.searchInput) {
         elementos.searchInput.addEventListener('input', debounce(pesquisarConteudo, 300));
@@ -197,17 +199,17 @@ function configurarEventListeners() {
             }
         });
     }
-    
+
     // Chart filter
     if (elementos.chartFilter) {
         elementos.chartFilter.addEventListener('change', filtrarGrafico);
     }
-    
+
     // View all button
     if (elementos.viewAllBtn) {
         elementos.viewAllBtn.addEventListener('click', verTodosReports);
     }
-    
+
     // Action buttons
     elementos.actionButtons.forEach(botao => {
         botao.addEventListener('click', handleActionClick);
@@ -215,85 +217,29 @@ function configurarEventListeners() {
             if (e.key === 'Enter' || e.key === ' ') handleActionClick.call(botao, e);
         });
     });
-    
-    // Status badges
-    elementos.statusBadges.forEach(badge => {
-        badge.addEventListener('click', () => filtrarPorStatus(badge.textContent));
-        badge.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') filtrarPorStatus(badge.textContent);
-        });
-    });
-    
+
+    // Status badges (se houver necessidade de filtrar por eles)
+    // elementos.statusBadges.forEach(badge => {
+    //     badge.addEventListener('click', () => filtrarPorStatus(badge.textContent));
+    //     badge.addEventListener('keypress', (e) => {
+    //         if (e.key === 'Enter' || e.key === ' ') filtrarPorStatus(badge.textContent);
+    //     });
+    // });
+
     // Eventos de teclado
     document.addEventListener('keydown', handleKeyboardShortcuts);
-    
-    // Redimensionamento da janela - ATUALIZADO
-    window.addEventListener('resize', debounce(function() {
-        verificarTamanhoTela();
-    }, 250));
-}
 
-// ===== TOGGLE MENU LATERAL =====
-function toggleMenuLateral() {
-    // Não permitir abrir o menu em telas grandes onde ele já está sempre visível
-    if (window.innerWidth >= 992) {
-        return;
-    }
-    
-    estado.menuAberto = !estado.menuAberto;
-    
-    if (estado.menuAberto) {
-        elementos.barraLateral.style.transform = 'translateX(0)';
-        elementos.overlay.classList.add('active');
-        elementos.menuToggle.innerHTML = '<i class="fas fa-times"></i>';
-        elementos.menuToggle.setAttribute('aria-label', 'Fechar menu');
-    } else {
-        elementos.barraLateral.style.transform = 'translateX(-100%)';
-        elementos.overlay.classList.remove('active');
-        elementos.menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
-        elementos.menuToggle.setAttribute('aria-label', 'Abrir menu');
-    }
-    
-    // Salvar preferência apenas para telas pequenas
-    if (window.innerWidth < 992) {
-        localStorage.setItem(CONFIG.LOCAL_STORAGE_KEYS.MENU_ABERTO, estado.menuAberto);
-    }
-    
-    document.dispatchEvent(new CustomEvent('menuToggle', { detail: estado.menuAberto }));
-}
-
-// ===== TOGGLE MODO ESCURO =====
-function toggleModoEscuro() {
-    estado.modoEscuroAtivo = !estado.modoEscuroAtivo;
-    
-    if (estado.modoEscuroAtivo) {
-        document.body.classList.add('dark-mode');
-        document.dispatchEvent(new CustomEvent('modoEscuroAlterado', { detail: true }));
-    } else {
-        document.body.classList.remove('dark-mode');
-        document.dispatchEvent(new CustomEvent('modoEscuroAlterado', { detail: false }));
-    }
-    
-    localStorage.setItem(CONFIG.LOCAL_STORAGE_KEYS.MODO_ESCURO, estado.modoEscuroAtivo);
+    // Redimensionamento da janela
+    window.addEventListener('resize', debounce(verificarTamanhoTela, 250));
 }
 
 // ===== PESQUISAR CONTEÚDO =====
 function pesquisarConteudo(e) {
     const termo = e.target.value.toLowerCase().trim();
-    
-    if (termo.length > 2) {
-        filtrarTabela(termo);
-        estado.dadosFiltrados = true;
-    } else if (estado.dadosFiltrados && termo.length === 0) {
-        resetarFiltroTabela();
-        estado.dadosFiltrados = false;
-    }
-}
 
-function filtrarTabela(termo) {
     const linhasTabela = document.querySelectorAll('.tabela-recentes tbody tr');
     let resultados = 0;
-    
+
     linhasTabela.forEach(linha => {
         const textoLinha = linha.textContent.toLowerCase();
         if (textoLinha.includes(termo)) {
@@ -305,24 +251,14 @@ function filtrarTabela(termo) {
             linha.classList.remove('highlight');
         }
     });
-    
-    // Mostrar mensagem se não houver resultados
-    mostrarResultadoPesquisa(resultados);
-}
 
-function resetarFiltroTabela() {
-    const linhasTabela = document.querySelectorAll('.tabela-recentes tbody tr');
-    linhasTabela.forEach(linha => {
-        linha.style.display = '';
-        linha.classList.remove('highlight');
-    });
-    
-    esconderResultadoPesquisa();
+    mostrarResultadoPesquisa(resultados);
+    estado.dadosFiltrados = termo.length > 0;
 }
 
 function mostrarResultadoPesquisa(resultados) {
     let mensagem = document.getElementById('resultado-pesquisa');
-    
+
     if (!mensagem) {
         mensagem = document.createElement('div');
         mensagem.id = 'resultado-pesquisa';
@@ -332,11 +268,19 @@ function mostrarResultadoPesquisa(resultados) {
             background: var(--info-light);
             border-left: 4px solid var(--accent-blue);
             border-radius: 4px;
+            color: var(--text-primary);
         `;
         document.querySelector('.tabela-recentes').appendChild(mensagem);
     }
-    
+
     mensagem.textContent = `${resultados} resultado(s) encontrado(s)`;
+    if (resultados === 0) {
+        mensagem.style.backgroundColor = 'var(--danger-light)';
+        mensagem.style.borderColor = 'var(--accent-red)';
+    } else {
+        mensagem.style.backgroundColor = 'var(--info-light)';
+        mensagem.style.borderColor = 'var(--accent-blue)';
+    }
 }
 
 function esconderResultadoPesquisa() {
@@ -347,51 +291,30 @@ function esconderResultadoPesquisa() {
 // ===== FILTRAR GRÁFICO =====
 function filtrarGrafico(e) {
     const periodo = e.target.value;
-    
-    // Mostrar indicador de carregamento
-    const chartWrapper = document.querySelector('.chart-wrapper');
-    chartWrapper.style.opacity = '0.5';
-    chartWrapper.classList.add('loading');
-    
-    // Simular requisição
-    setTimeout(() => {
-        atualizarGrafico(periodo);
-        chartWrapper.style.opacity = '1';
-        chartWrapper.classList.remove('loading');
-    }, 800);
-}
 
-function atualizarGrafico(periodo) {
-    const dadosPeriodo = {
-        'Últimos 7 dias': [42, 51, 27, 36, 18],
-        'Últimos 30 dias': [65, 78, 42, 55, 25],
-        'Este mês': [35, 45, 22, 30, 15]
-    };
-    
-    const alturas = dadosPeriodo[periodo] || [42, 51, 27, 36, 18];
-    const barras = document.querySelectorAll('.bar');
-    
-    barras.forEach((barra, index) => {
-        const valor = alturas[index];
-        barra.style.setProperty('--height', `${valor}%`);
-        barra.querySelector('.bar-value').textContent = valor;
-    });
-    
-    // Atualizar evento
-    document.dispatchEvent(new CustomEvent('graficoAtualizado', { detail: periodo }));
+    const chartContainer = document.querySelector('.main-chart');
+    chartContainer.classList.add('loading');
+
+    // Chamar a função de atualização do charts.js
+    if (window.GraficosDashboard && window.GraficosDashboard.atualizarCategorias) {
+        window.GraficosDashboard.atualizarCategorias(periodo);
+    }
+
+    // O remover da classe 'loading' é feito dentro de charts.js agora
 }
 
 // ===== VER TODOS REPORTS =====
 function verTodosReports(e) {
     e.preventDefault();
-    // Simular navegação
     window.location.href = 'gestao.html';
 }
 
 // ===== HANDLE ACTION CLICK =====
 function handleActionClick(e) {
-    const acao = this.querySelector('span').textContent;
-    
+    const acaoSpan = this.querySelector('span');
+    if (!acaoSpan) return; // Garante que o span existe
+    const acao = acaoSpan.textContent;
+
     switch(acao) {
         case 'Exportar Dados':
             exportarDados();
@@ -408,66 +331,67 @@ function handleActionClick(e) {
 }
 
 function exportarDados() {
-    // Simular exportação
     mostrarNotificacao('Dados exportados com sucesso!', 'sucesso');
-    
-    // Registrar no analytics
     document.dispatchEvent(new CustomEvent('exportacaoIniciada'));
 }
 
 function toggleFiltros() {
-    const filtrosAvancados = document.querySelector('.filtros-avancados');
-    
+    const quickActionsDiv = document.querySelector('.quick-actions');
+    let filtrosAvancados = quickActionsDiv.querySelector('.filtros-avancados');
+
     if (!filtrosAvancados) {
-        criarFiltrosAvancados();
+        filtrosAvancados = document.createElement('div');
+        filtrosAvancados.className = 'filtros-avancados';
+        filtrosAvancados.innerHTML = `
+            <h4>Filtros Avançados</h4>
+            <div class="filtro-grupo">
+                <label for="filtroDataInicial">Data Inicial</label>
+                <input type="date" id="filtroDataInicial">
+            </div>
+            <div class="filtro-grupo">
+                <label for="filtroDataFinal">Data Final</label>
+                <input type="date" id="filtroDataFinal">
+            </div>
+            <div class="filtro-grupo">
+                <label for="filtroCategoria">Categoria</label>
+                <select id="filtroCategoria">
+                    <option value="todas">Todas</option>
+                    <option value="Buraco">Buraco</option>
+                    <option value="Iluminação">Iluminação</option>
+                    <option value="Limpeza">Limpeza</option>
+                    <option value="Sinalização">Sinalização</option>
+                </select>
+            </div>
+            <button class="action-btn aplicar-filtros"><i class="fas fa-filter"></i> Aplicar Filtros</button>
+            <button class="botao-acao limpar-filtros"><i class="fas fa-times"></i> Limpar Filtros</button>
+        `;
+        quickActionsDiv.appendChild(filtrosAvancados);
+
+        // Adicionar listeners para os novos botões
+        filtrosAvancados.querySelector('.aplicar-filtros').addEventListener('click', () => {
+            mostrarNotificacao('Filtros avançados aplicados!', 'info');
+            // Implementar lógica de filtragem real aqui
+        });
+        filtrosAvancados.querySelector('.limpar-filtros').addEventListener('click', () => {
+            filtrosAvancados.querySelectorAll('input, select').forEach(input => {
+                if (input.type === 'date') input.value = '';
+                else if (input.tagName === 'SELECT') input.value = 'todas';
+            });
+            mostrarNotificacao('Filtros avançados limpos!', 'info');
+            // Implementar lógica para remover filtros
+        });
+
+        setTimeout(() => filtrosAvancados.classList.add('ativo'), 10);
     } else {
         filtrosAvancados.classList.toggle('ativo');
     }
 }
 
-function criarFiltrosAvancados() {
-    const filtros = document.createElement('div');
-    filtros.className = 'filtros-avancados';
-    filtros.innerHTML = `
-        <h4>Filtros Avançados</h4>
-        <div class="filtro-grupo">
-            <label>Data Inicial</label>
-            <input type="date">
-        </div>
-        <div class="filtro-grupo">
-            <label>Data Final</label>
-            <input type="date">
-        </div>
-        <div class="filtro-grupo">
-            <label>Categoria</label>
-            <select>
-                <option>Todas</option>
-                <option>Buraco</option>
-                <option>Iluminação</option>
-                <option>Limpeza</option>
-                <option>Sinalização</option>
-            </select>
-        </div>
-        <button class="aplicar-filtros">Aplicar Filtros</button>
-    `;
-    
-    document.querySelector('.quick-actions').appendChild(filtros);
-    setTimeout(() => filtros.classList.add('ativo'), 10);
-}
-
 function gerarRelatorio() {
-    // Simular geração de relatório
     mostrarNotificacao('Relatório sendo gerado...', 'info');
-    
     setTimeout(() => {
         mostrarNotificacao('Relatório gerado com sucesso!', 'sucesso');
     }, 2000);
-}
-
-function filtrarPorStatus(status) {
-    console.log('Filtrando por status:', status);
-    // Implementar filtro por status
-    mostrarNotificacao(`Filtrando por: ${status}`, 'info');
 }
 
 // ===== ANIMAÇÕES =====
@@ -509,7 +433,7 @@ function animarAtividades() {
 // ===== ATUALIZAÇÃO EM TEMPO REAL =====
 function iniciarAtualizacaoTempoReal() {
     if (!estado.tempoRealAtivo) return;
-    
+
     setInterval(() => {
         if (document.visibilityState === 'visible') {
             atualizarDadosTempoReal();
@@ -518,27 +442,29 @@ function iniciarAtualizacaoTempoReal() {
 }
 
 function atualizarDadosTempoReal() {
-    // Atualizar contadores
     elementos.cardsStatus.forEach(card => {
         const valorElemento = card.querySelector('.card-value');
         let valorAtual = parseInt(valorElemento.textContent);
         const variacao = Math.floor(Math.random() * 5) - 2;
         const novoValor = Math.max(0, valorAtual + variacao);
-        
-        // Animação de contagem
+
         animarContagem(valorElemento, valorAtual, novoValor);
-        
-        // Atualizar tendência
+
         const tendencia = card.querySelector('.card-trend');
-        if (variacao > 0) {
-            tendencia.className = 'card-trend up';
-            tendencia.innerHTML = '<i class="fas fa-arrow-up"></i> ' + Math.abs(variacao);
-        } else if (variacao < 0) {
-            tendencia.className = 'card-trend down';
-            tendencia.innerHTML = '<i class="fas fa-arrow-down"></i> ' + Math.abs(variacao);
+        if (tendencia) { // Verifica se o elemento tendência existe
+            if (variacao > 0) {
+                tendencia.className = 'card-trend up';
+                tendencia.innerHTML = `<i class="fas fa-arrow-up"></i> ${Math.abs(variacao)}%`;
+            } else if (variacao < 0) {
+                tendencia.className = 'card-trend down';
+                tendencia.innerHTML = `<i class="fas fa-arrow-down"></i> ${Math.abs(variacao)}%`;
+            } else {
+                tendencia.className = 'card-trend'; // Sem mudança
+                tendencia.innerHTML = '';
+            }
         }
     });
-    
+
     document.dispatchEvent(new CustomEvent('dadosAtualizados'));
 }
 
@@ -548,11 +474,11 @@ function animarContagem(elemento, valorInicial, valorFinal) {
     const passos = duracao / intervalo;
     const incremento = (valorFinal - valorInicial) / passos;
     let valorAtual = valorInicial;
-    
+
     const timer = setInterval(() => {
         valorAtual += incremento;
-        
-        if ((incremento > 0 && valorAtual >= valorFinal) || 
+
+        if ((incremento > 0 && valorAtual >= valorFinal) ||
             (incremento < 0 && valorAtual <= valorFinal)) {
             elemento.textContent = Math.round(valorFinal);
             clearInterval(timer);
@@ -573,8 +499,7 @@ function configurarObservadorIntersecao() {
                 }
             });
         }, { threshold: 0.1 });
-        
-        // Observar elementos que podem beneficiar do lazy loading
+
         document.querySelectorAll('.card, .chart-container, .activity-item').forEach(el => {
             observer.observe(el);
         });
@@ -594,51 +519,7 @@ function configurarServiceWorker() {
     }
 }
 
-// ===== NOTIFICAÇÕES =====
-function mostrarNotificacao(mensagem, tipo = 'info') {
-    const toast = document.createElement('div');
-    toast.className = `toast-message ${tipo}`;
-    toast.innerHTML = `
-        <i class="fas fa-${obterIconeNotificacao(tipo)}"></i>
-        <span>${mensagem}</span>
-    `;
-    
-    document.body.appendChild(toast);
-    
-    // Trigger reflow
-    toast.offsetHeight;
-    
-    toast.classList.add('show');
-    
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-    }, CONFIG.NOTIFICACAO_TIMEOUT);
-}
-
-function obterIconeNotificacao(tipo) {
-    const icones = {
-        'sucesso': 'check-circle',
-        'erro': 'exclamation-circle',
-        'aviso': 'exclamation-triangle',
-        'info': 'info-circle'
-    };
-    return icones[tipo] || 'info-circle';
-}
-
 // ===== UTILITÁRIOS =====
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
 function formatarNumero(numero) {
     if (numero >= 1000000) {
         return (numero / 1000000).toFixed(1) + 'M';
@@ -654,7 +535,7 @@ function handleKeyboardShortcuts(e) {
         e.preventDefault();
         elementos.searchInput.focus();
     }
-    
+
     // Esc para limpar pesquisa
     if (e.key === 'Escape' && document.activeElement === elementos.searchInput) {
         elementos.searchInput.value = '';
@@ -665,9 +546,13 @@ function handleKeyboardShortcuts(e) {
 
 // ===== EXPORTAÇÃO PARA USO EXTERNO =====
 window.Dashboard = {
-    toggleMenu: toggleMenuLateral,
-    toggleDarkMode: toggleModoEscuro,
+    toggleMenu: () => { // Wrapper para a função centralizada
+        elementos.menuToggle.click(); // Simula o clique no botão
+    },
+    toggleDarkMode: () => { // Wrapper para a função centralizada
+        elementos.darkModeToggle.click(); // Simula o clique no switch
+    },
     exportarDados: exportarDados,
-    atualizarGrafico: atualizarGrafico,
+    atualizarGrafico: filtrarGrafico, // Renomeado para refletir a ação
     mostrarNotificacao: mostrarNotificacao
 };
