@@ -1,7 +1,6 @@
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:supabase/supabase.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'validator.dart';
 
 class AutenticacaoUsuario {
   Future<String?> login(String email, String senha) async {
@@ -24,34 +23,38 @@ class AutenticacaoUsuario {
     }
   }
 
-  Future<Map<String, dynamic>> cadastrar(Map<String, dynamic> dados) async {
-    final String _urlBase = "http://192.168.0.20:5000/cadastrar_user";
+  Future cadastrar(Map<String, dynamic> dados) async {
+    final supabase = Supabase.instance.client;
+    final validar = Validator();
     try {
-      final resposta = await http.post(
-        Uri.parse(_urlBase),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(dados),
-      );
+      if (!validar.validarCPF(dados["cpf"])) {
+        print("Por favor, insira um CPF valido");
+      }
 
-      if (resposta.statusCode == 200) {
-        final respostaJson = jsonDecode(resposta.body);
-        return {
-          "sucesso": true,
-          "mensagem":
-              respostaJson["mensagem"] ?? "Cadastro realizado com sucesso!",
-        };
-      } else {
-        final erro = jsonDecode(resposta.body);
-        return {
-          "sucesso": false,
-          "mensagem": erro["erro"] ?? "Erro desconhecido no cadastro",
-        };
+      if (await !validar.validarCEP(dados["cep"])) {
+        print("Por favor, insira um CEP valido. ");
+      }
+
+      return print("ola mundo");
+
+      final response = await supabase.auth
+          .signUp(password: dados["senha"], email: dados["email"]);
+
+      if (response != null) {
+        await supabase.from('users').insert({
+          'id': response.user!.id, // ID do Auth
+          'nome': dados["nome"],
+          'cpf': dados["cpf"],
+          'email': dados["email"],
+          'telefone': dados["telefone"],
+          'fk_cidade': dados["fk_cidade"],
+          'cep': dados["cep"],
+        });
+
+        return null;
       }
     } catch (e) {
-      return {
-        "sucesso": false,
-        "mensagem": "Erro de conexão: $e",
-      };
+      return null;
     }
   }
 
