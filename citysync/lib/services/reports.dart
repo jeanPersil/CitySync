@@ -1,21 +1,22 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:citysync/model/modelReport.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ReportApiService {
+  final supabase = Supabase.instance.client;
   Future<List<Report>> obterListaReports(String idUsuario) async {
-    final response = await http.get(
-      Uri.parse('http://192.168.0.20:5000/listar_reports_app/$idUsuario'),
-      headers: {'Content-Type': 'application/json'},
-    );
+    final response = await supabase
+        .from("listar_reportes")
+        .select()
+        .eq("fk_usuario", idUsuario);
 
-    if (response.statusCode == 200) {
-      final jsonData = jsonDecode(response.body);
-      final List<dynamic> reportsJson = jsonData['reports'];
-      return reportsJson.map((r) => Report.fromJson(r)).toList();
-    } else {
-      throw Exception("Erro ao buscar reports: ${response.body}");
+    if (response == null || response.isEmpty) {
+      return [];
     }
+    return (response as List)
+        .map((item) => Report.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 
   Future<String?> enviarReport({
@@ -26,30 +27,22 @@ class ReportApiService {
     String? urlImagem,
   }) async {
     try {
-      final uri = Uri.parse('http://192.168.0.20:5000/efetuar_report_supa');
-      final body = jsonEncode({
-        "endereco": endereco,
-        "categoria": categoriaId,
-        "id_usuario": usuarioId,
-        "descricao": descricao,
-        "url_imagem": urlImagem ?? "",
-      });
-
-      final response = await http.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-        body: body,
-      );
-
-      if (response.statusCode == 200) {
-        return null;
-      } else {
-        final decoded = jsonDecode(response.body);
-        final mensagemErro = decoded['erro'] ?? 'erro desconhecido';
-        return mensagemErro;
+      if (endereco.isEmpty || categoriaId == 0) {
+        return "Endereço e categoria são obrigatórios.";
       }
+
+      await supabase.from("reportes").insert({
+        'endereco': endereco,
+        'fk_categoria': categoriaId,
+        'fk_usuario': usuarioId,
+        'descricao': descricao,
+        'url_imagem': urlImagem,
+      });
+      return null; // sucesso
+    } on PostgrestException catch (e) {
+      return "Erro do banco: ${e.message}";
     } catch (e) {
-      return e.toString();
+      return "Exceção inesperada: $e";
     }
   }
 }

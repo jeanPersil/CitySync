@@ -23,26 +23,35 @@ class AutenticacaoUsuario {
     }
   }
 
-  Future cadastrar(Map<String, dynamic> dados) async {
-    final supabase = Supabase.instance.client;
-    final validar = Validator();
+  Future<String?> cadastrar(Map<String, dynamic> dados) async {
     try {
+      final supabase = Supabase.instance.client;
+      final validar = Validator();
+      final cepValido = await validar.validarCepComApi(dados["cep"]);
+
       if (!validar.validarCPF(dados["cpf"])) {
-        print("Por favor, insira um CPF valido");
+        return "Por favor, insira um CPF válido";
       }
 
-      if (await !validar.validarCEP(dados["cep"])) {
-        print("Por favor, insira um CEP valido. ");
+      if (!cepValido) {
+        return "Por favor, insira um CEP válido";
       }
 
-      return print("ola mundo");
+      final cpfExistente =
+          await supabase.from("users").select().eq("cpf", dados["cpf"]);
 
-      final response = await supabase.auth
-          .signUp(password: dados["senha"], email: dados["email"]);
+      if (cpfExistente.isNotEmpty) {
+        return "Ja existe um usuario cadastrado com esse CPF";
+      }
 
-      if (response != null) {
+      final response = await supabase.auth.signUp(
+        password: dados["senha"],
+        email: dados["email"],
+      );
+
+      if (response.user != null) {
         await supabase.from('users').insert({
-          'id': response.user!.id, // ID do Auth
+          'id': response.user!.id,
           'nome': dados["nome"],
           'cpf': dados["cpf"],
           'email': dados["email"],
@@ -52,9 +61,11 @@ class AutenticacaoUsuario {
         });
 
         return null;
+      } else {
+        return "Erro ao criar usuário";
       }
     } catch (e) {
-      return null;
+      return "Erro inesperado: $e";
     }
   }
 

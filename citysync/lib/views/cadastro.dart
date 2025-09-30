@@ -198,10 +198,10 @@ class _TelaCadastroState extends State<TelaCadastro>
         _isLoading = false;
       });
 
-      if (!resultado["sucesso"]) {
+      if (resultado != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(resultado['mensagem'] ?? 'Erro desconhecido'),
+            content: Text("Erro ao cadastrar usuario: ${resultado}."),
             backgroundColor: Colors.redAccent,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -211,10 +211,9 @@ class _TelaCadastroState extends State<TelaCadastro>
         );
         return;
       }
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(resultado['mensagem']),
+          content: Text("Usuário cadastrado com sucesso!"),
           backgroundColor: const Color(0xFF20C997),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(

@@ -23,11 +23,11 @@ class Report {
     return Report(
       id: json['id'] ?? 0,
       endereco: json['endereco'] ?? '',
-      nomeCategoria: json['categoria'] ?? '',
-      nomeStatus: json['status'] ?? '',
-      idUsuario: json['id_usuario'] ?? '',
+      nomeCategoria: json['nome_categoria'] ?? '',
+      nomeStatus: json['nome_status'] ?? '',
+      idUsuario: json['fk_usuario'] ?? '',
       urlImagem: json['url_imagem'] ?? '',
-      dataCriacao: json['data_report'] ?? '',
+      dataCriacao: json['data_criacao'] ?? '',
       descricao: json['descricao'] ?? '',
     );
   }
