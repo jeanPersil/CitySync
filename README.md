@@ -10,7 +10,7 @@ Usuários cadastram reportes detalhando o problema encontrado na cidade, com des
 
 - **Frontend**: Flutter
 - **Backend**: Python com Flask
-- **Banco de dados**: Mysql
+- **Banco de dados**: SupaBase
 - **APIs externas**: Google Maps API para geolocalização
 
 
