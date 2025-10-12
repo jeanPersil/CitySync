@@ -1,5 +1,4 @@
-
-
+export const url_api = "http://localhost:3000";
 // ============================================================================
 // 1. Funções de UI (Interface do Usuário)
 // ============================================================================
@@ -12,33 +11,38 @@
  * @param {boolean} estadoMenuAberto - O estado atual do menu (aberto/fechado).
  * @returns {boolean} O novo estado do menu (aberto/fechado).
  */
-export function toggleMenuLateral(barraLateral, menuToggle, overlay, estadoMenuAberto) {
-    // Não permitir abrir/fechar o menu em telas grandes onde ele já está sempre visível
-    if (window.innerWidth >= 992) {
-        return true; // Retorna true para indicar que o menu está "aberto" em telas grandes
-    }
+export function toggleMenuLateral(
+  barraLateral,
+  menuToggle,
+  overlay,
+  estadoMenuAberto
+) {
+  // Não permitir abrir/fechar o menu em telas grandes onde ele já está sempre visível
+  if (window.innerWidth >= 992) {
+    return true; // Retorna true para indicar que o menu está "aberto" em telas grandes
+  }
 
-    const novoEstado = !estadoMenuAberto;
+  const novoEstado = !estadoMenuAberto;
 
-    if (novoEstado) {
-        barraLateral.style.transform = 'translateX(0)';
-        overlay.classList.add('active');
-        menuToggle.innerHTML = '<i class="fas fa-times"></i>';
-        menuToggle.setAttribute('aria-label', 'Fechar menu');
-    } else {
-        barraLateral.style.transform = 'translateX(-100%)';
-        overlay.classList.remove('active');
-        menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
-        menuToggle.setAttribute('aria-label', 'Abrir menu');
-    }
+  if (novoEstado) {
+    barraLateral.style.transform = "translateX(0)";
+    overlay.classList.add("active");
+    menuToggle.innerHTML = '<i class="fas fa-times"></i>';
+    menuToggle.setAttribute("aria-label", "Fechar menu");
+  } else {
+    barraLateral.style.transform = "translateX(-100%)";
+    overlay.classList.remove("active");
+    menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+    menuToggle.setAttribute("aria-label", "Abrir menu");
+  }
 
-    // Salvar preferência apenas para telas pequenas
-    if (window.innerWidth < 992) {
-        localStorage.setItem('menuAberto', novoEstado);
-    }
+  // Salvar preferência apenas para telas pequenas
+  if (window.innerWidth < 992) {
+    localStorage.setItem("menuAberto", novoEstado);
+  }
 
-    document.dispatchEvent(new CustomEvent('menuToggle', { detail: novoEstado }));
-    return novoEstado;
+  document.dispatchEvent(new CustomEvent("menuToggle", { detail: novoEstado }));
+  return novoEstado;
 }
 
 /**
@@ -47,18 +51,22 @@ export function toggleMenuLateral(barraLateral, menuToggle, overlay, estadoMenuA
  * @returns {boolean} O novo estado do modo escuro.
  */
 export function toggleModoEscuro(estadoModoEscuroAtivo) {
-    const novoEstado = !estadoModoEscuroAtivo;
+  const novoEstado = !estadoModoEscuroAtivo;
 
-    if (novoEstado) {
-        document.body.classList.add('dark-mode');
-        document.dispatchEvent(new CustomEvent('modoEscuroAlterado', { detail: true }));
-    } else {
-        document.body.classList.remove('dark-mode');
-        document.dispatchEvent(new CustomEvent('modoEscuroAlterado', { detail: false }));
-    }
+  if (novoEstado) {
+    document.body.classList.add("dark-mode");
+    document.dispatchEvent(
+      new CustomEvent("modoEscuroAlterado", { detail: true })
+    );
+  } else {
+    document.body.classList.remove("dark-mode");
+    document.dispatchEvent(
+      new CustomEvent("modoEscuroAlterado", { detail: false })
+    );
+  }
 
-    localStorage.setItem('darkMode', novoEstado);
-    return novoEstado;
+  localStorage.setItem("darkMode", novoEstado);
+  return novoEstado;
 }
 
 /**
@@ -67,16 +75,16 @@ export function toggleModoEscuro(estadoModoEscuroAtivo) {
  * @param {string} [tipo='info'] - O tipo da notificação ('sucesso', 'erro', 'aviso', 'info').
  * @param {number} [timeout=3000] - Tempo em milissegundos para a notificação desaparecer.
  */
-export function mostrarNotificacao(mensagem, tipo = 'info', timeout = 3000) {
-    const toast = document.createElement('div');
-    toast.className = `toast-message ${tipo}`;
-    toast.innerHTML = `
+export function mostrarNotificacao(mensagem, tipo = "info", timeout = 3000) {
+  const toast = document.createElement("div");
+  toast.className = `toast-message ${tipo}`;
+  toast.innerHTML = `
         <i class="fas fa-${obterIconeNotificacao(tipo)}"></i>
         <span>${mensagem}</span>
     `;
 
-    // Estilos para o toast (centralizados aqui para consistência)
-    toast.style.cssText = `
+  // Estilos para o toast (centralizados aqui para consistência)
+  toast.style.cssText = `
         position: fixed;
         bottom: 20px;
         right: 20px;
@@ -94,19 +102,19 @@ export function mostrarNotificacao(mensagem, tipo = 'info', timeout = 3000) {
         box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     `;
 
-    document.body.appendChild(toast);
+  document.body.appendChild(toast);
 
-    // Força o reflow para que a transição funcione
-    toast.offsetHeight;
+  // Força o reflow para que a transição funcione
+  toast.offsetHeight;
 
-    toast.style.opacity = '1';
-    toast.style.transform = 'translateY(0)';
+  toast.style.opacity = "1";
+  toast.style.transform = "translateY(0)";
 
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(20px)';
-        setTimeout(() => toast.remove(), 300);
-    }, timeout);
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.transform = "translateY(20px)";
+    setTimeout(() => toast.remove(), 300);
+  }, timeout);
 }
 
 /**
@@ -115,13 +123,13 @@ export function mostrarNotificacao(mensagem, tipo = 'info', timeout = 3000) {
  * @returns {string} Classe do ícone.
  */
 function obterIconeNotificacao(tipo) {
-    const icones = {
-        'sucesso': 'check-circle',
-        'erro': 'exclamation-circle',
-        'aviso': 'exclamation-triangle',
-        'info': 'info-circle'
-    };
-    return icones[tipo] || 'info-circle';
+  const icones = {
+    sucesso: "check-circle",
+    erro: "exclamation-circle",
+    aviso: "exclamation-triangle",
+    info: "info-circle",
+  };
+  return icones[tipo] || "info-circle";
 }
 
 /**
@@ -130,13 +138,13 @@ function obterIconeNotificacao(tipo) {
  * @returns {string} Código de cor CSS.
  */
 function obterCorNotificacao(tipo) {
-    const cores = {
-        'sucesso': '#2ecc71',
-        'erro': '#e74c3c',
-        'aviso': '#f39c12',
-        'info': '#3498db'
-    };
-    return cores[tipo] || '#3498db';
+  const cores = {
+    sucesso: "#2ecc71",
+    erro: "#e74c3c",
+    aviso: "#f39c12",
+    info: "#3498db",
+  };
+  return cores[tipo] || "#3498db";
 }
 
 // ============================================================================
@@ -151,15 +159,15 @@ function obterCorNotificacao(tipo) {
  * @returns {Function} A função debounced.
  */
 export function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
     };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
 }
 
 /**
@@ -167,11 +175,11 @@ export function debounce(func, wait) {
  * Isso garante que os estilos dos modais criados via JS estejam sempre disponíveis.
  */
 export function adicionarEstilosModais() {
-    if (document.getElementById('modal-global-styles')) {
-        return; // Estilos já adicionados
-    }
+  if (document.getElementById("modal-global-styles")) {
+    return; // Estilos já adicionados
+  }
 
-    const estilos = `
+  const estilos = `
         <style id="modal-global-styles">
             .modal-overlay {
                 position: fixed;
@@ -281,7 +289,51 @@ export function adicionarEstilosModais() {
         </style>
     `;
 
-    document.head.insertAdjacentHTML('beforeend', estilos);
+  document.head.insertAdjacentHTML("beforeend", estilos);
+}
+
+// Utils para gerenciar auth
+export const authUtils = {
+  getUser() {
+    try {
+      return JSON.parse(localStorage.getItem("user"));
+    } catch {
+      return null;
+    }
+  },
+
+  getToken() {
+    return localStorage.getItem("token");
+  },
+
+  isAuthenticated() {
+    return !!this.getUser() && !!this.getToken();
+  },
+
+  logout() {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+  },
+};
+
+export function carregarPerfilUsuario() {
+  const user = authUtils.getUser();
+
+  const span = document.querySelector("span.profile-name");
+  if (user && user.nome && span) {
+    span.textContent = user.nome;
+  } else {
+    span.textContent = "Usuário";
+  }
+}
+
+export async function obterProblemasPorPeriodo(periodoDias) {
+  const response = await fetch(`/reports?periodo=${periodoDias}`);
+
+  const data = await response.json();
+  console.log(data);
+  return data;
 }
 
 // Adicionar estilos para modais quando o script utils.js for carregado

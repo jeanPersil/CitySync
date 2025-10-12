@@ -1,8 +1,6 @@
 const supabase = require("../config");
 
 class UserController {
-
-
   async login(req, res) {
     try {
       const { email, senha } = req.body;
@@ -28,7 +26,7 @@ class UserController {
 
       const { data: dataUser, error: errorUser } = await supabase
         .from("users")
-        .select("role")
+        .select("role, nome, email")
         .eq("id", data.user.id)
         .single();
 
@@ -48,7 +46,12 @@ class UserController {
 
       return res.status(200).json({
         success: true,
-        data: data.user,
+        // data: data.user,
+        user: {
+          role: dataUser.role,
+          nome: dataUser.nome,
+          email: dataUser.email,
+        },
         redirect: "/dashboard",
         token: data.session.access_token,
       });

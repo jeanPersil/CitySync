@@ -3,6 +3,7 @@ import {
   toggleModoEscuro,
   mostrarNotificacao,
   debounce,
+  carregarPerfilUsuario
 } from "./utils.js";
 
 // ===== CONSTANTES E CONFIGURAÇÕES =====
@@ -44,6 +45,7 @@ document.addEventListener("DOMContentLoaded", function () {
   criarOverlay();
   carregarPreferencias();
   inicializarAplicacao();
+  carregarPerfilUsuario();
 });
 
 function inicializarElementos() {

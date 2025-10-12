@@ -3,37 +3,40 @@ const ReportModel = require("../models/reportModel");
 
 class ReportsController {
   async obterTodosOsReports(req, res) {
-    let problemasResolvidos = [];
-    let problemasEmAndamento = [];
-    let problemasPendentes = [];
+    let periodoDeReports = req.query.periodo || 365;
+
+    let dataInicio = new Date();
+    let dataFim = new Date();
+    dataInicio.setDate(dataFim.getDate() - parseInt(periodoDeReports));
 
     try {
       const { data, error } = await supabase
         .from("listar_reportes")
-        .select("*");
+        .select("*")
+        .gte("data_criacao", dataInicio.toISOString())
+        .lte("data_criacao", dataFim.toISOString());
+
       if (error) {
         return res.status(400).json({ message: error.message });
       }
+
+      console.log("dataInicio:", dataInicio.toISOString());
+      console.log("dataFim:", dataFim.toISOString());
+      console.log("Total reports:", data.length);
 
       const reports = data.map((row) => ({
         ...ReportModel.fromDb(row),
       }));
 
-      reports.forEach((report) => {
-        switch (report.nome_status) {
-          case "Resolvido":
-            problemasResolvidos.push(report);
-            break;
-          case "Em andamento":
-            problemasEmAndamento.push(report);
-            break;
-          case "Pendente":
-            problemasPendentes.push(report);
-            break;
-          default:
-            break;
-        }
-      });
+      const problemasResolvidos = reports.filter(
+        (r) => r.nome_status === "Resolvido"
+      );
+      const problemasEmAndamento = reports.filter(
+        (r) => r.nome_status === "Em andamento"
+      );
+      const problemasPendentes = reports.filter(
+        (r) => r.nome_status === "Pendente"
+      );
 
       return res.status(200).json({
         success: true,

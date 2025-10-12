@@ -1,6 +1,6 @@
 
 
-import { toggleMenuLateral, toggleModoEscuro, mostrarNotificacao, debounce, adicionarEstilosModais } from './utils.js';
+import { toggleMenuLateral, toggleModoEscuro, mostrarNotificacao, debounce, adicionarEstilosModais, carregarPerfilUsuario } from './utils.js';
 
 // ===== CONSTANTES =====
 const CONFIG = {
@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
     carregarPreferencias();
     carregarConfiguracoes();
     inicializarAplicacao();
+    carregarPerfilUsuario();
 });
 
 function inicializarElementos() {

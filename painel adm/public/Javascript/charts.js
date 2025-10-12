@@ -1,10 +1,8 @@
-import { toggleModoEscuro, debounce } from "./utils.js"; // Importa funções utilitárias
-
-async function obterReportes() {
-  const res = await fetch("http://localhost:3000/reports");
-  const data = await res.json();
-  return data;
-}
+import {
+  toggleModoEscuro,
+  debounce,
+  obterProblemasPorPeriodo,
+} from "./utils.js"; // Importa funções utilitárias
 
 let reports;
 
@@ -31,7 +29,7 @@ let categoriaChart, statusChart;
 // Inicialização dos gráficos
 document.addEventListener("DOMContentLoaded", async function () {
   // Pequeno atraso para garantir que o DOM esteja totalmente renderizado e o CSS aplicado
-  reports = await obterReportes();
+  reports = await obterProblemasPorPeriodo(20);
   setTimeout(initCharts, 100);
 });
 
@@ -87,6 +85,8 @@ function criarGraficoCategorias() {
             CHART_COLORS.orangeLight,
             CHART_COLORS.redLight,
             CHART_COLORS.purpleLight,
+            CHART_COLORS.yellowLight,
+            CHART_COLORS.orangeLight,
           ],
           borderColor: [
             CHART_COLORS.blue,
@@ -94,6 +94,8 @@ function criarGraficoCategorias() {
             CHART_COLORS.orange,
             CHART_COLORS.red,
             CHART_COLORS.purple,
+            CHART_COLORS.yellow,
+            CHART_COLORS.orange,
           ],
           borderWidth: 1,
           borderRadius: 5,
@@ -273,17 +275,65 @@ function criarLegendaPersonalizada() {
 
 // Obter dados para o gráfico de categorias baseado no período
 function obterDadosCategorias(dias) {
+  let buraco = 0;
+  let iluminacao = 0;
+  let lixo = 0;
+  let semaforo = 0;
+  let vazamento = 0;
+  let transporte = 0;
+  let outros = 0;
+
+  let todosOsReports = [
+    ...reports.problemasResolvidos,
+    ...reports.problemasEmAndamento,
+    ...reports.problemasPendentes,
+  ];
+
+
+
   const dadosPorPeriodo = {
     7: {
-      labels: ["Buraco", "Iluminação", "Limpeza", "Sinalização", "Outros"],
-      valores: [42, 51, 27, 36, 18],
+      labels: [
+        "Buraco",
+        "Iluminação",
+        "Lixo",
+        "Semáforo",
+        "Vazamento/Esgoto",
+        "Transporte",
+        "Outros",
+      ],
+      valores: [
+        buraco,
+        iluminacao,
+        lixo,
+        semaforo,
+        vazamento,
+        transporte,
+        outros,
+      ],
     },
     30: {
-      labels: ["Buraco", "Iluminação", "Limpeza", "Sinalização", "Outros"],
+      labels: [
+        "Buraco",
+        "Iluminação",
+        "Lixo",
+        "Semáforo",
+        "Vazamento/Esgoto",
+        "Transporte",
+        "Outros",
+      ],
       valores: [65, 78, 42, 55, 25],
     },
     90: {
-      labels: ["Buraco", "Iluminação", "Limpeza", "Sinalização", "Outros"],
+      labels: [
+        "Buraco",
+        "Iluminação",
+        "Lixo",
+        "Semáforo",
+        "Vazamento/Esgoto",
+        "Transporte",
+        "Outros",
+      ],
       valores: [120, 145, 85, 110, 45],
     },
   };
