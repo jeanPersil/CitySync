@@ -329,10 +329,9 @@ export function carregarPerfilUsuario() {
 }
 
 export async function obterProblemasPorPeriodo(periodoDias) {
-  const response = await fetch(`/reports?periodo=${periodoDias}`);
+  const response = await fetch(`${url_api}/reports?periodo=${periodoDias}`);
 
   const data = await response.json();
-  console.log(data);
   return data;
 }
 

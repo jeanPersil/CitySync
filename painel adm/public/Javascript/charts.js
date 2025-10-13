@@ -4,7 +4,7 @@ import {
   obterProblemasPorPeriodo,
 } from "./utils.js"; // Importa funções utilitárias
 
-let reports;
+let reports = [];
 
 // Constantes para cores dos gráficos
 const CHART_COLORS = {
@@ -29,7 +29,7 @@ let categoriaChart, statusChart;
 // Inicialização dos gráficos
 document.addEventListener("DOMContentLoaded", async function () {
   // Pequeno atraso para garantir que o DOM esteja totalmente renderizado e o CSS aplicado
-  reports = await obterProblemasPorPeriodo(20);
+  reports = await obterProblemasPorPeriodo(7);
   setTimeout(initCharts, 100);
 });
 
@@ -44,8 +44,11 @@ function initCharts() {
 function configurarEventListenersGraficos() {
   const periodoSelect = document.getElementById("periodo-select");
   if (periodoSelect) {
-    periodoSelect.addEventListener("change", function () {
+    periodoSelect.addEventListener("change", async function () {
+      reports = await obterProblemasPorPeriodo(this.value);
       atualizarGraficoCategorias(this.value);
+      if (statusChart) statusChart.destroy();
+      criarGraficoStatus();
     });
   }
 
@@ -86,7 +89,6 @@ function criarGraficoCategorias() {
             CHART_COLORS.redLight,
             CHART_COLORS.purpleLight,
             CHART_COLORS.yellowLight,
-            CHART_COLORS.orangeLight,
           ],
           borderColor: [
             CHART_COLORS.blue,
@@ -95,7 +97,6 @@ function criarGraficoCategorias() {
             CHART_COLORS.red,
             CHART_COLORS.purple,
             CHART_COLORS.yellow,
-            CHART_COLORS.orange,
           ],
           borderWidth: 1,
           borderRadius: 5,
@@ -182,9 +183,9 @@ function criarGraficoStatus() {
       datasets: [
         {
           data: [
-            reports.problemasResolvidos?.length || 0,
-            reports.problemasEmAndamento?.length || 0,
-            reports.problemasPendentes?.length || 0,
+            reports.problemasResolvidos.length || 0,
+            reports.problemasEmAndamento.length || 0,
+            reports.problemasPendentes.length || 0,
           ],
           backgroundColor: [
             CHART_COLORS.greenLight,
@@ -251,16 +252,18 @@ function criarLegendaPersonalizada() {
   const labels = ["Resolvidos", "Em Andamento", "Abertos"];
   const colors = [CHART_COLORS.green, CHART_COLORS.orange, CHART_COLORS.blue];
   const values = [
-    reports.problemasResolvidos?.length || 0,
-    reports.problemasEmAndamento?.length || 0,
-    reports.problemasPendentes?.length || 0,
+    reports.problemasResolvidos.length || 0,
+    reports.problemasEmAndamento.length || 0,
+    reports.problemasPendentes.length || 0,
   ];
+
   const total = values.reduce((a, b) => a + b, 0);
 
   let legendHTML = '<div class="custom-legend">';
 
   labels.forEach((label, index) => {
-    const percentage = Math.round((values[index] / total) * 100);
+    const percentage =
+      total > 0 ? Math.round((values[index] / total) * 100) : 0;
     legendHTML += `
             <div class="legend-item">
                 <span class="legend-color" style="background-color: ${colors[index]}"></span>
@@ -275,70 +278,22 @@ function criarLegendaPersonalizada() {
 
 // Obter dados para o gráfico de categorias baseado no período
 function obterDadosCategorias(dias) {
-  let buraco = 0;
-  let iluminacao = 0;
-  let lixo = 0;
-  let semaforo = 0;
-  let vazamento = 0;
-  let transporte = 0;
-  let outros = 0;
-
-  let todosOsReports = [
+  const todasCategorias = [
     ...reports.problemasResolvidos,
     ...reports.problemasEmAndamento,
     ...reports.problemasPendentes,
   ];
 
+  const contagem = {};
+  todasCategorias.forEach((item) => {
+    const categoria = item.nome_categoria || "Outros";
+    contagem[categoria] = (contagem[categoria] || 0) + 1;
+  });
 
+  const labels = Object.keys(contagem);
+  const valores = Object.values(contagem);
 
-  const dadosPorPeriodo = {
-    7: {
-      labels: [
-        "Buraco",
-        "Iluminação",
-        "Lixo",
-        "Semáforo",
-        "Vazamento/Esgoto",
-        "Transporte",
-        "Outros",
-      ],
-      valores: [
-        buraco,
-        iluminacao,
-        lixo,
-        semaforo,
-        vazamento,
-        transporte,
-        outros,
-      ],
-    },
-    30: {
-      labels: [
-        "Buraco",
-        "Iluminação",
-        "Lixo",
-        "Semáforo",
-        "Vazamento/Esgoto",
-        "Transporte",
-        "Outros",
-      ],
-      valores: [65, 78, 42, 55, 25],
-    },
-    90: {
-      labels: [
-        "Buraco",
-        "Iluminação",
-        "Lixo",
-        "Semáforo",
-        "Vazamento/Esgoto",
-        "Transporte",
-        "Outros",
-      ],
-      valores: [120, 145, 85, 110, 45],
-    },
-  };
-
-  return dadosPorPeriodo[dias] || dadosPorPeriodo[7];
+  return { labels, valores };
 }
 
 // Atualizar gráfico de categorias com base no período selecionado
