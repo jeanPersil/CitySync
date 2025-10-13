@@ -3,7 +3,8 @@ import {
   toggleModoEscuro,
   mostrarNotificacao,
   debounce,
-  carregarPerfilUsuario
+  carregarPerfilUsuario,
+  obterProblemasPorPeriodo,
 } from "./utils.js";
 
 // ===== CONSTANTES E CONFIGURAÇÕES =====
@@ -46,6 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
   carregarPreferencias();
   inicializarAplicacao();
   carregarPerfilUsuario();
+  mostrarProblemasRecentes();
 });
 
 function inicializarElementos() {
@@ -608,3 +610,27 @@ window.Dashboard = {
   atualizarGrafico: filtrarGrafico, // Renomeado para refletir a ação
   mostrarNotificacao: mostrarNotificacao,
 };
+
+async function mostrarProblemasRecentes() {
+  const tabela = document.getElementById("reportsRecentes");
+
+  const reports = await obterProblemasPorPeriodo(7);
+
+  const todasCategorias = [
+    ...reports.problemasResolvidos,
+    ...reports.problemasEmAndamento,
+    ...reports.problemasPendentes,
+  ];
+
+  todasCategorias.forEach((item) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>#${item.id}</td>
+      <td>${item.nome_categoria}</td>
+      <td>${item.endereco}</td>
+      <td><span class="status-badge">${item.nome_status}</span></td>
+      <td>${new Date(item.data_criacao).toLocaleDateString("pt-BR")}</td>
+    `;
+    tabela.appendChild(tr);
+  });
+}
