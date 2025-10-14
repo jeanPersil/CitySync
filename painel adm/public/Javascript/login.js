@@ -68,6 +68,15 @@ async function handleLogin(event) {
       mostrarNotificacao(data.message || "Erro no login.", "erro");
       return;
     }
+
+    if (lembrar) {
+      localStorage.setItem("emailLembrado", email);
+      localStorage.setItem("lembrarUsuario", "true");
+    } else {
+      localStorage.removeItem("emailLembrado");
+      localStorage.removeItem("lembrarUsuario");
+    }
+
     mostrarNotificacao("Login bem-sucedido!", "sucesso");
     localStorage.setItem("user", JSON.stringify(data.user));
     window.location.href = data.redirect;

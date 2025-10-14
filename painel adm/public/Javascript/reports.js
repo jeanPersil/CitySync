@@ -2,7 +2,7 @@
 // 1. CONFIGURAÇÃO INICIAL
 // ==================================
 
-import { carregarPerfilUsuario } from "./utils.js";
+import { carregarPerfilUsuario, url_api } from "./utils.js";
 
 document.addEventListener("DOMContentLoaded", function () {
   // Verificar se estamos na página correta
@@ -311,41 +311,124 @@ function initFilters() {
     searchInput.addEventListener("input", debounce(applyFilters, 300));
   }
 
-  function applyFilters() {
-    const searchTerm = searchInput ? searchInput.value.toLowerCase() : "";
-    const rows = document.querySelectorAll("tbody tr");
+  async function applyFilters() {
+    // Captura dos campos
+    const pesquisarInput = document.querySelector(
+      ".search-field .filter-input"
+    );
+    const bairroInput = document.querySelectorAll(".filter-input")[1];
+    const dataInput = document.querySelectorAll(".filter-input")[2];
+    const statusSelect = document.querySelectorAll(".select-field select")[0];
+    const prioridadeSelect = document.querySelectorAll(
+      ".select-field select"
+    )[1];
 
-    rows.forEach((row) => {
-      let shouldShow = true;
-      const cells = row.querySelectorAll("td");
+    // Garante que tudo existe antes de acessar o valor
+    const pesquisar = pesquisarInput?.value?.trim() || "";
+    const endereco = bairroInput?.value?.trim() || "";
+    const data = dataInput?.value || "";
+    const status = statusSelect?.value !== "todos" ? statusSelect?.value : "";
+    const categoria =
+      prioridadeSelect?.value !== "todos" ? prioridadeSelect?.value : "";
 
-      // Aplicar pesquisa geral
-      if (searchTerm) {
-        const rowText = Array.from(cells)
-          .map((cell) => cell.textContent.toLowerCase())
-          .join(" ");
-        shouldShow = rowText.includes(searchTerm);
-      }
-
-      // Aplicar outros filtros
-      filterInputs.forEach((input, index) => {
-        if (index > 0 && shouldShow) {
-          // Pular o campo de pesquisa
-          const filterValue = input.value.toLowerCase();
-          if (filterValue && filterValue !== "todos") {
-            const cellIndex = index + 1; // Ajustar índice para colunas da tabela
-            if (cells[cellIndex]) {
-              const cellText = cells[cellIndex].textContent.toLowerCase();
-              shouldShow = shouldShow && cellText.includes(filterValue);
-            }
-          }
-        }
+    console.log(status);
+    try {
+      // Monta os parâmetros de busca
+      const params = new URLSearchParams({
+        pesquisar,
+        endereco,
+        data,
+        status,
+        categoria,
       });
 
-      row.style.display = shouldShow ? "" : "none";
-    });
+      // Faz a requisição ao backend
+      const response = await fetch(
+        `${url_api}/reportsFiltrados?${params.toString()}`
+      );
+      const result = await response.json();
 
-    updateTableInfo();
+      if (result.success) {
+        renderTable(result.reports);
+        atualizar_cards(result.total, result.reports);
+      }
+    } catch (error) {
+      console.error("Erro na requisição:", error);
+    }
+  }
+
+  function atualizar_cards(total, reports) {
+    const cardTotal = document.getElementById("reports_total");
+    const cardPendente = document.getElementById("reports_pendentes");
+    const cardAndamento = document.getElementById("reports_andamento");
+    const cardResolvido = document.getElementById("reports_resolvidos"); // ← CORRIGIDO
+
+    cardTotal.textContent = total;
+
+    if (reports && Array.isArray(reports)) {
+      const pendentes = reports.filter(
+        (r) => r.nome_status === "Pendente"
+      ).length;
+      const emAndamento = reports.filter(
+        (r) => r.nome_status === "Em andamento"
+      ).length;
+      const resolvidos = reports.filter(
+        (r) => r.nome_status === "Resolvido"
+      ).length;
+
+      cardPendente.textContent = pendentes;
+      cardAndamento.textContent = emAndamento;
+      cardResolvido.textContent = resolvidos;
+    }
+  }
+
+  function renderTable(reports) {
+    const tbody = document.querySelector("tbody");
+    tbody.innerHTML = ""; // limpa a tabela anterior
+
+    if (!reports || reports.length === 0) {
+      tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align:center; padding:20px;">
+          Nenhum resultado encontrado.
+        </td>
+      </tr>`;
+      return;
+    }
+
+    reports.forEach((report) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+      <td><input type="checkbox" /></td>
+      <td>#${report.id}</td>
+      <td>${report.endereco || "-"}</td>
+      <td>${new Date(report.data_criacao).toLocaleDateString("pt-BR")}</td>
+      <td><span class="status status-${
+        report.nome_status?.toLowerCase() || "indefinido"
+      }">
+        ${report.nome_status || "-"}
+      </span></td>
+      <td><span class="prioridade ${
+        report.nome_categoria?.toLowerCase() || ""
+      }">
+        ${report.nome_categoria || "-"}
+      </span></td>
+      <td>
+        <div class="acoes">
+          <button class="botao-acao view-btn" data-id="${report.id}">
+            <i class="fas fa-eye"></i>
+          </button>
+          <button class="botao-acao">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button class="botao-acao delete">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </td>
+    `;
+      tbody.appendChild(tr);
+    });
   }
 
   function clearFilters() {
@@ -386,6 +469,8 @@ function initFilters() {
       timeout = setTimeout(later, wait);
     };
   }
+
+  applyFilters();
 }
 
 // ==================================

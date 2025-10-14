@@ -91,7 +91,7 @@
                 <i class="fas fa-file-alt"></i>
               </div>
               <div class="estatistica-info">
-                <span class="estatistica-valor">265</span>
+                <span class="estatistica-valor" id="reports_total"></span>
                 <span class="estatistica-label">Total de Reports</span>
               </div>
             </div>
@@ -100,7 +100,7 @@
                 <i class="fas fa-clock"></i>
               </div>
               <div class="estatistica-info">
-                <span class="estatistica-valor">75</span>
+                <span class="estatistica-valor" id="reports_pendentes"></span>
                 <span class="estatistica-label">Pendentes</span>
               </div>
             </div>
@@ -109,7 +109,7 @@
                 <i class="fas fa-hourglass-half"></i>
               </div>
               <div class="estatistica-info">
-                <span class="estatistica-valor">30</span>
+                <span class="estatistica-valor" id="reports_andamento"></span>
                 <span class="estatistica-label">Em Andamento</span>
               </div>
             </div>
@@ -118,7 +118,7 @@
                 <i class="fas fa-check-circle"></i>
               </div>
               <div class="estatistica-info">
-                <span class="estatistica-valor">160</span>
+                <span class="estatistica-valor" id="reports_resolvidos"></span>
                 <span class="estatistica-label">Resolvidos</span>
               </div>
             </div>
@@ -151,17 +151,21 @@
               <div class="select-field">
                 <select>
                   <option value="todos">Status: Todos</option>
-                  <option value="pendente">Pendente</option>
-                  <option value="andamento">Em andamento</option>
-                  <option value="resolvido">Resolvido</option>
+                  <option value="Pendente">Pendente</option>
+                  <option value="Em andamento">Em andamento</option>
+                  <option value="Resolvido">Resolvido</option>
                 </select>
               </div>
               <div class="select-field">
                 <select>
-                  <option value="todos">Prioridade: Todas</option>
-                  <option value="alta">Alta</option>
-                  <option value="media">Média</option>
-                  <option value="urgente">Urgente</option>
+                  <option value="">Categoria: Todas</option>
+                  <option value="Buraco">Buraco</option>
+                  <option value="Iluminação">Iluminação</option>
+                  <option value="Lixo">Lixo</option>
+                  <option value="Semáforo">Semáforo</option>
+                  <option value="Vazamento/esgoto">Vazamento/esgoto</option>
+                  <option value="Transporte">Transporte</option>
+                  <option value="Outros">Outros</option>
                 </select>
               </div>
               <div class="filtro-botoes">
@@ -201,7 +205,7 @@
                     <th>Bairro <i class="fas fa-sort"></i></th>
                     <th>Data <i class="fas fa-sort"></i></th>
                     <th>Status <i class="fas fa-sort"></i></th>
-                    <th>Prioridade <i class="fas fa-sort"></i></th>
+                    <th>Categoria <i class="fas fa-sort"></i></th>
                     <th>Ações</th>
                   </tr>
                 </thead>
