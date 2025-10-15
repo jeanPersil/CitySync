@@ -215,6 +215,58 @@ class ReportsController {
       });
     }
   }
+
+  async deletarReport(req, res) {
+    try {
+      const { id } = req.params;
+
+      if (!id || isNaN(parseInt(id))) {
+        return res.status(400).json({
+          success: false,
+          message: "ID de report inválido",
+        });
+      }
+      const { data: reportExistente, error: erroBusca } = await supabase
+        .from("reportes")
+        .select("id, endereco, descricao")
+        .eq("id", parseInt(id))
+        .single();
+
+      if (erroBusca || !reportExistente) {
+        return res.status(404).json({
+          success: false,
+          message: "Report não encontrado",
+        });
+      }
+
+      const { error } = await supabase
+        .from("reportes")
+        .delete()
+        .eq("id", reportId);
+
+      if (error) {
+        return res.status(400).json({
+          success: false,
+          message: `Erro ao excluir report: ${error.message}`,
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Report excluído com sucesso",
+        data: {
+          id: reportId,
+          endereco: reportExistente.endereco,
+        },
+      });
+    } catch (error) {
+      console.error("💥 Erro interno:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Erro interno ao excluir report",
+      });
+    }
+  }
 }
 
 module.exports = new ReportsController();

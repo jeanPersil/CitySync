@@ -41,9 +41,10 @@ app.post("/verificarToken", userController.verificarToken);
 app.get("/reports", reportsController.obterReportesPorPeriodo);
 app.get("/reportsFiltrados", reportsController.filtrarReports);
 
-app.put("/reports/:id", reportsController.editarReport);
+app.put("/editar/:id", reportsController.editarReport);
 
-app.delete("")
+app.delete("/deletar/:id", reportsController.deletarReport);
+
 app.listen(port, () => {
   console.log(`Servidor rodando na porta http://localhost:${port}`);
 });
