@@ -1,4 +1,5 @@
-import { mostrarNotificacao, url_api } from "./utils.js"; // Importa a função de notificação
+import { mostrarNotificacao } from "./utils.js"; // Importa a função de notificação
+import { api } from "./api.js";
 
 document.getElementById("ano").textContent = new Date().getFullYear();
 
@@ -52,23 +53,12 @@ async function handleLogin(event) {
     '<span class="botao-loading"><i class="fas fa-spinner fa-spin"></i></span>';
 
   try {
-    const response = await fetch(`${url_api}/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: `email=${encodeURIComponent(email)}&senha=${encodeURIComponent(
-        senha
-      )}`,
-    });
+    const result = await api.login(email, senha);
 
-    const data = await response.json();
-
-    if (!data.success) {
-      mostrarNotificacao(data.message || "Erro no login.", "erro");
+    if (!result.success) {
+      mostrarNotificacao(result.error, "erro");
       return;
     }
-
     if (lembrar) {
       localStorage.setItem("emailLembrado", email);
       localStorage.setItem("lembrarUsuario", "true");
@@ -78,8 +68,8 @@ async function handleLogin(event) {
     }
 
     mostrarNotificacao("Login bem-sucedido!", "sucesso");
-    localStorage.setItem("user", JSON.stringify(data.user));
-    window.location.href = data.redirect;
+    localStorage.setItem("user", JSON.stringify(result.data.user));
+    window.location.href = result.data.redirect;
   } catch (error) {
     mostrarNotificacao(
       `Erro ao conectar ao servidor: ${error.message}`,

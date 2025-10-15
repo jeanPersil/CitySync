@@ -2,7 +2,8 @@
 // 1. CONFIGURAÇÃO INICIAL
 // ==================================
 
-import { carregarPerfilUsuario, url_api } from "./utils.js";
+import { carregarPerfilUsuario } from "./utils.js";
+import { api } from "./api.js";
 
 document.addEventListener("DOMContentLoaded", function () {
   // Verificar se estamos na página correta
@@ -331,7 +332,6 @@ function initFilters() {
     const categoria =
       prioridadeSelect?.value !== "todos" ? prioridadeSelect?.value : "";
 
-    console.log(status);
     try {
       // Monta os parâmetros de busca
       const params = new URLSearchParams({
@@ -343,15 +343,15 @@ function initFilters() {
       });
 
       // Faz a requisição ao backend
-      const response = await fetch(
-        `${url_api}/reportsFiltrados?${params.toString()}`
-      );
-      const result = await response.json();
+      const result = await api.obterReportsFiltrados(params);
 
-      if (result.success) {
-        renderTable(result.reports);
-        atualizar_cards(result.total, result.reports);
+      if (!result.success) {
+        mostrarNotificacao(`Erro ao buscar reports: ${result.message}`, "erro");
+        return;
       }
+
+      renderTable(result.reports);
+      atualizar_cards(result.total, result.reports);
     } catch (error) {
       console.error("Erro na requisição:", error);
     }
@@ -361,7 +361,7 @@ function initFilters() {
     const cardTotal = document.getElementById("reports_total");
     const cardPendente = document.getElementById("reports_pendentes");
     const cardAndamento = document.getElementById("reports_andamento");
-    const cardResolvido = document.getElementById("reports_resolvidos"); // ← CORRIGIDO
+    const cardResolvido = document.getElementById("reports_resolvidos");
 
     cardTotal.textContent = total;
 

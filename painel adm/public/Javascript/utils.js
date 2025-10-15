@@ -1,4 +1,3 @@
-export const url_api = "http://localhost:3000";
 // ============================================================================
 // 1. Funções de UI (Interface do Usuário)
 // ============================================================================
@@ -326,13 +325,6 @@ export function carregarPerfilUsuario() {
   } else {
     span.textContent = "Usuário";
   }
-}
-
-export async function obterProblemasPorPeriodo(periodoDias) {
-  const response = await fetch(`${url_api}/reports?periodo=${periodoDias}`);
-
-  const data = await response.json();
-  return data;
 }
 
 // Adicionar estilos para modais quando o script utils.js for carregado

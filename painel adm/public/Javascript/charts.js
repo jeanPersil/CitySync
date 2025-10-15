@@ -1,8 +1,6 @@
-import {
-  toggleModoEscuro,
-  debounce,
-  obterProblemasPorPeriodo,
-} from "./utils.js"; // Importa funções utilitárias
+import { toggleModoEscuro, debounce } from "./utils.js"; // Importa funções utilitárias
+
+import { api } from "./api.js";
 
 let reports = [];
 
@@ -29,7 +27,7 @@ let categoriaChart, statusChart;
 // Inicialização dos gráficos
 document.addEventListener("DOMContentLoaded", async function () {
   // Pequeno atraso para garantir que o DOM esteja totalmente renderizado e o CSS aplicado
-  reports = await obterProblemasPorPeriodo(7);
+  reports = await api.obterReportsPorPeriodo(7);
   setTimeout(initCharts, 100);
 });
 
@@ -45,7 +43,7 @@ function configurarEventListenersGraficos() {
   const periodoSelect = document.getElementById("periodo-select");
   if (periodoSelect) {
     periodoSelect.addEventListener("change", async function () {
-      reports = await obterProblemasPorPeriodo(this.value);
+      reports = await api.obterReportsPorPeriodo(this.value);
       atualizarGraficoCategorias(this.value);
       if (statusChart) statusChart.destroy();
       criarGraficoStatus();

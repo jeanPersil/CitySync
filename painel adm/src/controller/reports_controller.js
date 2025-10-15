@@ -1,8 +1,9 @@
 const supabase = require("../config");
 const ReportModel = require("../models/reportModel");
+const { mapearCategoria, mapearStatus } = require("../utils/utils");
 
 class ReportsController {
-  async obterTodosOsReports(req, res) {
+  async obterReportesPorPeriodo(req, res) {
     let periodoDeReports = req.query.periodo || 365;
 
     let dataInicio = new Date();
@@ -19,10 +20,6 @@ class ReportsController {
       if (error) {
         return res.status(400).json({ message: error.message });
       }
-
-      console.log("dataInicio:", dataInicio.toISOString());
-      console.log("dataFim:", dataFim.toISOString());
-      console.log("Total reports:", data.length);
 
       const reports = data.map((row) => ({
         ...ReportModel.fromDb(row),
@@ -46,12 +43,17 @@ class ReportsController {
         total: reports.length,
       });
     } catch (error) {
-      console.error("Erro ao obter reports:", error);
+      res.status(500).json({
+        success: false,
+        message: "Erro interno do servidor",
+      });
     }
   }
 
   async filtrarReports(req, res) {
     const { endereco, data, status, pesquisar, categoria } = req.query;
+
+    console.log("🟢 Filtros recebidos:", req.query);
 
     try {
       let query = supabase.from("listar_reportes").select("*");
@@ -106,6 +108,110 @@ class ReportsController {
       return res.status(500).json({
         success: false,
         message: "Erro interno no servidor",
+      });
+    }
+  }
+
+  async editarReport(req, res) {
+    try {
+      const { id } = req.params; // Melhor usar params para ID
+      const { endereco, descricao, categoria, status, url_imagem } = req.body;
+
+      // ========== VALIDAÇÕES ==========
+
+      // Validar ID
+      if (!id || isNaN(parseInt(id))) {
+        return res.status(400).json({
+          success: false,
+          message: "ID do report é obrigatório e deve ser um número válido",
+        });
+      }
+
+      // Validar campos obrigatórios
+      const camposObrigatorios = {
+        endereco,
+        descricao,
+        categoria,
+        status,
+      };
+      const camposFaltantes = Object.keys(camposObrigatorios).filter(
+        (campo) =>
+          !camposObrigatorios[campo] ||
+          camposObrigatorios[campo].toString().trim() === ""
+      );
+
+      if (camposFaltantes.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: `Campos obrigatórios faltando: ${camposFaltantes.join(
+            ", "
+          )}`,
+        });
+      }
+
+      // Validar status permitidos
+      const statusPermitidos = ["Pendente", "Em andamento", "Resolvido"];
+      if (!statusPermitidos.includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: `Status inválido. Permitidos: ${statusPermitidos.join(
+            ", "
+          )}`,
+        });
+      }
+
+      // ========== PREPARAR DADOS ==========
+
+      const dadosAtualizados = {
+        endereco: endereco.trim(),
+        descricao: descricao.trim(),
+        fk_categoria: mapearCategoria(categoria),
+        fk_status: mapearStatus(status),
+      };
+
+      // ========== EXECUTAR ATUALIZAÇÃO ==========
+
+      console.log(`📝 Tentando atualizar report ${id}:`, dadosAtualizados);
+
+      const { data, error } = await supabase
+        .from("reportes")
+        .update(dadosAtualizados)
+        .eq("id", parseInt(id))
+        .select() // Retornar os dados atualizados
+        .single();
+
+      if (error) {
+        console.error("❌ Erro Supabase:", error);
+        return res.status(400).json({
+          success: false,
+          message: `Erro ao atualizar report: ${error.message}`,
+          details: error.details || null,
+        });
+      }
+
+      if (!data) {
+        return res.status(404).json({
+          success: false,
+          message: "Report não encontrado ou nenhuma alteração foi feita",
+        });
+      }
+
+      console.log("✅ Report atualizado com sucesso:", data);
+
+      // ========== RESPOSTA DE SUCESSO ==========
+
+      return res.status(200).json({
+        success: true,
+        message: "Report atualizado com sucesso",
+        data: data,
+      });
+    } catch (error) {
+      console.error("💥 Erro interno no servidor:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Erro interno do servidor ao editar report",
+        error:
+          process.env.NODE_ENV === "development" ? error.message : undefined,
       });
     }
   }

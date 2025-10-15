@@ -78,11 +78,7 @@ class UserController {
         return res.status(401).json({ message: "Token inválido ou expirado" });
       }
 
-      return res.status(200).json({
-        success: true,
-        redirect: "/dashboard",
-        user: data.user,
-      });
+      next();
     } catch (error) {
       return res.status(500).json({
         success: false,

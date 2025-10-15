@@ -38,9 +38,12 @@ app.get("/configuracao", (req, res) => {
 // ROTAS DE API
 app.post("/login", userController.login);
 app.post("/verificarToken", userController.verificarToken);
-app.get("/reports", reportsController.obterTodosOsReports);
+app.get("/reports", reportsController.obterReportesPorPeriodo);
 app.get("/reportsFiltrados", reportsController.filtrarReports);
 
+app.put("/reports/:id", reportsController.editarReport);
+
+app.delete("")
 app.listen(port, () => {
   console.log(`Servidor rodando na porta http://localhost:${port}`);
 });

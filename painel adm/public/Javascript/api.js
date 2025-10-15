@@ -1,0 +1,83 @@
+class Api {
+  // AUTENTICAÇÃO ( LOGIN, LOGOUT )
+  constructor() {
+    this.url_api = "http://localhost:3000";
+  }
+  async login(email, senha) {
+    try {
+      const response = await fetch(`${this.url_api}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: `email=${encodeURIComponent(email)}&senha=${encodeURIComponent(
+          senha
+        )}`,
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.message);
+      }
+
+      return {
+        success: true,
+        data: data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  async logout() {}
+
+  // ==== REPORTES ====
+  async obterReportsPorPeriodo(periodoDias) {
+    try {
+      const response = await fetch(
+        `${this.url_api}/reports?periodo=${periodoDias}`
+      );
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.message);
+      }
+
+      return data;
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message,
+      };
+    }
+  }
+
+  async obterReportsFiltrados(parametros) {
+    try {
+      const response = await fetch(
+        `${this.url_api}/reportsFiltrados?${parametros.toString()}`
+      );
+
+      const result = await response.json();
+
+      return result;
+    } catch (error) {
+      console.error("Erro em obterReportsFiltrados:", error);
+      return {
+        success: false,
+        message: error.message || error,
+      };
+    }
+  }
+
+  async editarReport() {}
+
+  async excluirReport() {}
+}
+
+export const api = new Api();

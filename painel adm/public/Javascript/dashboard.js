@@ -4,8 +4,9 @@ import {
   mostrarNotificacao,
   debounce,
   carregarPerfilUsuario,
-  obterProblemasPorPeriodo,
 } from "./utils.js";
+
+import { api } from "./api.js";
 
 // ===== CONSTANTES E CONFIGURAÇÕES =====
 const CONFIG = {
@@ -614,7 +615,7 @@ window.Dashboard = {
 async function mostrarProblemasRecentes() {
   const tabela = document.getElementById("reportsRecentes");
 
-  const reports = await obterProblemasPorPeriodo(7);
+  const reports = await api.obterReportsPorPeriodo(7);
 
   const todasCategorias = [
     ...reports.problemasResolvidos,
