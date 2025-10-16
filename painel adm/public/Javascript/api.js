@@ -7,12 +7,8 @@ class Api {
     try {
       const response = await fetch(`${this.url_api}/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: `email=${encodeURIComponent(email)}&senha=${encodeURIComponent(
-          senha
-        )}`,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, senha }),
       });
 
       const data = await response.json();
@@ -20,7 +16,6 @@ class Api {
       if (!data.success) {
         throw new Error(data.message);
       }
-
       return {
         success: true,
         data: data,
@@ -33,7 +28,21 @@ class Api {
     }
   }
 
-  async logout() {}
+  async logout() {
+    try {
+      const response = await fetch(`${this.url_api}/logout`, {
+        method: "POST", // ⬅️ Corrigido: Agora é uma string
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      return data;
+    } catch (error) {
+      console.error("Erro na API de logout:", error);
+      throw error;
+    }
+  }
 
   // ==== REPORTES ====
   async obterReportsPorPeriodo(periodoDias) {

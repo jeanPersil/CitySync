@@ -4,6 +4,7 @@ import {
   mostrarNotificacao,
   debounce,
   carregarPerfilUsuario,
+  authUtils,
 } from "./utils.js";
 
 import { api } from "./api.js";
@@ -20,6 +21,8 @@ const CONFIG = {
 };
 
 // ===== ELEMENTOS DO DOM =====
+const btnSair = document.getElementById("btnSair");
+
 let elementos = {
   menuToggle: null,
   barraLateral: null,
@@ -635,3 +638,8 @@ async function mostrarProblemasRecentes() {
     tabela.appendChild(tr);
   });
 }
+
+btnSair.addEventListener("click", async (e) => {
+  e.preventDefault();
+  authUtils.logout();
+});

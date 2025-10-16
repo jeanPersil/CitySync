@@ -1,3 +1,4 @@
+import { api } from "./api.js";
 // ============================================================================
 // 1. Funções de UI (Interface do Usuário)
 // ============================================================================
@@ -309,10 +310,20 @@ export const authUtils = {
     return !!this.getUser() && !!this.getToken();
   },
 
-  logout() {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    window.location.href = "/login";
+  async logout() {
+    try {
+      const data = await api.logout();
+
+      if (!data.success) {
+        mostrarNotificacao(data.message, "erro");
+        return;
+      }
+
+      window.location.href = data.redirect || "/";
+    } catch (error) {
+      mostrarNotificacao(error, "erro");
+      return;
+    }
   },
 };
 

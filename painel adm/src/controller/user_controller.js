@@ -44,16 +44,25 @@ class UserController {
         });
       }
 
+      // Após passar pelas validações
+
+      const accessToken = data.session.access_token;
+
+      res.cookie("authToken", accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 3600000,
+        sameSIte: "strict",
+      });
+
       return res.status(200).json({
         success: true,
-        // data: data.user,
         user: {
           role: dataUser.role,
           nome: dataUser.nome,
           email: dataUser.email,
         },
         redirect: "/dashboard",
-        token: data.session.access_token,
       });
     } catch (error) {
       console.error("Erro no login:", error);
@@ -64,31 +73,46 @@ class UserController {
     }
   }
 
-  async verificarToken(req, res) {
+  async logout(req, res) {
     try {
-      const token = req.headers["authorization"];
+      res.clearCookie("authToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
+
+      return res.status(200).json({
+        success: true,
+        redirect: "/",
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "erro no servidor",
+      });
+    }
+  }
+
+  async verificarToken(req, res, next) {
+    try {
+      const token = req.cookies.authToken;
 
       if (!token) {
-        return res.status(401).json({
-          success: false,
-          message: "Usuario não autenticado.",
-        });
+        return res.redirect("/");
       }
 
       const { data, error } = await supabase.auth.getUser(token);
 
       if (error || !data.user) {
-        return res.status(401).json({
-          success: false,
-          message: "Token inválido ou expirado",
-        });
+        res.clearCookie("authToken");
+        return res.redirect("/");
       }
 
       next();
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: `erro: ${error.messsage}`,
+        message: `erro no token: ${error}`,
       });
     }
   }

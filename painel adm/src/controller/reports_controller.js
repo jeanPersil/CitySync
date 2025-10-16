@@ -53,8 +53,6 @@ class ReportsController {
   async filtrarReports(req, res) {
     const { endereco, data, status, pesquisar, categoria } = req.query;
 
-    console.log("🟢 Filtros recebidos:", req.query);
-
     try {
       let query = supabase.from("listar_reportes").select("*");
 

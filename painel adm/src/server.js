@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const path = require("path");
+const cookieParse = require("cookie-parser");
 const userController = require("./controller/user_controller");
 const reportsController = require("./controller/reports_controller");
 
@@ -9,6 +10,7 @@ const port = 3000;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParse());
 
 // SERVIR ARQUIVOS ESTÁTICOS
 app.use(express.static(path.join(__dirname, "..", "public")));
@@ -18,7 +20,7 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/pages/index.html"));
 });
 
-app.get("/dashboard", userController.verificarToken, (req, res) => {
+app.get("/dashboard", userController.verificarToken, (req, res, next) => {
   res.sendFile(path.join(__dirname, "../public/pages/dashboard.html"));
 });
 
