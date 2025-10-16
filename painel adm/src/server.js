@@ -1,7 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const path = require("path");
-const supabase = require("./config");
 const userController = require("./controller/user_controller");
 const reportsController = require("./controller/reports_controller");
 
@@ -19,19 +18,19 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/pages/index.html"));
 });
 
-app.get("/dashboard", (req, res) => {
+app.get("/dashboard", userController.verificarToken, (req, res) => {
   res.sendFile(path.join(__dirname, "../public/pages/dashboard.html"));
 });
 
-app.get("/gestao", (req, res) => {
+app.get("/gestao", userController.verificarToken, (req, res) => {
   res.sendFile(path.join(__dirname, "../public/pages/gestao.html"));
 });
 
-app.get("/usuario", (req, res) => {
+app.get("/usuario", userController.verificarToken, (req, res) => {
   res.sendFile(path.join(__dirname, "../public/pages/usuario.html"));
 });
 
-app.get("/configuracao", (req, res) => {
+app.get("/configuracao", userController.verificarToken, (req, res) => {
   res.sendFile(path.join(__dirname, "../public/pages/configuracoes.html"));
 });
 

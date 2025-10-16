@@ -66,16 +66,22 @@ class UserController {
 
   async verificarToken(req, res) {
     try {
-      const token = req.headers["authorization"]?.replace("Bearer ", "");
+      const token = req.headers["authorization"];
 
       if (!token) {
-        return res.status(401).json({ message: "Token não fornecido" });
+        return res.status(401).json({
+          success: false,
+          message: "Usuario não autenticado.",
+        });
       }
 
       const { data, error } = await supabase.auth.getUser(token);
 
       if (error || !data.user) {
-        return res.status(401).json({ message: "Token inválido ou expirado" });
+        return res.status(401).json({
+          success: false,
+          message: "Token inválido ou expirado",
+        });
       }
 
       next();

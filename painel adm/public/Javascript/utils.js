@@ -302,7 +302,7 @@ export const authUtils = {
   },
 
   getToken() {
-    return localStorage.getItem("token");
+    return localStorage.getItem("userToken");
   },
 
   isAuthenticated() {
