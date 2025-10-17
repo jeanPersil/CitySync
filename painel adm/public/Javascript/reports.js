@@ -2,7 +2,11 @@
 // 1. CONFIGURAÇÃO INICIAL
 // ==================================
 
-import { carregarPerfilUsuario } from "./utils.js";
+import {
+  carregarPerfilUsuario,
+  mostrarNotificacao,
+  reconnectModalListeners,
+} from "./utils.js";
 import { api } from "./api.js";
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -384,7 +388,7 @@ function initFilters() {
 
   function renderTable(reports) {
     const tbody = document.querySelector("tbody");
-    tbody.innerHTML = ""; // limpa a tabela anterior
+    tbody.innerHTML = "";
 
     if (!reports || reports.length === 0) {
       tbody.innerHTML = `
@@ -421,13 +425,43 @@ function initFilters() {
           <button class="botao-acao">
             <i class="fas fa-edit"></i>
           </button>
-          <button class="botao-acao delete">
+          <button class="botao-acao delete" data-id="${report.id}">
             <i class="fas fa-trash"></i>
           </button>
         </div>
       </td>
     `;
       tbody.appendChild(tr);
+    });
+
+    adicionarEventosRemover();
+    reconnectModalListeners(reports);
+  }
+
+  function adicionarEventosRemover() {
+    const botoesRemover = document.querySelectorAll(".delete");
+
+    botoesRemover.forEach((botao) => {
+      botao.addEventListener("click", async (e) => {
+        e.stopPropagation();
+
+        const id = e.currentTarget.getAttribute("data-id");
+
+        if (!confirm("Tem certeza que deseja excluir este report?")) return;
+
+        try {
+          const result = await api.excluirReport(id);
+
+          if (result !== null)
+            return mostrarNotificacao("erro ao excluir report.", "erro");
+
+          mostrarNotificacao("Reporte excluido com sucesso", "sucesso");
+          applyFilters();
+        } catch (error) {
+          console.error("Erro ao excluir:", error);
+          mostrarNotificacao("Erro inesperado ao excluir report.", "erro");
+        }
+      });
     });
   }
 

@@ -338,5 +338,95 @@ export function carregarPerfilUsuario() {
   }
 }
 
+export function reconnectModalListeners(reports) {
+  const modal = document.getElementById("reportModal");
+  const viewButtons = document.querySelectorAll(".view-btn");
+  const closeButton = document.getElementById("modalClose");
+  const modalCloseBtn = document.querySelector(".modal-footer .btn-secondary");
+
+  // Abrir modal com dados dinâmicos
+  viewButtons.forEach((button) => {
+    // Remove event listeners existentes para evitar duplicação
+    button.replaceWith(button.cloneNode(true));
+  });
+
+  // Re-seleciona os botões após o clone
+  const newViewButtons = document.querySelectorAll(".view-btn");
+
+  newViewButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      const reportId = this.getAttribute("data-id");
+
+      // Encontrar o report correspondente nos dados
+      const reportData = reports.find((report) => report.id == reportId);
+
+      if (reportData) {
+        // Preencher dados do modal com informações reais da API
+        document.getElementById("modalReportId").textContent = reportId;
+        document.getElementById("modalBairro").textContent =
+          reportData.endereco || "-";
+        document.getElementById("modalData").textContent = new Date(
+          reportData.data_criacao
+        ).toLocaleDateString("pt-BR");
+        document.getElementById("modalCategoria").textContent =
+          reportData.nome_categoria || "-";
+        document.getElementById("modalDescricao").textContent =
+          reportData.descricao || "Sem descrição disponível";
+        document.getElementById("modalStatus").textContent =
+          reportData.nome_status || "-";
+        document.getElementById("modalPrioridade").textContent =
+          reportData.nome_categoria || "-";
+        document.getElementById("modalResponsavel").textContent =
+          reportData.responsavel || "Não atribuído";
+        document.getElementById("modalDataPrevista").textContent =
+          reportData.data_prevista_resolucao
+            ? new Date(reportData.data_prevista_resolucao).toLocaleDateString(
+                "pt-BR"
+              )
+            : "Não definida";
+
+        // Ajustar classes de status para corresponder aos dados reais
+        const statusElement = document.getElementById("modalStatus");
+        statusElement.className = "info-value";
+        if (reportData.nome_status) {
+          statusElement.classList.add(
+            `status-${reportData.nome_status.toLowerCase()}`
+          );
+        }
+
+        // Mostrar modal
+        modal.classList.add("active");
+        document.body.style.overflow = "hidden";
+      }
+    });
+  });
+
+  // Manter a funcionalidade de fechar modal (já existe, mas garantindo)
+  function closeModal() {
+    modal.classList.remove("active");
+    document.body.style.overflow = "";
+  }
+
+  if (closeButton) {
+    closeButton.addEventListener("click", closeModal);
+  }
+
+  if (modalCloseBtn) {
+    modalCloseBtn.addEventListener("click", closeModal);
+  }
+
+  modal.addEventListener("click", function (event) {
+    if (event.target === modal) {
+      closeModal();
+    }
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && modal.classList.contains("active")) {
+      closeModal();
+    }
+  });
+}
+
 // Adicionar estilos para modais quando o script utils.js for carregado
 adicionarEstilosModais();

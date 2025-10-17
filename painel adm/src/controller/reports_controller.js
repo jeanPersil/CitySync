@@ -240,7 +240,7 @@ class ReportsController {
       const { error } = await supabase
         .from("reportes")
         .delete()
-        .eq("id", reportId);
+        .eq("id", parseInt(id));
 
       if (error) {
         return res.status(400).json({
@@ -253,7 +253,7 @@ class ReportsController {
         success: true,
         message: "Report excluído com sucesso",
         data: {
-          id: reportId,
+          id: parseInt(id),
           endereco: reportExistente.endereco,
         },
       });

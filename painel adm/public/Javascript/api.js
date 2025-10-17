@@ -31,7 +31,7 @@ class Api {
   async logout() {
     try {
       const response = await fetch(`${this.url_api}/logout`, {
-        method: "POST", // ⬅️ Corrigido: Agora é uma string
+        method: "POST",
         credentials: "include",
       });
 
@@ -86,7 +86,21 @@ class Api {
 
   async editarReport() {}
 
-  async excluirReport() {}
+  async excluirReport(id) {
+    const response = await fetch(`${this.url_api}/deletar/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    });
+
+    const result = await response.json();
+
+    if (!result.success) throw new Error(result.message);
+
+    return null;
+  }
 }
 
 export const api = new Api();
