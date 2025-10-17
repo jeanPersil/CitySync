@@ -24,9 +24,20 @@ function mapearStatus(status) {
 
 let status = mapearCategoria("Vazamento/esgotO");
 
-console.log(status);
+function validarEmailBasico(email) {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(email);
+}
+
+
+let testar = validarEmailBasico("jeanlucasteste")
+
+console.log(testar)
+
+
 
 module.exports = {
   mapearCategoria,
   mapearStatus,
+  validarEmailBasico
 };

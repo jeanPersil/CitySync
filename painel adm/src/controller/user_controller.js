@@ -1,4 +1,5 @@
 const supabase = require("../config");
+const { validarEmailBasico } = require("../utils/utils")
 
 class UserController {
   async login(req, res) {
@@ -92,6 +93,38 @@ class UserController {
       });
     }
   }
+
+
+  async recuperarSenha(req, res){
+    const email = req.body;
+
+    if(!email){
+      return res.status(400).json({
+        success: false,
+        message: "É obrigatorio inserir um e-mail."
+      })
+    }
+
+    if(!validarEmailBasico(email)){
+      return res.status(400).json({
+        success: false,
+        message: "O e-mail inserido é invalido"
+      })
+    }
+
+    const {data, error} = await supabase.auth.resend({
+      type: recovery,
+      email: email, 
+      
+    })
+
+
+
+
+
+
+  }
+  
 
   async verificarToken(req, res, next) {
     try {

@@ -7,6 +7,10 @@ router.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/pages/index.html"));
 });
 
+router.get("/esqueciSenha", (req, res) =>{
+  res.sendFile(path.join(__dirname, "../public/pages/esqueci-senha.html"))
+})
+
 router.get("/dashboard", userController.verificarToken, (req, res) => {
   res.sendFile(path.join(__dirname, "../public/pages/dashboard.html"));
 });
