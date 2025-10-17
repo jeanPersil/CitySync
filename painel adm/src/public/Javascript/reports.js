@@ -6,8 +6,11 @@ import {
   carregarPerfilUsuario,
   mostrarNotificacao,
   reconnectModalListeners,
+  authUtils,
 } from "./utils.js";
 import { api } from "./api.js";
+
+const btnSair = document.getElementById("btnSair");
 
 document.addEventListener("DOMContentLoaded", function () {
   // Verificar se estamos na página correta
@@ -548,3 +551,8 @@ function initPagination() {
 
 // Chamar a inicialização da paginação
 initPagination();
+
+btnSair.addEventListener("click", async (e) => {
+  e.preventDefault();
+  authUtils.logout();
+});

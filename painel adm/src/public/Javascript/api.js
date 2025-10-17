@@ -1,11 +1,11 @@
 class Api {
   // AUTENTICAÇÃO ( LOGIN, LOGOUT )
   constructor() {
-    this.url_api = "http://localhost:3000";
+    this.url_api = "http://localhost:3000/api";
   }
   async login(email, senha) {
     try {
-      const response = await fetch(`${this.url_api}/login`, {
+      const response = await fetch(`${this.url_api}/users/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, senha }),
@@ -30,7 +30,7 @@ class Api {
 
   async logout() {
     try {
-      const response = await fetch(`${this.url_api}/logout`, {
+      const response = await fetch(`${this.url_api}/users/logout`, {
         method: "POST",
         credentials: "include",
       });
@@ -48,7 +48,7 @@ class Api {
   async obterReportsPorPeriodo(periodoDias) {
     try {
       const response = await fetch(
-        `${this.url_api}/reports?periodo=${periodoDias}`
+        `${this.url_api}/reports/periodo?periodo=${periodoDias}`
       );
 
       const data = await response.json();
@@ -69,7 +69,7 @@ class Api {
   async obterReportsFiltrados(parametros) {
     try {
       const response = await fetch(
-        `${this.url_api}/reportsFiltrados?${parametros.toString()}`
+        `${this.url_api}/reports/filtrados?${parametros.toString()}`
       );
 
       const result = await response.json();
@@ -87,7 +87,7 @@ class Api {
   async editarReport() {}
 
   async excluirReport(id) {
-    const response = await fetch(`${this.url_api}/deletar/${id}`, {
+    const response = await fetch(`${this.url_api}/reports/deletar/${id}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",

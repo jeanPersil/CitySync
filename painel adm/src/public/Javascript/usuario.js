@@ -6,6 +6,8 @@ import {
   authUtils,
 } from "./utils.js";
 
+const btnSair = document.getElementById("btnSair");
+
 // ===== CONSTANTES =====
 const CONFIG = {
   ANIMACAO_ENTRADA: 300,
@@ -387,3 +389,8 @@ window.Usuario = {
   alternarAba: alternarAba,
   mostrarNotificacao: mostrarNotificacao,
 };
+
+btnSair.addEventListener("click", async (e) => {
+  e.preventDefault();
+  authUtils.logout();
+});
