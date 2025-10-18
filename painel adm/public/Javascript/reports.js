@@ -349,7 +349,6 @@ function initFilters() {
         categoria,
       });
 
-      // Faz a requisição ao backend
       const result = await api.obterReportsFiltrados(params);
 
       if (!result.success) {

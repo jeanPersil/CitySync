@@ -1,3 +1,16 @@
+/**
+ * APP CONFIGURATION - Configuração principal do servidor Express
+ *
+ * Responsabilidades:
+ * - Inicializar e configurar o servidor Express
+ * - Registrar middlewares globais da aplicação
+ * - Definir estrutura de rotas e namespaces
+ * - Configurar servidor de arquivos estáticos
+ * - Estabelecer pipeline de processamento de requisições
+ *
+ * Ponto de entrada da aplicação backend
+ */
+
 const express = require("express");
 const bodyParser = require("body-parser");
 const path = require("path");
@@ -16,7 +29,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Arquivos estáticos
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "../public")));
 
 // Rotas
 app.use("/", pageRoutes);

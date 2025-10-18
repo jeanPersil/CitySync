@@ -240,11 +240,6 @@ function configurarEventListeners() {
     elementos.chartFilter.addEventListener("change", filtrarGrafico);
   }
 
-  // View all button
-  if (elementos.viewAllBtn) {
-    elementos.viewAllBtn.addEventListener("click", verTodosReports);
-  }
-
   // Action buttons
   elementos.actionButtons.forEach((botao) => {
     botao.addEventListener("click", handleActionClick);
@@ -342,11 +337,6 @@ function filtrarGrafico(e) {
 }
 
 // ===== VER TODOS REPORTS =====
-
-function verTodosReports(e) {
-  e.preventDefault();
-  window.location.href = "gestao.html";
-}
 
 // ===== HANDLE ACTION CLICK =====
 function handleActionClick(e) {

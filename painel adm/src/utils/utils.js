@@ -22,22 +22,13 @@ function mapearStatus(status) {
   return mapeamento[status.toLowerCase()] || status;
 }
 
-let status = mapearCategoria("Vazamento/esgotO");
-
 function validarEmailBasico(email) {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
 }
 
-
-let testar = validarEmailBasico("jeanlucasteste")
-
-console.log(testar)
-
-
-
 module.exports = {
   mapearCategoria,
   mapearStatus,
-  validarEmailBasico
+  validarEmailBasico,
 };
