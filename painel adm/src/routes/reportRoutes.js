@@ -14,7 +14,10 @@
 
 const express = require("express");
 const router = express.Router();
+const middleware = require("../middleware/authMiddleware");
 const reportsController = require("../controller/reports_controller");
+
+router.use(middleware.verificar_autenticacao, middleware.verificarAdmin);
 
 // Rotas de leitura
 router.get("/periodo", reportsController.obterReportesPorPeriodo);

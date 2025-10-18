@@ -14,7 +14,6 @@
 const { validarEmailBasico } = require("../utils/utils");
 const userServices = require("../services/userService");
 
-
 class UserController {
   async login(req, res) {
     try {
@@ -78,29 +77,6 @@ class UserController {
       return res.status(500).json({
         success: false,
         message: "erro no servidor",
-      });
-    }
-  }
-
-  async verificarToken(req, res, next) {
-    try {
-      const token = req.cookies.authToken;
-
-      if (!token) {
-        return res.redirect("/");
-      }
-
-      const validar = await userServices.verificar_token_usuario(token);
-
-      if (!validar) {
-        res.clearCookie("authToken");
-        return res.redirect("/");
-      }
-      next();
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: `erro no token: ${error}`,
       });
     }
   }

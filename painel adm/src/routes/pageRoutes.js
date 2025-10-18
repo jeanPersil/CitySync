@@ -14,8 +14,9 @@
 
 const express = require("express");
 const path = require("path");
+const middleware = require("../middleware/authMiddleware");
 const router = express.Router();
-const userController = require("../controller/user_controller");
+const authMiddleware = require("../middleware/authMiddleware");
 
 router.get("/", (req, res) => {
   res.sendFile(
@@ -29,28 +30,48 @@ router.get("/esqueciSenha", (req, res) => {
   );
 });
 
-router.get("/dashboard", userController.verificarToken, (req, res) => {
-  res.sendFile(
-    path.join(__dirname, "..", "..", "public", "pages", "dashboard.html")
-  );
-});
+router.get(
+  "/dashboard",
+  middleware.verificar_autenticacao,
+  middleware.verificarAdmin,
+  (req, res) => {
+    res.sendFile(
+      path.join(__dirname, "..", "..", "public", "pages", "dashboard.html")
+    );
+  }
+);
 
-router.get("/gestao", userController.verificarToken, (req, res) => {
-  res.sendFile(
-    path.join(__dirname, "..", "..", "public", "pages", "gestao.html")
-  );
-});
+router.get(
+  "/gestao",
+  middleware.verificar_autenticacao,
+  middleware.verificarAdmin,
+  (req, res) => {
+    res.sendFile(
+      path.join(__dirname, "..", "..", "public", "pages", "gestao.html")
+    );
+  }
+);
 
-router.get("/usuario", userController.verificarToken, (req, res) => {
-  res.sendFile(
-    path.join(__dirname, "..", "..", "public", "pages", "usuario.html")
-  );
-});
+router.get(
+  "/usuario",
+  middleware.verificar_autenticacao,
+  middleware.verificarAdmin,
+  (req, res) => {
+    res.sendFile(
+      path.join(__dirname, "..", "..", "public", "pages", "usuario.html")
+    );
+  }
+);
 
-router.get("/configuracao", userController.verificarToken, (req, res) => {
-  res.sendFile(
-    path.join(__dirname, "..", "..", "public", "pages", "configuracoes.html")
-  );
-});
+router.get(
+  "/configuracao",
+  middleware.verificar_autenticacao,
+  middleware.verificarAdmin,
+  (req, res) => {
+    res.sendFile(
+      path.join(__dirname, "..", "..", "public", "pages", "configuracoes.html")
+    );
+  }
+);
 
 module.exports = router;

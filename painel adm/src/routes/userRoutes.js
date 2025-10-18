@@ -16,9 +16,17 @@ const express = require("express");
 const router = express.Router();
 const userController = require("../controller/user_controller");
 
-router.post("/login", userController.login);
-router.post("/verificarToken", userController.verificarToken);
+const {
+  loginLimiter,
+  recuperarSenhaLimit,
+} = require("../middleware/rateLimited");
+
+router.post("/login", loginLimiter, userController.login);
 router.post("/logout", userController.logout);
-router.post("/esqueceuSenha", userController.solicitar_recuperacao_senha);
+router.post(
+  "/esqueceuSenha",
+  recuperarSenhaLimit,
+  userController.solicitar_recuperacao_senha
+);
 
 module.exports = router;

@@ -30,25 +30,10 @@ class UserService {
       throw new Error("Detalhes do usuário não encontrados após o login.");
     }
 
-    if (dados_usuario.role != "admin") {
-      throw {
-        name: "Forbidden",
-        message: "Acesso negado. Usuário não é admin.",
-      };
-    }
-
     return {
       session: data.session,
       user: dados_usuario,
     };
-  }
-
-  async verificar_token_usuario(token) {
-    const { data, error } = await supabase.auth.getUser(token);
-
-    if (!data || error) return false;
-
-    return true;
   }
 
   async enviar_email_de_recuperacao_de_senha(email) {
