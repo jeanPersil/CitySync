@@ -1,10 +1,14 @@
 import 'package:citysync/widgets/modal_pagina_inicial.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:citysync/views/perfil.dart'; // 👈 importa a tela de perfil
 
 class Telaprincipal extends StatefulWidget {
-  const Telaprincipal(
-      {super.key, required this.nomeUsuario, required this.usuarioID});
+  const Telaprincipal({
+    super.key,
+    required this.nomeUsuario,
+    required this.usuarioID,
+  });
 
   final String nomeUsuario;
   final String usuarioID;
@@ -58,56 +62,69 @@ class _TelaprincipalState extends State<Telaprincipal>
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: isDark
-          ? Colors.grey[900]
-          : const Color(0xFF1E3A5F) ,
+      backgroundColor: isDark ? Colors.grey[900] : const Color(0xFF1E3A5F),
       appBar: PreferredSize(
-      preferredSize: const Size.fromHeight(kToolbarHeight),
+        preferredSize: const Size.fromHeight(kToolbarHeight),
         child: FadeTransition(
-      opacity: _appBarFadeAnimation,
-        child: AppBar(
-      backgroundColor: isDark
-          ? Colors.grey[900]
-          : const Color(0xFF1E3A5F) ,
-      elevation: 8,
-      shadowColor: Colors.black.withOpacity(0.4),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          bottom: Radius.circular(16),
-        ),
-      ),
-      title: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: const Color(0xFF20C997).withOpacity(0.2),
-              shape: BoxShape.circle,
+          opacity: _appBarFadeAnimation,
+          child: AppBar(
+            backgroundColor: isDark ? Colors.grey[900] : const Color(0xFF1E3A5F),
+            elevation: 8,
+            shadowColor: Colors.black.withOpacity(0.4),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(16),
+              ),
             ),
-            child: const Icon(Icons.person_outline,
-                color: Colors.white, size: 22),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            widget.nomeUsuario,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-              fontSize: 18,
-              shadows: [
-                Shadow(
-                  blurRadius: 4,
-                  color: Colors.black,
-                  offset: Offset(0, 1),
-                )
+            title: Row(
+              children: [
+                // 👇 Ícone do usuário agora é clicável e navega para o perfil
+                InkWell(
+                  borderRadius: BorderRadius.circular(24),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        // Se o nome da classe no seu `view/perfil.dart` for outro,
+                        // troque `Perfil()` pelo nome correto, ex.: `PerfilPage()`.
+                        builder: (_) => ProfileScreen(),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF20C997).withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.person_outline,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  widget.nomeUsuario,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                    fontSize: 18,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 4,
+                        color: Colors.black,
+                        offset: Offset(0, 1),
+                      )
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
-        ],
+        ),
       ),
-    ),
-  ),
-),
 
       body: Stack(
         children: [
@@ -148,22 +165,19 @@ class _TelaprincipalState extends State<Telaprincipal>
               ),
             ),
           ),
-          
-          
+
           Positioned(
             right: 16,
             bottom: 100,
             child: Column(
               children: [
-                
                 FloatingActionButton.small(
                   onPressed: () {},
                   backgroundColor: Colors.white,
                   child: const Icon(Icons.add, color: Color(0xFF1E3A5F)),
                   heroTag: "zoom_in",
                 ),
-                 SizedBox(height: 10),
-                
+                const SizedBox(height: 10),
                 FloatingActionButton.small(
                   onPressed: () {},
                   backgroundColor: Colors.white,
@@ -171,11 +185,11 @@ class _TelaprincipalState extends State<Telaprincipal>
                   heroTag: "zoom_out",
                 ),
                 const SizedBox(height: 10),
-                
                 FloatingActionButton.small(
                   onPressed: () {},
                   backgroundColor: Colors.white,
-                  child: const Icon(Icons.my_location, color: Color(0xFF1E3A5F)),
+                  child:
+                      const Icon(Icons.my_location, color: Color(0xFF1E3A5F)),
                   heroTag: "location",
                 ),
               ],
@@ -183,7 +197,7 @@ class _TelaprincipalState extends State<Telaprincipal>
           ),
         ],
       ),
-      
+
       floatingActionButton: ScaleTransition(
         scale: _fabAnimation,
         child: Container(
@@ -213,8 +227,7 @@ class _TelaprincipalState extends State<Telaprincipal>
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat
-      
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
