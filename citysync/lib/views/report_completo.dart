@@ -49,7 +49,7 @@ class ReportCompleto extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: _getAppBarColor(context),
         elevation: 6,
-        shadowColor: Colors.black.withOpacity(0.4),
+        shadowColor: Colors.black.withValues(alpha: 0.4),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
             bottom: Radius.circular(16),
@@ -74,11 +74,11 @@ class ReportCompleto extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E3A5F).withOpacity(0.9),
+            color: const Color(0xFF1E3A5F).withValues(alpha: 0.9),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.25),
+                color: Colors.black.withValues(alpha: 0.25),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),

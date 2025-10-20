@@ -24,7 +24,7 @@ int mapearCategoriaId(String nome) {
   }
 }
 
-void mostrarModal(BuildContext context, String id_usuario) {
+void mostrarModal(BuildContext context, String idUsuario) {
   String? categoriaSelecionada;
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -159,7 +159,7 @@ void mostrarModal(BuildContext context, String id_usuario) {
                               MaterialPageRoute(
                                   builder: (context) => TelaReport(
                                         categoria: categoriaSelecionada!,
-                                        usuarioId: id_usuario,
+                                        usuarioId: idUsuario,
                                       )),
                             );
                           },

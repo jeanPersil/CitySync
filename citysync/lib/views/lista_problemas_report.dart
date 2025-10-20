@@ -1,7 +1,7 @@
 import 'package:citysync/model/modelReport.dart';
 import 'package:citysync/services/reports.dart';
-import 'package:citysync/views/reportCompleto.dart';
-import 'package:citysync/widgets/cardProblema.dart';
+import 'package:citysync/views/report_completo.dart';
+import 'package:citysync/widgets/card_problema.dart';
 import 'package:flutter/material.dart';
 
 class ProblemasReport extends StatefulWidget {
@@ -77,7 +77,7 @@ class _ProblemasReportState extends State<ProblemasReport>
     final theme = Theme.of(context);
     return theme.brightness == Brightness.dark
         ? Colors.grey[800]!
-        : const Color(0xFF1E3A5F).withOpacity(0.8);
+        : const Color(0xFF1E3A5F).withValues(alpha: 0.8);
   }
 
   Color _getTextColor(BuildContext context) {
@@ -107,7 +107,7 @@ class _ProblemasReportState extends State<ProblemasReport>
       appBar: AppBar(
         backgroundColor: _getAppBarColor(context),
         elevation: 8,
-        shadowColor: Colors.black.withOpacity(0.4),
+        shadowColor: Colors.black.withValues(alpha: 0.4),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
             bottom: Radius.circular(16),
@@ -118,7 +118,7 @@ class _ProblemasReportState extends State<ProblemasReport>
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: const Color(0xFF20C997).withOpacity(0.2),
+                color: const Color(0xFF20C997).withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.people_alt_outlined,
@@ -149,7 +149,7 @@ class _ProblemasReportState extends State<ProblemasReport>
             icon: Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: _getTextColor(context).withOpacity(0.1),
+                color: _getTextColor(context).withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child:
@@ -188,7 +188,7 @@ class _ProblemasReportState extends State<ProblemasReport>
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF20C997).withOpacity(0.4),
+                        color: const Color(0xFF20C997).withValues(alpha: 0.4),
                         blurRadius: 15,
                         spreadRadius: 2,
                         offset: const Offset(0, 5),
@@ -293,7 +293,7 @@ class _ProblemasReportState extends State<ProblemasReport>
                                   borderRadius: BorderRadius.circular(20),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.3),
+                                      color: Colors.black.withValues(alpha: 0.3),
                                       blurRadius: 10,
                                       offset: const Offset(0, 4),
                                     ),
@@ -319,7 +319,7 @@ class _ProblemasReportState extends State<ProblemasReport>
                                       "Seus reports aparecerão aqui quando você fizer sua primeira solicitação",
                                       style: TextStyle(
                                         color: _getSecondaryTextColor(context)
-                                            .withOpacity(0.8),
+                                            .withValues(alpha: 0.8),
                                         fontSize: 14,
                                       ),
                                       textAlign: TextAlign.center,

@@ -3,7 +3,7 @@ import 'package:citysync/model/modelReport.dart';
 import 'package:intl/intl.dart';
 
 class CardPRoblema extends StatelessWidget {
-  CardPRoblema({super.key, required this.report});
+  const CardPRoblema({super.key, required this.report});
 
   final Report report;
 
