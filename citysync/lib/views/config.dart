@@ -76,7 +76,7 @@ class _TelaConfigState extends State<TelaConfig> {
                           onChanged: (value) {
                             themeProvider.toggleTheme();
                           },
-                          activeColor: const Color(0xFF20C997), 
+                          activeThumbColor: const Color(0xFF20C997), 
                         ),
                       ),
                     ),

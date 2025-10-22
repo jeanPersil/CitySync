@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:citysync/Tema/color_extension.dart';
 
 class TelaReport extends StatefulWidget {
   const TelaReport(
@@ -26,6 +25,7 @@ class TelaReportState extends State<TelaReport> {
 
   final LatLng _initialPosicao = LatLng(-12.2664, -38.9668);
 
+  @override
   void initState() {
     super.initState();
     problemController.text = widget.categoria;
@@ -37,14 +37,23 @@ class TelaReportState extends State<TelaReport> {
 
   Future<void> pickImage() async {
     if (kIsWeb) {
-      // Web
-      print("testando");
+      // Implementação para Web
+      final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        final bytes = await pickedFile.readAsBytes();
+        if (!mounted) return;
+        setState(() {
+          imageBytes = bytes;
+          imageName = pickedFile.name;
+        });
+      }
     } else {
-      // Mobile
+      // Implementação para Mobile
       final picker = ImagePicker();
       final pickedFile = await picker.pickImage(source: ImageSource.camera);
 
       if (pickedFile != null) {
+        if (!mounted) return;
         setState(() {
           imageFile = io.File(pickedFile.path);
           imageName = pickedFile.name;
@@ -79,7 +88,7 @@ class TelaReportState extends State<TelaReport> {
       context: context,
       builder: (context) {
         return Scaffold(
-          backgroundColor: Colors.black.withOpacidade(0.9),
+          backgroundColor: Colors.black.withValues(alpha: 0.9),
           body: Stack(
             children: [
               Center(
@@ -94,7 +103,7 @@ class TelaReportState extends State<TelaReport> {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacidade(0.5),
+                      color: Colors.white.withValues(alpha: 0.5),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -122,6 +131,8 @@ class TelaReportState extends State<TelaReport> {
         descricao: descriptionController.text,
         urlImagem: imageName,
       );
+
+      if (!mounted) return;
 
       if (resultado == null) {
         Navigator.of(context).pop();

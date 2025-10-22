@@ -1,7 +1,6 @@
 import 'package:citysync/services/auth.dart';
 import 'package:citysync/views/login.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class AlterarSenha extends StatelessWidget {
   AlterarSenha({super.key, required this.email});

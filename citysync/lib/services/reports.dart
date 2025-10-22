@@ -1,19 +1,19 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:citysync/model/modelReport.dart';
+import 'package:citysync/model/model_report.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ReportApiService {
   final supabase = Supabase.instance.client;
+  
   Future<List<Report>> obterListaReports(String idUsuario) async {
     final response = await supabase
         .from("listar_reportes")
         .select()
         .eq("fk_usuario", idUsuario);
 
-    if (response == null || response.isEmpty) {
+    if (response.isEmpty) {
       return [];
     }
+    
     return (response as List)
         .map((item) => Report.fromJson(item as Map<String, dynamic>))
         .toList();

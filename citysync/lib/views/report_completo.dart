@@ -1,9 +1,9 @@
-import 'package:citysync/model/modelReport.dart';
+import 'package:citysync/model/model_report.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class ReportCompleto extends StatelessWidget {
-  ReportCompleto({super.key, required this.report});
+  const ReportCompleto({super.key, required this.report});
 
   final Report report;
 

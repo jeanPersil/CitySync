@@ -9,8 +9,6 @@ class Validator {
       return "O cpf é obrigatorio";
     }
 
-    final String numeros = cpf.replaceAll(RegExp(r'\D'), '');
-
     if (!CPFValidator.isValid(cpf)) {
       return false;
     }
