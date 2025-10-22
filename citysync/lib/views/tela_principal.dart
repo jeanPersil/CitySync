@@ -2,6 +2,8 @@ import 'package:citysync/widgets/modal_pagina_inicial.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:citysync/views/perfil.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 class Telaprincipal extends StatefulWidget {
   const Telaprincipal({
@@ -25,15 +27,25 @@ class _TelaprincipalState extends State<Telaprincipal>
   static const double _initialZoom = 18.0;
   static const Duration _animationDuration = Duration(milliseconds: 800);
 
-  // Controladores de animação
+  // Controladores
   late AnimationController _animationController;
   late Animation<double> _fabAnimation;
   late Animation<double> _appBarFadeAnimation;
+  GoogleMapController? _mapController;
+  bool _isModalOpen = false;
+
+  // Localização e marcador
+  LatLng? _currentLocation;
+  LatLng? _selectedLocation;
+  Marker? _locationMarker;
+  String? _selectedAddress;
+  bool _isLoadingLocation = false;
 
   @override
   void initState() {
     super.initState();
     _initializeAnimations();
+    _getCurrentLocation();
   }
 
   void _initializeAnimations() {
@@ -59,6 +71,127 @@ class _TelaprincipalState extends State<Telaprincipal>
     _animationController.forward();
   }
 
+  // Obter localização atual do usuário
+  Future<void> _getCurrentLocation() async {
+    if (_isLoadingLocation) return;
+    
+    setState(() {
+      _isLoadingLocation = true;
+    });
+
+    try {
+      // Verificar permissões
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        _setDefaultLocation();
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          _setDefaultLocation();
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        _setDefaultLocation();
+        return;
+      }
+
+      // Obter posição atual
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.best,
+      );
+
+      if (mounted) {
+        setState(() {
+          _currentLocation = LatLng(position.latitude, position.longitude);
+          _selectedLocation = _currentLocation;
+        });
+        _updateMarker(_currentLocation!);
+        _moveToLocation(_currentLocation!);
+        _getAddressFromLatLng(_currentLocation!);
+      }
+    } catch (e) {
+      _setDefaultLocation();
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingLocation = false;
+        });
+      }
+    }
+  }
+
+  void _setDefaultLocation() {
+    if (mounted) {
+      setState(() {
+        _currentLocation = _senaiFeiraDeSantana;
+        _selectedLocation = _senaiFeiraDeSantana;
+      });
+      _updateMarker(_senaiFeiraDeSantana);
+      _moveToLocation(_senaiFeiraDeSantana);
+    }
+  }
+
+  void _updateMarker(LatLng position) {
+    setState(() {
+      _locationMarker = Marker(
+        markerId: const MarkerId('selected_location'),
+        position: position,
+        draggable: true,
+        onDragEnd: (newPosition) {
+          _onMarkerDragEnd(newPosition);
+        },
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        infoWindow: const InfoWindow(
+          title: 'Local do Problema',
+          snippet: 'Arraste para ajustar a localização',
+        ),
+      );
+    });
+  }
+
+  void _onMarkerDragEnd(LatLng newPosition) {
+    setState(() {
+      _selectedLocation = newPosition;
+    });
+    _getAddressFromLatLng(newPosition);
+  }
+
+  Future<void> _getAddressFromLatLng(LatLng position) async {
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks.first;
+        setState(() {
+          _selectedAddress = '${place.street}, ${place.locality}, ${place.administrativeArea}';
+        });
+      } else {
+        setState(() {
+          _selectedAddress = 'Endereço não encontrado';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _selectedAddress = 'Erro ao obter endereço';
+      });
+    }
+  }
+
+  void _moveToLocation(LatLng location) {
+    _mapController?.animateCamera(
+      CameraUpdate.newLatLng(location),
+    );
+  }
+
   void _navigateToProfile() {
     if (!mounted) return;
     Navigator.push(
@@ -68,13 +201,65 @@ class _TelaprincipalState extends State<Telaprincipal>
   }
 
   void _showProblemModal() {
-    if (!mounted) return;
-    mostrarModal(context, widget.usuarioID);
+    if (!mounted || _selectedLocation == null) return;
+    
+    setState(() {
+      _isModalOpen = true;
+    });
+    
+    mostrarModal(
+      context, 
+      widget.usuarioID,
+      selectedLocation: _selectedLocation!,
+      selectedAddress: _selectedAddress ?? 'Endereço não disponível',
+    ).then((_) {
+      if (mounted) {
+        setState(() {
+          _isModalOpen = false;
+        });
+      }
+    });
+  }
+
+  // Funções dos botões do mapa
+  void _zoomIn() {
+    _mapController?.getZoomLevel().then((currentZoom) {
+      _mapController?.animateCamera(
+        CameraUpdate.zoomTo(currentZoom + 1),
+      );
+    });
+  }
+
+  void _zoomOut() {
+    _mapController?.getZoomLevel().then((currentZoom) {
+      _mapController?.animateCamera(
+        CameraUpdate.zoomTo(currentZoom - 1),
+      );
+    });
+  }
+
+  void _goToMyLocation() {
+    if (_currentLocation != null) {
+      _moveToLocation(_currentLocation!);
+    }
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    _mapController = controller;
+  }
+
+  void _onMapTap(LatLng position) {
+    setState(() {
+      _selectedLocation = position;
+    });
+    _updateMarker(position);
+    _getAddressFromLatLng(position);
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _mapController?.dispose();
     super.dispose();
   }
 
@@ -115,7 +300,6 @@ class _TelaprincipalState extends State<Telaprincipal>
   Widget _buildAppBarTitle() {
     return Row(
       children: [
-        // Ícone do usuário clicável
         InkWell(
           borderRadius: BorderRadius.circular(24),
           onTap: _navigateToProfile,
@@ -133,18 +317,35 @@ class _TelaprincipalState extends State<Telaprincipal>
           ),
         ),
         const SizedBox(width: 12),
-        Text(
-          widget.nomeUsuario,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-            fontSize: 18,
-            shadows: [
-              Shadow(
-                blurRadius: 4,
-                color: Colors.black,
-                offset: Offset(0, 1),
-              )
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.nomeUsuario,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                  fontSize: 18,
+                  shadows: [
+                    Shadow(
+                      blurRadius: 4,
+                      color: Colors.black,
+                      offset: Offset(0, 1),
+                    )
+                  ],
+                ),
+              ),
+              if (_selectedAddress != null)
+                Text(
+                  _selectedAddress!,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
             ],
           ),
         ),
@@ -157,6 +358,10 @@ class _TelaprincipalState extends State<Telaprincipal>
       children: [
         _buildMap(),
         _buildMapControls(),
+        if (_isLoadingLocation)
+          const Center(
+            child: CircularProgressIndicator(),
+          ),
       ],
     );
   }
@@ -180,21 +385,27 @@ class _TelaprincipalState extends State<Telaprincipal>
         ),
         child: GoogleMap(
           initialCameraPosition: CameraPosition(
-            target: _senaiFeiraDeSantana,
+            target: _currentLocation ?? _senaiFeiraDeSantana,
             zoom: _initialZoom,
           ),
           mapType: MapType.normal,
           myLocationEnabled: true,
-          myLocationButtonEnabled: true,
+          myLocationButtonEnabled: false,
           zoomControlsEnabled: false,
           buildingsEnabled: true,
           compassEnabled: true,
           indoorViewEnabled: true,
           mapToolbarEnabled: true,
-          rotateGesturesEnabled: true,
-          scrollGesturesEnabled: true,
-          tiltGesturesEnabled: true,
-          zoomGesturesEnabled: true,
+          // Bloqueia interações quando modal está aberto
+          rotateGesturesEnabled: !_isModalOpen,
+          scrollGesturesEnabled: !_isModalOpen,
+          tiltGesturesEnabled: !_isModalOpen,
+          zoomGesturesEnabled: !_isModalOpen,
+          markers: _locationMarker != null 
+              ? Set<Marker>.of([_locationMarker!]) 
+              : Set<Marker>(),
+          onMapCreated: _onMapCreated,
+          onTap: _onMapTap,
         ),
       ),
     );
@@ -209,19 +420,19 @@ class _TelaprincipalState extends State<Telaprincipal>
           _buildMapControlButton(
             icon: Icons.add,
             heroTag: "zoom_in",
-            onPressed: () {}, // Implementar zoom in
+            onPressed: _zoomIn,
           ),
           const SizedBox(height: 10),
           _buildMapControlButton(
             icon: Icons.remove,
             heroTag: "zoom_out",
-            onPressed: () {}, // Implementar zoom out
+            onPressed: _zoomOut,
           ),
           const SizedBox(height: 10),
           _buildMapControlButton(
             icon: Icons.my_location,
             heroTag: "location",
-            onPressed: () {}, // Implementar localização
+            onPressed: _goToMyLocation,
           ),
         ],
       ),
