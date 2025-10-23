@@ -2,13 +2,11 @@ import 'package:citysync/views/config.dart';
 import 'package:citysync/views/lista_problemas_report.dart';
 import 'package:citysync/views/tela_principal.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'Tema/color_extension.dart';
 
 class Homepage extends StatefulWidget {
-  Homepage({super.key, required this.usuarioNome, required this.usuarioID});
-
-  final String usuarioNome;
-  final String usuarioID;
+  Homepage({super.key});
 
   @override
   State<Homepage> createState() => _HomepageState();
@@ -17,11 +15,19 @@ class Homepage extends StatefulWidget {
 class _HomepageState extends State<Homepage> {
   int paginaAtual = 0;
   late PageController pc;
+  String? usuarioNome;
+  String? usuarioID;
 
   @override
   void initState() {
     super.initState();
     pc = PageController(initialPage: paginaAtual);
+    final user = Supabase.instance.client.auth.currentUser;
+
+    if (user != null) {
+      usuarioID = user.id;
+      usuarioNome = user.email;
+    }
   }
 
   @override
@@ -37,12 +43,12 @@ class _HomepageState extends State<Homepage> {
         physics: const NeverScrollableScrollPhysics(),
         children: [
           Telaprincipal(
-            nomeUsuario: widget.usuarioNome,
-            usuarioID: widget.usuarioID,
+            nomeUsuario: usuarioNome!,
+            usuarioID: usuarioID!,
           ),
           ProblemasReport(
-            nomeUsuario: widget.usuarioNome,
-            usuarioID: widget.usuarioID,
+            nomeUsuario: usuarioNome!,
+            usuarioID: usuarioID!,
           ),
           const TelaConfig(),
         ],

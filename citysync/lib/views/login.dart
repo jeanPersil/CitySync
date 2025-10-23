@@ -15,6 +15,8 @@ class _TelaLoginState extends State<TelaLogin> with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
+  final _emailFocusNode = FocusNode();
+  final _senhaFocusNode = FocusNode();
 
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
@@ -24,6 +26,7 @@ class _TelaLoginState extends State<TelaLogin> with TickerProviderStateMixin {
 
   bool _obscureText = true;
   bool _isLoading = false;
+  bool _validatedOnce = false;
 
   @override
   void initState() {
@@ -56,18 +59,60 @@ class _TelaLoginState extends State<TelaLogin> with TickerProviderStateMixin {
     ));
 
     _animationController.forward();
+
+    // Listeners para atualizar tanto no foco quanto no blur
+    _emailFocusNode.addListener(_onEmailFocusChange);
+    _senhaFocusNode.addListener(_onSenhaFocusChange);
+
+    // Listeners para validar durante a digitação
+    _emailController.addListener(_onEmailTextChange);
+    _senhaController.addListener(_onSenhaTextChange);
+  }
+
+  void _onEmailFocusChange() {
+    if (_validatedOnce) {
+      _formKey.currentState?.validate();
+    }
+  }
+
+  void _onSenhaFocusChange() {
+    if (_validatedOnce) {
+      _formKey.currentState?.validate();
+    }
+  }
+
+  void _onEmailTextChange() {
+    if (_validatedOnce && _emailFocusNode.hasFocus) {
+      _formKey.currentState?.validate();
+    }
+  }
+
+  void _onSenhaTextChange() {
+    if (_validatedOnce && _senhaFocusNode.hasFocus) {
+      _formKey.currentState?.validate();
+    }
   }
 
   @override
   void dispose() {
     _animationController.dispose();
-
+    _emailFocusNode.removeListener(_onEmailFocusChange);
+    _senhaFocusNode.removeListener(_onSenhaFocusChange);
+    _emailController.removeListener(_onEmailTextChange);
+    _senhaController.removeListener(_onSenhaTextChange);
+    _emailFocusNode.dispose();
+    _senhaFocusNode.dispose();
     _emailController.dispose();
     _senhaController.dispose();
     super.dispose();
   }
 
   void _handleLogin() async {
+    // Marcar que já validamos pelo menos uma vez
+    setState(() {
+      _validatedOnce = true;
+    });
+
     if (_formKey.currentState?.validate() != true) return;
 
     setState(() {
@@ -83,20 +128,17 @@ class _TelaLoginState extends State<TelaLogin> with TickerProviderStateMixin {
       _isLoading = false;
     });
 
-    if (resultado["sucesso"]) {
+    if (resultado == null) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => Homepage(
-            usuarioNome: resultado['nome_usuario'],
-            usuarioID: resultado['user_id'],
-          ),
+          builder: (_) => Homepage(),
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(resultado["mensagem"]),
+          content: Text(resultado),
           backgroundColor: Colors.redAccent,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -174,6 +216,7 @@ class _TelaLoginState extends State<TelaLogin> with TickerProviderStateMixin {
                             icon: Icons.email,
                             validator: _validateEmail,
                             keyboardType: TextInputType.emailAddress,
+                            focusNode: _emailFocusNode,
                           ),
                           const SizedBox(height: 20),
                           _buildTextField(
@@ -182,6 +225,7 @@ class _TelaLoginState extends State<TelaLogin> with TickerProviderStateMixin {
                             icon: Icons.lock,
                             validator: _validateSenha,
                             obscureText: _obscureText,
+                            focusNode: _senhaFocusNode,
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscureText
@@ -279,6 +323,7 @@ class _TelaLoginState extends State<TelaLogin> with TickerProviderStateMixin {
     Widget? suffixIcon,
     TextInputType? keyboardType,
     void Function(String)? onSubmitted,
+    required FocusNode focusNode,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -293,6 +338,7 @@ class _TelaLoginState extends State<TelaLogin> with TickerProviderStateMixin {
       ),
       child: TextFormField(
         controller: controller,
+        focusNode: focusNode,
         obscureText: obscureText,
         validator: validator,
         style: const TextStyle(color: Colors.white),

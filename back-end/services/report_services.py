@@ -41,6 +41,7 @@ def listar_reports_do_usuario(id_usuario):
             "categoria": linha.get("nome_categoria", ""),
             "status": linha.get("nome_status", ""),
             "id_usuario": linha.get("fk_usuario", 0),
+            "descricao": linha.get("descricao", ""),
             "url_imagem": linha.get("url_imagem", ""),
             "data_report": linha.get("data_criacao", "")
         } for linha in resultados]
