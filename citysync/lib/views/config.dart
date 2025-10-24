@@ -76,7 +76,14 @@ class _TelaConfigState extends State<TelaConfig> {
                           onChanged: (value) {
                             themeProvider.toggleTheme();
                           },
-                          activeThumbColor: const Color(0xFF20C997), 
+                          thumbColor: WidgetStateProperty.resolveWith<Color>(
+                            (states) {
+                              if (states.contains(WidgetState.selected)) {
+                                return const Color(0xFF20C997); // cor quando o switch está ativo ✅
+                              }
+                              return Colors.grey.shade400; // cor quando está desativado
+                            },
+                          ),
                         ),
                       ),
                     ),
