@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:citysync/Tema/color_extension.dart';
-import 'package:geocoding/geocoding.dart'; // Adicione este pacote
 
 class TelaReport extends StatefulWidget {
   const TelaReport(
@@ -26,88 +25,15 @@ class TelaReportState extends State<TelaReport> {
   final TextEditingController descriptionController = TextEditingController();
 
   final LatLng _initialPosicao = LatLng(-12.2664, -38.9668);
-  
-  // Controlador do mapa
-  GoogleMapController? _mapController;
-  
-  // Marcador no mapa
-  Set<Marker> _markers = {};
-  
-  // Posição atual do mapa
-  LatLng? _currentPosition;
 
-  @override
   void initState() {
     super.initState();
     problemController.text = widget.categoria;
-    
-    // Adicionar listener para o campo de endereço
-    addressController.addListener(_onAddressChanged);
-    
-    // Marcador inicial na posição padrão
-    _addMarker(_initialPosicao, "Posição Inicial");
-    _currentPosition = _initialPosicao;
-  }
-
-  @override
-  void dispose() {
-    addressController.removeListener(_onAddressChanged);
-    super.dispose();
   }
 
   Uint8List? imageBytes;
   io.File? imageFile;
   String? imageName;
-
-  // Listener para mudanças no campo de endereço
-  void _onAddressChanged() {
-    // Usar um delay para não fazer muitas requisições enquanto o usuário digita
-    Future.delayed(const Duration(milliseconds: 1000), () {
-      if (addressController.text.isNotEmpty) {
-        _geocodeAddress(addressController.text);
-      }
-    });
-  }
-
-  // Função para converter endereço em coordenadas
-  Future<void> _geocodeAddress(String address) async {
-    try {
-      List<Location> locations = await locationFromAddress(address);
-      
-      if (locations.isNotEmpty) {
-        Location location = locations.first;
-        LatLng newPosition = LatLng(location.latitude, location.longitude);
-        
-        setState(() {
-          _currentPosition = newPosition;
-          _markers.clear();
-          _addMarker(newPosition, address);
-        });
-        
-        // Animar a câmera para a nova posição
-        _mapController?.animateCamera(
-          CameraUpdate.newLatLngZoom(newPosition, 16),
-        );
-      }
-    } catch (e) {
-      print("Erro ao geocodificar endereço: $e");
-      // Você pode mostrar um snackbar ou tratar o erro de outra forma
-    }
-  }
-
-  // Função para adicionar marcador
-  void _addMarker(LatLng position, String title) {
-    setState(() {
-      _markers.add(
-        Marker(
-          markerId: MarkerId(title),
-          position: position,
-          infoWindow: InfoWindow(title: title),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-        ),
-      );
-    });
-  }
 
   Future<void> pickImage() async {
     if (kIsWeb) {
@@ -237,17 +163,10 @@ class TelaReportState extends State<TelaReport> {
               children: [
                 GoogleMap(
                   initialCameraPosition: CameraPosition(
-                    target: _currentPosition ?? _initialPosicao,
+                    target: _initialPosicao,
                     zoom: 16,
                   ),
-                  onMapCreated: (controller) {
-                    _mapController = controller;
-                  },
-                  markers: _markers,
-                  onTap: (LatLng position) {
-                    // Opcional: permitir que o usuário clique no mapa para selecionar localização
-                    _handleMapTap(position);
-                  },
+                  onMapCreated: (controller) {},
                 ),
                 Positioned(
                   top: 16,
@@ -287,7 +206,8 @@ class TelaReportState extends State<TelaReport> {
                       descriptionController, "Descreva o problema...", isDark),
                   const SizedBox(height: 10),
                   GestureDetector(
-                    onTap: pickImage,
+                    onTap:
+                        pickImage, // Tocar aqui para tirar ou selecionar uma nova imagem
                     child: Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
@@ -398,34 +318,6 @@ class TelaReportState extends State<TelaReport> {
         ],
       ),
     );
-  }
-
-  // Função opcional para permitir seleção pelo mapa
-  void _handleMapTap(LatLng position) async {
-    try {
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
-      
-      if (placemarks.isNotEmpty) {
-        Placemark placemark = placemarks.first;
-        String address = "${placemark.street}, ${placemark.locality}";
-        
-        setState(() {
-          addressController.text = address;
-          _currentPosition = position;
-          _markers.clear();
-          _addMarker(position, address);
-        });
-        
-        _mapController?.animateCamera(
-          CameraUpdate.newLatLngZoom(position, 16),
-        );
-      }
-    } catch (e) {
-      print("Erro ao obter endereço: $e");
-    }
   }
 
   Widget _buildSectionTitle(String title, bool isDark) {
