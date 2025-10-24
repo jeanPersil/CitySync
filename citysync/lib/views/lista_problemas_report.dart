@@ -32,10 +32,15 @@ class _ProblemasReportState extends State<ProblemasReport>
   late Color _textColor;
   late Color _secondaryTextColor;
 
+  List<Report> _reports = [];
+  bool _isLoading = true;
+  String? _errorMessage;
+
   @override
   void initState() {
     super.initState();
     _initializeAnimations();
+    _loadReports();
   }
 
   void _initializeAnimations() {
@@ -62,6 +67,25 @@ class _ProblemasReportState extends State<ProblemasReport>
     _animationController.forward();
   }
 
+  Future<void> _loadReports() async {
+    try {
+      final reports = await _reportApiService.obterListaReports(widget.usuarioID);
+      if (mounted) {
+        setState(() {
+          _reports = reports;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString();
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -78,8 +102,8 @@ class _ProblemasReportState extends State<ProblemasReport>
     _cardColor = isDark 
         ? Colors.grey[800]! 
         : const Color(0xFF1E3A5F).withValues(alpha: 0.8);
-    _textColor = Colors.white; // Sempre branco em ambos os temas
-    _secondaryTextColor = Colors.white70; // Sempre white70 em ambos os temas
+    _textColor = Colors.white;
+    _secondaryTextColor = Colors.white70;
   }
 
   @override
@@ -89,14 +113,27 @@ class _ProblemasReportState extends State<ProblemasReport>
   }
 
   Future<void> _handleRefresh() async {
-    setState(() {});
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+    }
+    await _loadReports();
   }
 
   void _navigateToReportDetail(Report report) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => ReportCompleto(report: report),
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => ReportCompleto(report: report),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 300),
       ),
     );
   }
@@ -116,8 +153,9 @@ class _ProblemasReportState extends State<ProblemasReport>
           children: [
             const SizedBox(height: 20),
             _buildHeader(containerWidth),
+            const SizedBox(height: 20),
             Expanded(
-              child: _buildReportsList(),
+              child: _buildContent(),
             ),
           ],
         ),
@@ -156,7 +194,7 @@ class _ProblemasReportState extends State<ProblemasReport>
               fontWeight: FontWeight.w600,
               color: _textColor,
               fontSize: 18,
-              shadows: _appBarColor == const Color(0xFF1E3A5F) // Apenas se não for dark
+              shadows: _appBarColor == const Color(0xFF1E3A5F)
                   ? [
                       const Shadow(
                         blurRadius: 4,
@@ -194,7 +232,6 @@ class _ProblemasReportState extends State<ProblemasReport>
         child: Container(
           width: containerWidth,
           padding: const EdgeInsets.all(20.0),
-          margin: const EdgeInsets.only(bottom: 20.0),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             gradient: const LinearGradient(
@@ -243,21 +280,20 @@ class _ProblemasReportState extends State<ProblemasReport>
     );
   }
 
-  Widget _buildReportsList() {
-    return FutureBuilder<List<Report>>(
-      future: _reportApiService.obterListaReports(widget.usuarioID),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildLoadingState();
-        } else if (snapshot.hasError) {
-          return _buildErrorState(snapshot.error.toString());
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return _buildEmptyState();
-        }
+  Widget _buildContent() {
+    if (_isLoading) {
+      return _buildLoadingState();
+    }
 
-        return _buildReportsListView(snapshot.data!);
-      },
-    );
+    if (_errorMessage != null) {
+      return _buildErrorState(_errorMessage!);
+    }
+
+    if (_reports.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return _buildReportsListView();
   }
 
   Widget _buildLoadingState() {
@@ -288,13 +324,16 @@ class _ProblemasReportState extends State<ProblemasReport>
         children: [
           const Icon(Icons.error_outline, color: Colors.redAccent, size: 48),
           const SizedBox(height: 16),
-          Text(
-            "Erro ao carregar reports: $error",
-            style: TextStyle(
-              color: _secondaryTextColor,
-              fontSize: 16,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              "Erro ao carregar reports: ${error.length > 100 ? '${error.substring(0, 100)}...' : error}",
+              style: TextStyle(
+                color: _secondaryTextColor,
+                fontSize: 16,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
           ElevatedButton.icon(
@@ -317,96 +356,95 @@ class _ProblemasReportState extends State<ProblemasReport>
       child: FadeTransition(
         opacity: _fadeAnimation,
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: _cardColor,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.inbox_outlined,
-                      color: _secondaryTextColor,
-                      size: 64,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      "Nenhum problema reportado ainda",
-                      style: TextStyle(
-                        color: _secondaryTextColor,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Seus reports aparecerão aqui quando você fizer sua primeira solicitação",
-                      style: TextStyle(
-                        color: _secondaryTextColor.withValues(alpha: 0.8),
-                        fontSize: 14,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: _cardColor,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-            ],
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.inbox_outlined,
+                    color: _secondaryTextColor,
+                    size: 64,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    "Nenhum problema reportado ainda",
+                    style: TextStyle(
+                      color: _secondaryTextColor,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Seus reports aparecerão aqui quando você fizer sua primeira solicitação",
+                    style: TextStyle(
+                      color: _secondaryTextColor.withValues(alpha: 0.8),
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildReportsListView(List<Report> reports) {
+  Widget _buildReportsListView() {
     return ListView.builder(
-      itemCount: reports.length,
+      physics: const BouncingScrollPhysics(),
+      itemCount: _reports.length,
       itemBuilder: (context, index) {
-        final report = reports[index];
+        final report = _reports[index];
         return _buildReportItem(report, index);
       },
     );
   }
 
   Widget _buildReportItem(Report report, int index) {
-    return SlideTransition(
-      position: Tween<Offset>(
-        begin: Offset(0, 0.5 + (index * 0.1)),
-        end: Offset.zero,
-      ).animate(CurvedAnimation(
-        parent: _animationController,
-        curve: Interval(0.1 * index, 1.0, curve: Curves.easeOut),
-      )),
-      child: FadeTransition(
-        opacity: Tween<double>(
-          begin: 0.0,
-          end: 1.0,
-        ).animate(CurvedAnimation(
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, child) {
+        final animation = CurvedAnimation(
           parent: _animationController,
-          curve: Interval(0.1 * index, 1.0, curve: Curves.easeIn),
-        )),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-          child: InkWell(
-            onTap: () => _navigateToReportDetail(report),
-            borderRadius: BorderRadius.circular(12),
-            child: CardPRoblema(report: report),
+          curve: Interval(0.1 * index, 1.0, curve: Curves.easeOut),
+        );
+
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 0.5),
+            end: Offset.zero,
+          ).animate(animation),
+          child: FadeTransition(
+            opacity: animation,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+              child: InkWell(
+                onTap: () => _navigateToReportDetail(report),
+                borderRadius: BorderRadius.circular(12),
+                child: CardPRoblema(report: report),
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
