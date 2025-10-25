@@ -1,7 +1,7 @@
 import 'package:citysync/widgets/modal_pagina_inicial.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:citysync/views/perfil.dart'; // 👈 importa a tela de perfil
+import 'package:citysync/views/perfil.dart';
 
 class Telaprincipal extends StatefulWidget {
   const Telaprincipal({
@@ -28,7 +28,6 @@ class _TelaprincipalState extends State<Telaprincipal>
   void initState() {
     super.initState();
 
-    // Animação para o FAB e AppBar
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
@@ -59,16 +58,14 @@ class _TelaprincipalState extends State<Telaprincipal>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: isDark ? Colors.grey[900] : const Color(0xFF1E3A5F),
+      backgroundColor: const Color(0xFF1E3A5F),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
         child: FadeTransition(
           opacity: _appBarFadeAnimation,
           child: AppBar(
-            backgroundColor: isDark ? Colors.grey[900] : const Color(0xFF1E3A5F),
+            backgroundColor: const Color(0xFF1E3A5F),
             elevation: 8,
             shadowColor: Colors.black.withOpacity(0.4),
             shape: const RoundedRectangleBorder(
@@ -78,15 +75,12 @@ class _TelaprincipalState extends State<Telaprincipal>
             ),
             title: Row(
               children: [
-                // 👇 Ícone do usuário agora é clicável e navega para o perfil
                 InkWell(
                   borderRadius: BorderRadius.circular(24),
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        // Se o nome da classe no seu `view/perfil.dart` for outro,
-                        // troque `Perfil()` pelo nome correto, ex.: `PerfilPage()`.
                         builder: (_) => ProfileScreen(),
                       ),
                     );
@@ -125,10 +119,8 @@ class _TelaprincipalState extends State<Telaprincipal>
           ),
         ),
       ),
-
       body: Stack(
         children: [
-          // Mapa
           Container(
             decoration: BoxDecoration(
               boxShadow: [
@@ -165,7 +157,6 @@ class _TelaprincipalState extends State<Telaprincipal>
               ),
             ),
           ),
-
           Positioned(
             right: 16,
             bottom: 100,
@@ -188,8 +179,7 @@ class _TelaprincipalState extends State<Telaprincipal>
                 FloatingActionButton.small(
                   onPressed: () {},
                   backgroundColor: Colors.white,
-                  child:
-                      const Icon(Icons.my_location, color: Color(0xFF1E3A5F)),
+                  child: const Icon(Icons.my_location, color: Color(0xFF1E3A5F)),
                   heroTag: "location",
                 ),
               ],
@@ -197,7 +187,6 @@ class _TelaprincipalState extends State<Telaprincipal>
           ),
         ],
       ),
-
       floatingActionButton: ScaleTransition(
         scale: _fabAnimation,
         child: Container(

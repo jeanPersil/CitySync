@@ -5,9 +5,6 @@ class PoliticaPrivacidadePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -24,11 +21,11 @@ class PoliticaPrivacidadePage extends StatelessWidget {
         ),
       ),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              isDark ? Colors.grey[900]!  : const Color(0xFF1E3A5F),
-              isDark ? Colors.grey[900]!  : const Color(0xFF152C49),
+              Color(0xFF1E3A5F),
+              Color(0xFF152C49),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -49,7 +46,7 @@ class PoliticaPrivacidadePage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Center(
+                      const Center(
                         child: Text(
                           'Última atualização: 06 de Junho de 2025',
                           style: TextStyle(

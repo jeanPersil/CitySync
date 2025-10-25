@@ -67,7 +67,7 @@ class _HomepageState extends State<Homepage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.report_problem_sharp),
-            label: "Problemas report",
+            label: "Meus reports",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),

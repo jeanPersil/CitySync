@@ -21,7 +21,6 @@ class _SuportePageState extends State<SuportePage> {
       return;
     }
 
-    
     debugPrint("⭐ Avaliação: $_avaliacao");
     debugPrint("📝 Feedback: $feedback");
 
@@ -37,8 +36,6 @@ class _SuportePageState extends State<SuportePage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
@@ -60,13 +57,13 @@ class _SuportePageState extends State<SuportePage> {
         ),
       ),
       body: Container(
-         width: double.infinity,
-         height: double.infinity,
-        decoration: BoxDecoration(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              isDark ? Colors.grey[900]! : const Color(0xFF1E3A5F),
-              isDark ? Colors.grey[900]! : const Color(0xFF152C49),
+              Color(0xFF1E3A5F),
+              Color(0xFF152C49),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -82,8 +79,7 @@ class _SuportePageState extends State<SuportePage> {
               ),
               elevation: 4,
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
@@ -122,26 +118,22 @@ class _SuportePageState extends State<SuportePage> {
 
                       const SizedBox(height: 20),
 
-                    
                       TextField(
                         controller: _feedbackController,
                         maxLines: 5,
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
-                          hintText:
-                              "Digite aqui sua sugestão ou problema...",
+                          hintText: "Digite aqui sua sugestão ou problema...",
                           hintStyle: const TextStyle(color: Colors.white70),
                           filled: true,
                           fillColor: Colors.white.withOpacity(0.05),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
-                            borderSide:
-                                const BorderSide(color: Colors.white24),
+                            borderSide: const BorderSide(color: Colors.white24),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
-                            borderSide:
-                                const BorderSide(color: Colors.white),
+                            borderSide: const BorderSide(color: Colors.white),
                           ),
                         ),
                       ),
@@ -163,7 +155,9 @@ class _SuportePageState extends State<SuportePage> {
                           child: const Text(
                             "Enviar Feedback",
                             style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),

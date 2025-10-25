@@ -58,54 +58,16 @@ class _ProblemasReportState extends State<ProblemasReport>
     super.dispose();
   }
 
-  // Função para obter cores baseadas no tema
-  Color _getBackgroundColor(BuildContext context) {
-    final theme = Theme.of(context);
-    return theme.brightness == Brightness.dark
-        ? Colors.grey[900]!
-        : const Color(0xFF0A1D3D);
-  }
-
-  Color _getAppBarColor(BuildContext context) {
-    final theme = Theme.of(context);
-    return theme.brightness == Brightness.dark
-        ? Colors.grey[850]!
-        : const Color(0xFF1E3A5F);
-  }
-
-  Color _getCardColor(BuildContext context) {
-    final theme = Theme.of(context);
-    return theme.brightness == Brightness.dark
-        ? Colors.grey[800]!
-        : const Color(0xFF1E3A5F).withOpacity(0.8);
-  }
-
-  Color _getTextColor(BuildContext context) {
-    final theme = Theme.of(context);
-    return theme.brightness == Brightness.dark ? Colors.white : Colors.white;
-  }
-
-  Color _getSecondaryTextColor(BuildContext context) {
-    final theme = Theme.of(context);
-    return theme.brightness == Brightness.dark
-        ? Colors.white70
-        : Colors.white70;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
-    final containerWidth =
-        (screenWidth < 600) ? screenWidth * 0.9 : screenWidth * 0.5;
-    final horizontalPadding =
-        (screenWidth < 600) ? 16.0 : (screenWidth - containerWidth) / 2;
+    final containerWidth = (screenWidth < 600) ? screenWidth * 0.9 : screenWidth * 0.5;
+    final horizontalPadding = (screenWidth < 600) ? 16.0 : (screenWidth - containerWidth) / 2;
 
     return Scaffold(
-      backgroundColor: _getBackgroundColor(context),
+      backgroundColor: const Color(0xFF0A1D3D),
       appBar: AppBar(
-        backgroundColor: _getAppBarColor(context),
+        backgroundColor: const Color(0xFF1E3A5F),
         elevation: 8,
         shadowColor: Colors.black.withOpacity(0.4),
         shape: const RoundedRectangleBorder(
@@ -121,25 +83,26 @@ class _ProblemasReportState extends State<ProblemasReport>
                 color: const Color(0xFF20C997).withOpacity(0.2),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.people_alt_outlined,
-                  color: _getTextColor(context), size: 22),
+              child: const Icon(
+                Icons.people_alt_outlined,
+                color: Colors.white,
+                size: 22,
+              ),
             ),
             const SizedBox(width: 12),
             Text(
               widget.nomeUsuario,
-              style: TextStyle(
+              style: const TextStyle(
                 fontWeight: FontWeight.w600,
-                color: _getTextColor(context),
+                color: Colors.white,
                 fontSize: 18,
-                shadows: isDark
-                    ? []
-                    : [
-                        const Shadow(
-                          blurRadius: 4,
-                          color: Colors.black,
-                          offset: Offset(0, 1),
-                        )
-                      ],
+                shadows: [
+                  Shadow(
+                    blurRadius: 4,
+                    color: Colors.black,
+                    offset: Offset(0, 1),
+                  )
+                ],
               ),
             ),
           ],
@@ -149,11 +112,10 @@ class _ProblemasReportState extends State<ProblemasReport>
             icon: Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: _getTextColor(context).withOpacity(0.1),
+                color: Colors.white.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child:
-                  Icon(Icons.refresh, color: _getTextColor(context), size: 22),
+              child: const Icon(Icons.refresh, color: Colors.white, size: 22),
             ),
             onPressed: () {
               setState(() {});
@@ -167,7 +129,6 @@ class _ProblemasReportState extends State<ProblemasReport>
         child: Column(
           children: [
             const SizedBox(height: 20),
-            // Header com animação
             SlideTransition(
               position: _slideAnimation,
               child: FadeTransition(
@@ -202,7 +163,7 @@ class _ProblemasReportState extends State<ProblemasReport>
                         Icon(Icons.assignment, color: Colors.white, size: 24),
                         SizedBox(width: 12),
                         Text(
-                          "📋 Reports Enviados",
+                          " Reports Enviados",
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -222,27 +183,22 @@ class _ProblemasReportState extends State<ProblemasReport>
                 ),
               ),
             ),
-
-            /// Lista de reports
             Expanded(
               child: FutureBuilder<List<Report>>(
                 future: reportApiService.obterListaReports(widget.usuarioID),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
+                    return const Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                                const Color(0xFF20C997)),
+                            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF20C997)),
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16),
                           Text(
                             "Carregando seus reports...",
-                            style: TextStyle(
-                                color: _getSecondaryTextColor(context),
-                                fontSize: 16),
+                            style: TextStyle(color: Colors.white70, fontSize: 16),
                           ),
                         ],
                       ),
@@ -252,14 +208,11 @@ class _ProblemasReportState extends State<ProblemasReport>
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.error_outline,
-                              color: Colors.redAccent, size: 48),
+                          const Icon(Icons.error_outline, color: Colors.redAccent, size: 48),
                           const SizedBox(height: 16),
                           Text(
                             "Erro ao carregar reports: ${snapshot.error}",
-                            style: TextStyle(
-                                color: _getSecondaryTextColor(context),
-                                fontSize: 16),
+                            style: const TextStyle(color: Colors.white70, fontSize: 16),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 20),
@@ -289,7 +242,7 @@ class _ProblemasReportState extends State<ProblemasReport>
                               Container(
                                 padding: const EdgeInsets.all(20),
                                 decoration: BoxDecoration(
-                                  color: _getCardColor(context),
+                                  color: const Color(0xFF1E3A5F).withOpacity(0.8),
                                   borderRadius: BorderRadius.circular(20),
                                   boxShadow: [
                                     BoxShadow(
@@ -299,27 +252,24 @@ class _ProblemasReportState extends State<ProblemasReport>
                                     ),
                                   ],
                                 ),
-                                child: Column(
+                                child: const Column(
                                   children: [
-                                    Icon(Icons.inbox_outlined,
-                                        color: _getSecondaryTextColor(context),
-                                        size: 64),
-                                    const SizedBox(height: 16),
+                                    Icon(Icons.inbox_outlined, color: Colors.white70, size: 64),
+                                    SizedBox(height: 16),
                                     Text(
                                       "Nenhum problema reportado ainda",
                                       style: TextStyle(
-                                        color: _getSecondaryTextColor(context),
+                                        color: Colors.white70,
                                         fontSize: 18,
                                         fontWeight: FontWeight.w500,
                                       ),
                                       textAlign: TextAlign.center,
                                     ),
-                                    const SizedBox(height: 8),
+                                    SizedBox(height: 8),
                                     Text(
                                       "Seus reports aparecerão aqui quando você fizer sua primeira solicitação",
                                       style: TextStyle(
-                                        color: _getSecondaryTextColor(context)
-                                            .withOpacity(0.8),
+                                        color: Colors.white54,
                                         fontSize: 14,
                                       ),
                                       textAlign: TextAlign.center,
@@ -345,8 +295,7 @@ class _ProblemasReportState extends State<ProblemasReport>
                           end: Offset.zero,
                         ).animate(CurvedAnimation(
                           parent: _animationController,
-                          curve:
-                              Interval(0.1 * index, 1.0, curve: Curves.easeOut),
+                          curve: Interval(0.1 * index, 1.0, curve: Curves.easeOut),
                         )),
                         child: FadeTransition(
                           opacity: Tween<double>(
@@ -354,17 +303,14 @@ class _ProblemasReportState extends State<ProblemasReport>
                             end: 1.0,
                           ).animate(CurvedAnimation(
                             parent: _animationController,
-                            curve: Interval(0.1 * index, 1.0,
-                                curve: Curves.easeIn),
+                            curve: Interval(0.1 * index, 1.0, curve: Curves.easeIn),
                           )),
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 300),
                             curve: Curves.easeOut,
-                            margin: const EdgeInsets.symmetric(
-                                vertical: 8, horizontal: 4),
+                            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                             child: InkWell(
                               onTap: () {
-                                // Navega para a tela ReportCompleto
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -374,8 +320,7 @@ class _ProblemasReportState extends State<ProblemasReport>
                                   ),
                                 );
                               },
-                              borderRadius: BorderRadius.circular(
-                                  12), // Opcional: para matchar o borderRadius do card
+                              borderRadius: BorderRadius.circular(12),
                               child: CardPRoblema(report: report),
                             ),
                           ),

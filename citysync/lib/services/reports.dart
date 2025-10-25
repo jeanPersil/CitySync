@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ReportApiService {
   final supabase = Supabase.instance.client;
+  
   Future<List<Report>> obterListaReports(String idUsuario) async {
     final response = await supabase
         .from("listar_reportes")
@@ -25,6 +26,8 @@ class ReportApiService {
     required String usuarioId,
     required String descricao,
     String? urlImagem,
+    required double latitude,   //  ADICIONADO
+    required double longitude,  //  ADICIONADO
   }) async {
     try {
       if (endereco.isEmpty || categoriaId == 0) {
@@ -37,6 +40,8 @@ class ReportApiService {
         'fk_usuario': usuarioId,
         'descricao': descricao,
         'url_imagem': urlImagem,
+        'latitude': latitude,     // ⬅️ ADICIONADO
+        'longitude': longitude,   // ⬅️ ADICIONADO
       });
       return null; // sucesso
     } on PostgrestException catch (e) {

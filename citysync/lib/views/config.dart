@@ -1,8 +1,6 @@
 import 'package:citysync/views/login.dart';
 import 'package:citysync/views/suporte.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:citysync/Tema/theme_provider.dart';
 import 'package:citysync/views/politica_privacidade.dart';
 
 
@@ -18,20 +16,15 @@ class _TelaConfigState extends State<TelaConfig> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return Scaffold(
-      
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              isDark ? Colors.grey[850]! : Color(0xFF1E3A5F), 
-              isDark ? Colors.grey[900]! : Color(0xFF1E3A5F) 
+              Color(0xFF1E3A5F), 
+              Color(0xFF1E3A5F),
             ],
           ),
         ),
@@ -41,76 +34,52 @@ class _TelaConfigState extends State<TelaConfig> {
               AppBar(
                 backgroundColor: Colors.transparent,
                 elevation: 0,
-                title: Text(
+                title: const Text(
                   'Configurações',
                   style: TextStyle(
-                    color: isDark ? Colors.white : Colors.white,
+                    color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 centerTitle: true,
+                iconTheme: const IconThemeData(
+                  color: Colors.white,
+                ),
               ),
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.all(16.0),
                   children: [
-                    
+                    // Idioma
                     Card(
                       margin: const EdgeInsets.symmetric(vertical: 8.0),
                       elevation: 4,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      color: isDark ? Colors.grey[800] : Colors.white.withOpacity(0.9),
+                      color: Colors.white.withOpacity(0.9),
                       child: ListTile(
-                        leading: Icon(Icons.brightness_6, color: isDark ? Colors.white : Colors.blueGrey[700]),
-                        title: Text(
-                          'Tema Escuro',
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.blueGrey[900],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        trailing: Switch(
-                          value: themeProvider.isDarkMode,
-                          onChanged: (value) {
-                            themeProvider.toggleTheme();
-                          },
-                          activeColor: const Color(0xFF20C997), 
-                        ),
-                      ),
-                    ),
-                    
-                    Card(
-                      margin: const EdgeInsets.symmetric(vertical: 8.0),
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      color: isDark ? Colors.grey[800] : Colors.white.withOpacity(0.9),
-                      child: ListTile(
-                        leading: Icon(Icons.language, color: isDark ? Colors.white : Colors.blueGrey[700]),
+                        leading: Icon(Icons.language, color: Colors.blueGrey[700]),
                         title: Text(
                           'Idioma',
                           style: TextStyle(
-                            color: isDark ? Colors.white : Colors.blueGrey[900],
+                            color: Colors.blueGrey[900],
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                         trailing: DropdownButton<String>(
                           value: _selectedLanguage,
-                          dropdownColor: isDark ? Colors.grey[700] : Colors.white, 
+                          dropdownColor: Colors.white, 
                           style: TextStyle(
-                            color: isDark ? Colors.white : Colors.blueGrey[900],
+                            color: Colors.blueGrey[900],
                             fontSize: 16,
                           ),
-                          iconEnabledColor: isDark ? Colors.white : Colors.blueGrey[700], 
+                          iconEnabledColor: Colors.blueGrey[700], 
                           underline: const SizedBox(), 
                           onChanged: (String? newValue) {
                             setState(() {
                               _selectedLanguage = newValue!; 
                             });
-                            
                           },
                           items: const [
                             DropdownMenuItem(
@@ -126,23 +95,24 @@ class _TelaConfigState extends State<TelaConfig> {
                       ),
                     ),
                     
+                    // Política de Privacidade
                     Card(
                       margin: const EdgeInsets.symmetric(vertical: 8.0),
                       elevation: 4,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      color: isDark ? Colors.grey[800] : Colors.white.withOpacity(0.9),
+                      color: Colors.white.withOpacity(0.9),
                       child: ListTile(
-                        leading: Icon(Icons.policy, color: isDark ? Colors.white : Colors.blueGrey[700]),
+                        leading: Icon(Icons.policy, color: Colors.blueGrey[700]),
                         title: Text(
                           'Política de Privacidade',
                           style: TextStyle(
-                            color: isDark ? Colors.white : Colors.blueGrey[900],
+                            color: Colors.blueGrey[900],
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        trailing: Icon(Icons.arrow_forward_ios, size: 18, color: isDark ? Colors.white54 : Colors.blueGrey[400]),
+                        trailing: Icon(Icons.arrow_forward_ios, size: 18, color: Colors.blueGrey[400]),
                         onTap: () {
                           Navigator.push(
                             context,
@@ -152,23 +122,24 @@ class _TelaConfigState extends State<TelaConfig> {
                       ),
                     ),
 
+                    // Suporte e Feedback
                     Card(
                       margin: const EdgeInsets.symmetric(vertical: 8.0),
                       elevation: 4,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      color: isDark ? Colors.grey[800] : Colors.white.withOpacity(0.9),
+                      color: Colors.white.withOpacity(0.9),
                       child: ListTile(
-                        leading: Icon(Icons.help_outline, color: isDark ? Colors.white : Colors.blueGrey[700]),
+                        leading: Icon(Icons.help_outline, color: Colors.blueGrey[700]),
                         title: Text(
                           'Suporte e Feedback',
                           style: TextStyle(
-                            color: isDark ? Colors.white : Colors.blueGrey[900],
+                            color: Colors.blueGrey[900],
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        trailing: Icon(Icons.arrow_forward_ios, size: 18, color: isDark ? Colors.white54 : Colors.blueGrey[400]),
+                        trailing: Icon(Icons.arrow_forward_ios, size: 18, color: Colors.blueGrey[400]),
                         onTap: () {
                           Navigator.push(
                             context,
@@ -178,13 +149,14 @@ class _TelaConfigState extends State<TelaConfig> {
                       ),
                     ),
                    
+                    // Sair
                     Card(
                       margin: const EdgeInsets.symmetric(vertical: 8.0),
                       elevation: 4,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      color: isDark ? Colors.red[900]!.withOpacity(0.8) : Colors.red[700]!.withOpacity(0.9), // Cor de destaque para Logout
+                      color: Colors.red[700]!.withOpacity(0.9),
                       child: ListTile(
                         leading: const Icon(Icons.exit_to_app, color: Colors.white),
                         title: const Text(
@@ -195,13 +167,7 @@ class _TelaConfigState extends State<TelaConfig> {
                           ),
                         ),
                         trailing: const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.white54),
-                        onTap: () {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(builder: (context) => const TelaLogin()),
-                            (Route<dynamic> route) => false,
-                          );
-                        },
+                        onTap: _logout,
                       ),
                     ),
                   ],
@@ -211,6 +177,14 @@ class _TelaConfigState extends State<TelaConfig> {
           ),
         ),
       ),
+    );
+  }
+  
+  void _logout() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const TelaLogin()),
+      (Route<dynamic> route) => false,
     );
   }
 }

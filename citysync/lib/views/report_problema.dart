@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 import 'dart:io' as io show File;
+import 'dart:convert';
+import 'dart:async';
 
 import 'package:citysync/services/reports.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -7,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:citysync/Tema/color_extension.dart';
+import 'package:http/http.dart' as http;
 
 class TelaReport extends StatefulWidget {
   const TelaReport(
@@ -25,22 +28,155 @@ class TelaReportState extends State<TelaReport> {
   final TextEditingController descriptionController = TextEditingController();
 
   final LatLng _initialPosicao = LatLng(-12.2664, -38.9668);
+  LatLng _posicaoSelecionada = LatLng(-12.2664, -38.9668);
+  
+  GoogleMapController? _mapController;
+  Set<Marker> _markers = {};
+  bool _isUpdatingFromMap = false;
+  bool _isUpdatingFromTextField = false;
 
+  // Google API Key do projeto
+  static const String _googleApiKey = "AIzaSyBuuPoXMIcbCOMSgIzTnHENU9jzfzb22nc";
+
+  @override
   void initState() {
     super.initState();
     problemController.text = widget.categoria;
+    _posicaoSelecionada = _initialPosicao;
+    _adicionarMarcador(_initialPosicao);
   }
 
   Uint8List? imageBytes;
   io.File? imageFile;
   String? imageName;
 
+  // Adiciona ou atualiza o marcador no mapa
+  void _adicionarMarcador(LatLng posicao) {
+    setState(() {
+      _markers.clear();
+      _markers.add(
+        Marker(
+          markerId: MarkerId('local_selecionado'),
+          position: posicao,
+          draggable: true,
+          onDragEnd: (novaPosicao) {
+            _atualizarPosicao(novaPosicao);
+          },
+        ),
+      );
+    });
+  }
+
+  // Atualiza a posição e busca o endereço
+  void _atualizarPosicao(LatLng novaPosicao) async {
+    setState(() {
+      _posicaoSelecionada = novaPosicao;
+      _isUpdatingFromMap = true;
+    });
+    
+    _adicionarMarcador(novaPosicao);
+    _mapController?.animateCamera(
+      CameraUpdate.newLatLng(novaPosicao),
+    );
+
+    // Busca o endereço da posição usando a API do Google
+    try {
+      // Verifica se a API key está configurada
+      if (_googleApiKey == "SUA_API_KEY_AQUI" || _googleApiKey.isEmpty) {
+        print("⚠️ API Key não configurada! Configure a chave na constante _googleApiKey");
+        addressController.text = "Lat: ${novaPosicao.latitude.toStringAsFixed(6)}, Lng: ${novaPosicao.longitude.toStringAsFixed(6)}";
+        _isUpdatingFromMap = false;
+        return;
+      }
+
+      final url = Uri.parse(
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${novaPosicao.latitude},${novaPosicao.longitude}&key=$_googleApiKey&language=pt-BR'
+      );
+      
+      print("🔍 Buscando endereço para: ${novaPosicao.latitude}, ${novaPosicao.longitude}");
+      
+      final response = await http.get(url);
+      
+      print("📡 Status da resposta: ${response.statusCode}");
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print("📦 Resposta da API: ${data['status']}");
+        
+        if (data['status'] == 'OK' && data['results'].isNotEmpty) {
+          String endereco = data['results'][0]['formatted_address'];
+          endereco = endereco.replaceAll(', Brasil', '');
+          
+          print("✅ Endereço encontrado: $endereco");
+          addressController.text = endereco;
+        } else if (data['status'] == 'REQUEST_DENIED') {
+          print("❌ API Key inválida ou sem permissão para Geocoding API");
+          addressController.text = "Erro: API Key inválida";
+        } else if (data['status'] == 'ZERO_RESULTS') {
+          print("⚠️ Nenhum endereço encontrado para esta localização");
+          addressController.text = "Lat: ${novaPosicao.latitude.toStringAsFixed(6)}, Lng: ${novaPosicao.longitude.toStringAsFixed(6)}";
+        } else {
+          throw Exception('Status: ${data['status']}');
+        }
+      } else {
+        throw Exception('Erro HTTP: ${response.statusCode}');
+      }
+    } catch (e) {
+      print("❌ Erro ao buscar endereço: $e");
+      addressController.text = "Lat: ${novaPosicao.latitude.toStringAsFixed(6)}, Lng: ${novaPosicao.longitude.toStringAsFixed(6)}";
+    } finally {
+      _isUpdatingFromMap = false;
+    }
+  }
+
+  // Busca coordenadas a partir do endereço digitado
+  void _buscarLocalizacaoPorEndereco(String endereco) async {
+    if (endereco.isEmpty || _isUpdatingFromMap || endereco.length < 3) return;
+    
+    setState(() {
+      _isUpdatingFromTextField = true;
+    });
+
+    try {
+      String enderecoCompleto = endereco;
+      if (!endereco.toLowerCase().contains('feira de santana')) {
+        enderecoCompleto = "$endereco, Feira de Santana, BA, Brasil";
+      }
+
+      final url = Uri.parse(
+        'https://maps.googleapis.com/maps/api/geocode/json?address=${Uri.encodeComponent(enderecoCompleto)}&key=$_googleApiKey&language=pt-BR'
+      );
+      
+      final response = await http.get(url);
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        
+        if (data['status'] == 'OK' && data['results'].isNotEmpty) {
+          final location = data['results'][0]['geometry']['location'];
+          LatLng novaPosicao = LatLng(location['lat'], location['lng']);
+          
+          setState(() {
+            _posicaoSelecionada = novaPosicao;
+          });
+          
+          _adicionarMarcador(novaPosicao);
+          _mapController?.animateCamera(
+            CameraUpdate.newLatLngZoom(novaPosicao, 16),
+          );
+        }
+      }
+    } catch (e) {
+      print("Erro ao buscar localização: $e");
+    } finally {
+      _isUpdatingFromTextField = false;
+    }
+  }
+
   Future<void> pickImage() async {
     if (kIsWeb) {
-      // Web
       print("testando");
     } else {
-      // Mobile
       final picker = ImagePicker();
       final pickedFile = await picker.pickImage(source: ImageSource.camera);
 
@@ -79,12 +215,11 @@ class TelaReportState extends State<TelaReport> {
       context: context,
       builder: (context) {
         return Scaffold(
-          backgroundColor: Colors.black.withOpacidade(0.9),
+          backgroundColor: Colors.black.withOpacity(0.9),
           body: Stack(
             children: [
               Center(
-                child:
-                    kIsWeb ? Image.memory(imageBytes!) : Image.file(imageFile!),
+                child: kIsWeb ? Image.memory(imageBytes!) : Image.file(imageFile!),
               ),
               Positioned(
                 top: 40,
@@ -94,7 +229,7 @@ class TelaReportState extends State<TelaReport> {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacidade(0.5),
+                      color: Colors.white.withOpacity(0.5),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -121,6 +256,8 @@ class TelaReportState extends State<TelaReport> {
         usuarioId: widget.usuarioId,
         descricao: descriptionController.text,
         urlImagem: imageName,
+        latitude: _posicaoSelecionada.latitude,
+        longitude: _posicaoSelecionada.longitude,
       );
 
       if (resultado == null) {
@@ -152,9 +289,6 @@ class TelaReportState extends State<TelaReport> {
     final screenHeight = MediaQuery.of(context).size.height;
     final panelHeight = screenHeight * 0.6;
 
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return Scaffold(
       body: Column(
         children: [
@@ -166,16 +300,20 @@ class TelaReportState extends State<TelaReport> {
                     target: _initialPosicao,
                     zoom: 16,
                   ),
-                  onMapCreated: (controller) {},
+                  markers: _markers,
+                  onMapCreated: (controller) {
+                    _mapController = controller;
+                  },
+                  onTap: (posicao) {
+                    _atualizarPosicao(posicao);
+                  },
                 ),
                 Positioned(
                   top: 16,
                   left: 16,
                   child: CircleAvatar(
-                    backgroundColor:
-                        isDark ? Colors.grey[700] : Colors.grey[300],
-                    child: Icon(Icons.person,
-                        color: isDark ? Colors.black : Colors.white),
+                    backgroundColor: Colors.grey[300],
+                    child: const Icon(Icons.person, color: Colors.white),
                   ),
                 ),
               ],
@@ -185,9 +323,9 @@ class TelaReportState extends State<TelaReport> {
             width: double.infinity,
             height: panelHeight,
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: isDark ? Colors.grey[900] : const Color(0xFF1E3A5F),
-              borderRadius: const BorderRadius.only(
+            decoration: const BoxDecoration(
+              color: Color(0xFF1E3A5F),
+              borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(25),
                 topRight: Radius.circular(25),
               ),
@@ -196,38 +334,39 @@ class TelaReportState extends State<TelaReport> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildSectionTitle("Endereço selecionado:", isDark),
-                  _buildTextField(addressController, "EX: Senai - FSA", isDark),
-                  _buildSectionTitle("Problema relatado", isDark),
-                  _buildTextField(problemController, "EX: Buraco", isDark,
-                      readOnly: true),
-                  _buildSectionTitle("Descrição (opcional)", isDark),
+                  _buildSectionTitle("Endereço selecionado:"),
                   _buildTextField(
-                      descriptionController, "Descreva o problema...", isDark),
+                    addressController,
+                    "EX: Senai - FSA",
+                    onChanged: (valor) {
+                      if (!_isUpdatingFromMap) {
+                        _buscarLocalizacaoPorEndereco(valor);
+                      }
+                    },
+                  ),
+                  _buildSectionTitle("Problema relatado"),
+                  _buildTextField(problemController, "EX: Buraco", readOnly: true),
+                  _buildSectionTitle("Descrição (opcional)"),
+                  _buildTextField(descriptionController, "Descreva o problema..."),
                   const SizedBox(height: 10),
                   GestureDetector(
-                    onTap:
-                        pickImage, // Tocar aqui para tirar ou selecionar uma nova imagem
+                    onTap: pickImage,
                     child: Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: isDark ? Colors.grey[800] : Colors.white,
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            Icons.camera_alt,
-                            color: isDark ? Colors.white : Colors.black,
-                            size: 30,
-                          ),
+                          const Icon(Icons.camera_alt, color: Colors.black, size: 30),
                           if (imageName != null) ...[
                             const SizedBox(width: 8),
                             Text(
                               'Imagem salva: ${imageName!.length > 15 ? '${imageName!.substring(0, 12)}...' : imageName}',
-                              style: TextStyle(
-                                color: isDark ? Colors.white : Colors.black,
+                              style: const TextStyle(
+                                color: Colors.black,
                                 fontSize: 14,
                               ),
                             ),
@@ -240,9 +379,9 @@ class TelaReportState extends State<TelaReport> {
                                   imageName = null;
                                 });
                               },
-                              child: Icon(
+                              child: const Icon(
                                 Icons.close,
-                                color: isDark ? Colors.redAccent : Colors.red,
+                                color: Colors.red,
                                 size: 20,
                               ),
                             ),
@@ -293,19 +432,15 @@ class TelaReportState extends State<TelaReport> {
                         child: ElevatedButton(
                           onPressed: _cancelarReport,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                isDark ? Colors.grey[800] : Colors.white,
+                            backgroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
-                              side: BorderSide(
-                                  color: isDark ? Colors.white30 : Colors.grey),
+                              side: const BorderSide(color: Colors.grey),
                             ),
                           ),
-                          child: Text(
+                          child: const Text(
                             "Cancelar",
-                            style: TextStyle(
-                                color: isDark ? Colors.white : Colors.black,
-                                fontSize: 14),
+                            style: TextStyle(color: Colors.black, fontSize: 14),
                           ),
                         ),
                       ),
@@ -320,7 +455,7 @@ class TelaReportState extends State<TelaReport> {
     );
   }
 
-  Widget _buildSectionTitle(String title, bool isDark) {
+  Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(top: 12, bottom: 8),
       child: Text(
@@ -337,9 +472,9 @@ class TelaReportState extends State<TelaReport> {
 
   Widget _buildTextField(
     TextEditingController controller,
-    String hint,
-    bool isDark, {
+    String hint, {
     bool readOnly = false,
+    Function(String)? onChanged,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -348,6 +483,7 @@ class TelaReportState extends State<TelaReport> {
         readOnly: readOnly,
         textAlign: TextAlign.center,
         style: const TextStyle(color: Colors.white),
+        onChanged: onChanged,
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: const TextStyle(color: Colors.white70),
