@@ -54,7 +54,10 @@ class CardPRoblema extends StatelessWidget {
           children: [
             Text(
               report.nomeCategoria,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black),
             ),
             SizedBox(height: 4),
             Text(

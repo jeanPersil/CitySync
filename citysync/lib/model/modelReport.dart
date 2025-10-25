@@ -1,6 +1,8 @@
 class Report {
   final int id;
   final String endereco;
+  final double latitude;
+  final double longitude;
   final String nomeCategoria;
   final String nomeStatus;
   final String idUsuario;
@@ -11,6 +13,8 @@ class Report {
   Report({
     required this.id,
     required this.endereco,
+    required this.latitude,
+    required this.longitude,
     required this.nomeCategoria,
     required this.nomeStatus,
     required this.idUsuario,
@@ -23,6 +27,8 @@ class Report {
     return Report(
       id: json['id'] ?? 0,
       endereco: json['endereco'] ?? '',
+      latitude: json['latitude'] ?? '',
+      longitude: json['longitude'] ?? '',
       nomeCategoria: json['nome_categoria'] ?? '',
       nomeStatus: json['nome_status'] ?? '',
       idUsuario: json['fk_usuario'] ?? '',

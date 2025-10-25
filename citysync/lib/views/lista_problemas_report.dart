@@ -61,8 +61,10 @@ class _ProblemasReportState extends State<ProblemasReport>
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final containerWidth = (screenWidth < 600) ? screenWidth * 0.9 : screenWidth * 0.5;
-    final horizontalPadding = (screenWidth < 600) ? 16.0 : (screenWidth - containerWidth) / 2;
+    final containerWidth =
+        (screenWidth < 600) ? screenWidth * 0.9 : screenWidth * 0.5;
+    final horizontalPadding =
+        (screenWidth < 600) ? 16.0 : (screenWidth - containerWidth) / 2;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0A1D3D),
@@ -193,12 +195,14 @@ class _ProblemasReportState extends State<ProblemasReport>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF20C997)),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                Color(0xFF20C997)),
                           ),
                           SizedBox(height: 16),
                           Text(
                             "Carregando seus reports...",
-                            style: TextStyle(color: Colors.white70, fontSize: 16),
+                            style:
+                                TextStyle(color: Colors.white70, fontSize: 16),
                           ),
                         ],
                       ),
@@ -208,11 +212,13 @@ class _ProblemasReportState extends State<ProblemasReport>
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.error_outline, color: Colors.redAccent, size: 48),
+                          const Icon(Icons.error_outline,
+                              color: Colors.redAccent, size: 48),
                           const SizedBox(height: 16),
                           Text(
                             "Erro ao carregar reports: ${snapshot.error}",
-                            style: const TextStyle(color: Colors.white70, fontSize: 16),
+                            style: const TextStyle(
+                                color: Colors.white70, fontSize: 16),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 20),
@@ -242,7 +248,8 @@ class _ProblemasReportState extends State<ProblemasReport>
                               Container(
                                 padding: const EdgeInsets.all(20),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF1E3A5F).withOpacity(0.8),
+                                  color:
+                                      const Color(0xFF1E3A5F).withOpacity(0.8),
                                   borderRadius: BorderRadius.circular(20),
                                   boxShadow: [
                                     BoxShadow(
@@ -254,7 +261,8 @@ class _ProblemasReportState extends State<ProblemasReport>
                                 ),
                                 child: const Column(
                                   children: [
-                                    Icon(Icons.inbox_outlined, color: Colors.white70, size: 64),
+                                    Icon(Icons.inbox_outlined,
+                                        color: Colors.white70, size: 64),
                                     SizedBox(height: 16),
                                     Text(
                                       "Nenhum problema reportado ainda",
@@ -295,7 +303,8 @@ class _ProblemasReportState extends State<ProblemasReport>
                           end: Offset.zero,
                         ).animate(CurvedAnimation(
                           parent: _animationController,
-                          curve: Interval(0.1 * index, 1.0, curve: Curves.easeOut),
+                          curve:
+                              Interval(0.1 * index, 1.0, curve: Curves.easeOut),
                         )),
                         child: FadeTransition(
                           opacity: Tween<double>(
@@ -303,12 +312,14 @@ class _ProblemasReportState extends State<ProblemasReport>
                             end: 1.0,
                           ).animate(CurvedAnimation(
                             parent: _animationController,
-                            curve: Interval(0.1 * index, 1.0, curve: Curves.easeIn),
+                            curve: Interval(0.1 * index, 1.0,
+                                curve: Curves.easeIn),
                           )),
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 300),
                             curve: Curves.easeOut,
-                            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                            margin: const EdgeInsets.symmetric(
+                                vertical: 8, horizontal: 4),
                             child: InkWell(
                               onTap: () {
                                 Navigator.push(
