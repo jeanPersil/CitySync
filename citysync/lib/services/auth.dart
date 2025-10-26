@@ -46,10 +46,7 @@ class AutenticacaoUsuario {
 
       final response = await supabase.auth.signUp(
         password: dados["senha"],
-        email: dados["email"],
-        data: {
-          
-        }
+        email: dados["email"]
       );
 
       if (response.user != null) {
