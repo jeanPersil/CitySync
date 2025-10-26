@@ -61,7 +61,7 @@ class ReportsController {
   async editarReport(req, res) {
     try {
       const { id } = req.params;
-      const { endereco, descricao, categoria, status, url_imagem } = req.body;
+      const { endereco, descricao, categoria, status } = req.body;
 
       if (!id || isNaN(parseInt(id))) {
         return res.status(400).json({
@@ -69,13 +69,11 @@ class ReportsController {
           message: "ID do report é obrigatório e deve ser um número válido",
         });
       }
-
       const camposObrigatorios = {
         endereco,
         descricao,
         categoria,
         status,
-        url_imagem,
       };
       const camposFaltantes = Object.keys(camposObrigatorios).filter(
         (campo) =>
@@ -97,7 +95,6 @@ class ReportsController {
         descricao,
         categoria,
         status,
-        url_imagem,
       };
 
       const reportAtualizado = await reportService.editarReport(

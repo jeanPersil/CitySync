@@ -84,7 +84,40 @@ class Api {
     }
   }
 
-  async editarReport() {}
+  async atualizarReport(reportId, dadosDoFormulario) {
+    try {
+      const bodyParaBackend = {
+        endereco: dadosDoFormulario.endereco,
+        descricao: dadosDoFormulario.descricao,
+        categoria: dadosDoFormulario.nome_categoria,
+        status: dadosDoFormulario.nome_status,
+      };
+
+      const response = await fetch(`/api/reports/editar/${reportId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(bodyParaBackend),
+        credentials: "include",
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Falha ao atualizar report");
+      }
+
+      return result;
+      
+    } catch (error) {
+      console.error("Erro em api.atualizarReport:", error);
+      if (error instanceof SyntaxError) {
+        throw new Error();
+      }
+      throw error;
+    }
+  }
 
   async excluirReport(id) {
     const response = await fetch(`${this.url_api}/reports/deletar/${id}`, {
@@ -100,6 +133,32 @@ class Api {
     if (!result.success) throw new Error(result.message);
 
     return null;
+  }
+
+  async editar_dados(novoNome, novoEmail) {
+    try {
+      const response = await fetch(`${this.url_api}/users/atualizar_dados`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({ novoNome, novoEmail }),
+
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Ocorreu um erro no servidor");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Erro ao editar dados:", error);
+      throw new Error(error.message);
+    }
   }
 }
 

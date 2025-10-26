@@ -81,6 +81,52 @@ class UserController {
     }
   }
 
+  // CONTROLLER CORRIGIDO
+
+  async editar_dados(req, res) {
+    try {
+      const token = req.cookies.authToken;
+      const { novoNome, novoEmail } = req.body;
+
+      if (!token) {
+        return res.status(401).json({
+          success: false,
+          message: "Token não fornecido",
+        });
+      }
+
+      if (!novoNome && !novoEmail) {
+        return res.status(400).json({
+          success: false,
+          message: "Nenhum dado (nome ou email) fornecido para atualização",
+        });
+      }
+
+      if (
+        (novoNome !== undefined && novoNome.trim() === "") ||
+        (novoEmail !== undefined && novoEmail.trim() === "")
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Nome ou E-mail não podem ser campos vazios se forem fornecidos.",
+        });
+      }
+
+      await userServices.editar_dados(novoNome, novoEmail, token);
+
+      return res.status(200).json({
+        success: true,
+        message: "Dados atualizados com sucesso",
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: error.message || "Erro inesperado no servidor",
+      });
+    }
+  }
+
   async solicitar_recuperacao_senha(req, res) {
     try {
       const { email } = req.body;

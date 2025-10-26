@@ -6,6 +6,8 @@ import {
   authUtils,
 } from "./utils.js";
 
+import { api } from "./api.js";
+
 const btnSair = document.getElementById("btnSair");
 
 // ===== CONSTANTES =====
@@ -259,12 +261,13 @@ function alternarAba(abaId) {
 }
 
 // ===== SALVAR DADOS DO USUÁRIO =====
-function salvarDadosUsuario(e) {
+async function salvarDadosUsuario(e) {
   e.preventDefault();
 
   const novoNome = elementos.inputName.value;
   const novoEmail = elementos.inputEmail.value;
 
+  // --- 1. Validação do Frontend (seu código original, está ótimo) ---
   if (!novoNome || !novoEmail) {
     mostrarNotificacao("Por favor, preencha todos os campos.", "erro");
     return;
@@ -275,26 +278,29 @@ function salvarDadosUsuario(e) {
     return;
   }
 
-  // ✅ Atualizar estado local
-  estado.dadosUsuario.nome = novoNome;
-  estado.dadosUsuario.email = novoEmail;
+  try {
+    await api.editar_dados(novoNome, novoEmail);
 
-  // ✅ Atualizar localStorage mantendo a estrutura original
-  const userDataAtualizado = {
-    ...JSON.parse(
-      localStorage.getItem(CONFIG.LOCAL_STORAGE_KEYS.DADOS_USUARIO) || "{}"
-    ),
-    nome: novoNome,
-    email: novoEmail,
-  };
+    estado.dadosUsuario.nome = novoNome;
+    estado.dadosUsuario.email = novoEmail;
 
-  localStorage.setItem(
-    CONFIG.LOCAL_STORAGE_KEYS.DADOS_USUARIO,
-    JSON.stringify(userDataAtualizado)
-  );
+    const userDataAtualizado = {
+      ...JSON.parse(
+        localStorage.getItem(CONFIG.LOCAL_STORAGE_KEYS.DADOS_USUARIO) || "{}"
+      ),
+      nome: novoNome,
+      email: novoEmail,
+    };
+    localStorage.setItem(
+      CONFIG.LOCAL_STORAGE_KEYS.DADOS_USUARIO,
+      JSON.stringify(userDataAtualizado)
+    );
 
-  atualizarInterfaceUsuario();
-  mostrarNotificacao("Dados salvos com sucesso!", "sucesso");
+    atualizarInterfaceUsuario();
+    mostrarNotificacao("Dados salvos com sucesso!", "sucesso");
+  } catch (error) {
+    mostrarNotificacao(error.message, "erro");
+  }
 }
 
 function validarEmail(email) {

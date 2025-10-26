@@ -12,6 +12,40 @@ import { api } from "./api.js";
 
 const btnSair = document.getElementById("btnSair");
 
+// --- NOVO: Objeto de elementos do DOM ---
+// Agrupa todas as referências do DOM em um só lugar
+const elementos = {
+  // Modais
+  viewModal: document.getElementById("reportModal"),
+  viewModalClose: document.getElementById("modalClose"),
+  viewModalBtnClose: document.querySelector(
+    "#reportModal .modal-footer .btn-secondary"
+  ),
+  editModal: document.getElementById("editReportModal"),
+  editModalClose: document.getElementById("editModalClose"),
+
+  // Formulário de Edição
+  editReportForm: document.getElementById("editReportForm"),
+  editModalReportId: document.getElementById("editModalReportId"),
+  editReportInternalId: document.getElementById("editReportInternalId"),
+  editBairro: document.getElementById("editBairro"),
+  editData: document.getElementById("editData"),
+  editCategoria: document.getElementById("editCategoria"),
+  editStatus: document.getElementById("editStatus"),
+  editDescricao: document.getElementById("editDescricao"),
+  cancelEditReportBtn: document.getElementById("cancelEditReport"),
+  saveEditedReportBtn: document.getElementById("saveEditedReport"),
+
+  // Tabela e Filtros
+  tbody: document.querySelector("tbody"),
+  applyFiltersBtn: document.querySelector(".botao-primario"),
+  clearFiltersBtn: document.querySelector(".botao-secundario"),
+  filterInputs: document.querySelectorAll(
+    ".filter-input, .select-field select"
+  ),
+  searchInput: document.querySelector(".search-field input"),
+};
+
 document.addEventListener("DOMContentLoaded", function () {
   // Verificar se estamos na página correta
   if (!document.querySelector(".container-painel")) {
@@ -22,6 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initDarkMode();
   initMenuToggle();
   initModal();
+  initEditModal(); // --- NOVO: Chama a inicialização do modal de edição
   initTableInteractions();
   initFilters();
   carregarPerfilUsuario();
@@ -30,20 +65,14 @@ document.addEventListener("DOMContentLoaded", function () {
 // ==================================
 // 2. MODO ESCURO
 // ==================================
-
 function initDarkMode() {
   const darkModeToggle = document.getElementById("dark-mode-toggle");
   const body = document.body;
-
-  // Verificar preferência salva
   const isDarkMode = localStorage.getItem("darkMode") === "true";
-
   if (isDarkMode) {
     body.classList.add("dark-mode");
     darkModeToggle.checked = true;
   }
-
-  // Alternar modo escuro
   darkModeToggle.addEventListener("change", function () {
     body.classList.toggle("dark-mode");
     localStorage.setItem("darkMode", body.classList.contains("dark-mode"));
@@ -53,14 +82,11 @@ function initDarkMode() {
 // ==================================
 // 3. MENU MOBILE
 // ==================================
-
 function initMenuToggle() {
   const menuToggle = document.getElementById("menuToggle");
   const sidebar = document.querySelector(".barra-lateral");
   const overlay = document.getElementById("overlay");
-
   if (!menuToggle || !sidebar) return;
-
   menuToggle.addEventListener("click", function () {
     sidebar.classList.toggle("open");
     overlay.classList.toggle("active");
@@ -68,15 +94,11 @@ function initMenuToggle() {
       ? "hidden"
       : "";
   });
-
-  // Fechar menu ao clicar no overlay
   overlay.addEventListener("click", function () {
     sidebar.classList.remove("open");
     overlay.classList.remove("active");
     document.body.style.overflow = "";
   });
-
-  // Fechar menu ao redimensionar a tela
   window.addEventListener("resize", function () {
     if (window.innerWidth > 992) {
       sidebar.classList.remove("open");
@@ -87,81 +109,12 @@ function initMenuToggle() {
 }
 
 // ==================================
-// 4. MODAL (CORRIGIDO)
+// 4. MODAL DE VISUALIZAÇÃO
 // ==================================
-
+// --- MODIFICADO: usa 'reconnectModalListeners' ---
 function initModal() {
-  const modal = document.getElementById("reportModal");
-  const viewButtons = document.querySelectorAll(".view-btn");
-  const closeButton = document.getElementById("modalClose");
-  const modalCloseBtn = document.querySelector(".modal-footer .btn-secondary");
-
-  // Dados de exemplo para os reports
-  const reportsData = {
-    "001": {
-      bairro: "Centro",
-      data: "15/12/2024",
-      categoria: "Iluminação Pública",
-      descricao:
-        "Poste de luz quebrado na Rua Principal, próximo ao número 123. A lâmpada está piscando intermitentemente, causando insegurança na área.",
-      status: "Pendente",
-      prioridade: "Urgente",
-      responsavel: "João Silva",
-      dataPrevista: "20/12/2024",
-    },
-    "002": {
-      bairro: "Jardim das Flores",
-      data: "14/12/2024",
-      categoria: "Buraco na Via",
-      descricao:
-        "Buraco de aproximadamente 50cm de diâmetro na Avenida das Flores, próximo ao supermercado. Risco de acidentes.",
-      status: "Em andamento",
-      prioridade: "Alta",
-      responsavel: "Maria Santos",
-      dataPrevista: "18/12/2024",
-    },
-    "003": {
-      bairro: "Vila Nova",
-      data: "13/12/2024",
-      categoria: "Coleta de Lixo",
-      descricao:
-        "Lixo acumulado há 3 dias no ponto de coleta da Rua Nova Esperança. Odor forte e risco de proliferação de animais.",
-      status: "Resolvido",
-      prioridade: "Média",
-      responsavel: "Pedro Costa",
-      dataPrevista: "15/12/2024",
-    },
-  };
-
-  // Abrir modal
-  viewButtons.forEach((button) => {
-    button.addEventListener("click", function () {
-      const reportId = this.getAttribute("data-id");
-      const reportData = reportsData[reportId];
-
-      if (reportData) {
-        // Preencher dados do modal
-        document.getElementById("modalReportId").textContent = reportId;
-        document.getElementById("modalBairro").textContent = reportData.bairro;
-        document.getElementById("modalData").textContent = reportData.data;
-        document.getElementById("modalCategoria").textContent =
-          reportData.categoria;
-        document.getElementById("modalDescricao").textContent =
-          reportData.descricao;
-        document.getElementById("modalStatus").textContent = reportData.status;
-        document.getElementById("modalPrioridade").textContent =
-          reportData.prioridade;
-        document.getElementById("modalResponsavel").textContent =
-          reportData.responsavel;
-        document.getElementById("modalDataPrevista").textContent =
-          reportData.dataPrevista;
-
-        // Mostrar modal
-        modal.classList.add("active");
-        document.body.style.overflow = "hidden";
-      }
-    });
-  });
+  const modal = elementos.viewModal;
+  if (!modal) return;
 
   // Fechar modal
   function closeModal() {
@@ -170,12 +123,11 @@ function initModal() {
   }
 
   // Event listeners para fechar modal
-  if (closeButton) {
-    closeButton.addEventListener("click", closeModal);
+  if (elementos.viewModalClose) {
+    elementos.viewModalClose.addEventListener("click", closeModal);
   }
-
-  if (modalCloseBtn) {
-    modalCloseBtn.addEventListener("click", closeModal);
+  if (elementos.viewModalBtnClose) {
+    elementos.viewModalBtnClose.addEventListener("click", closeModal);
   }
 
   // Fechar modal clicando fora
@@ -193,16 +145,109 @@ function initModal() {
   });
 }
 
+function formatarDataParaInput(dataString) {
+  if (!dataString) return "";
+  try {
+    const date = new Date(dataString);
+    if (isNaN(date.getTime())) return ""; // Data inválida
+
+    // Pega o fuso horário local para evitar erro de "um dia a menos"
+    const offset = date.getTimezoneOffset();
+    const dateCorrigida = new Date(date.getTime() - offset * 60 * 1000);
+
+    return dateCorrigida.toISOString().split("T")[0];
+  } catch (e) {
+    return "";
+  }
+}
+
+/**
+ * Preenche e abre o modal de edição com os dados do report
+ */
+function openEditReportModal(reportData) {
+  if (!elementos.editModal) return;
+
+  // Mapeia os dados da API para os campos do formulário
+  elementos.editModalReportId.textContent = reportData.id;
+  elementos.editReportInternalId.value = reportData.id; // O ID real
+  elementos.editBairro.value = reportData.endereco || "";
+  elementos.editData.value = formatarDataParaInput(reportData.data_criacao);
+  elementos.editCategoria.value = reportData.nome_categoria || "";
+  elementos.editStatus.value = reportData.nome_status || "";
+  elementos.editDescricao.value = reportData.descricao || "";
+
+  elementos.editModal.classList.add("active"); // Mostra o modal
+  document.body.style.overflow = "hidden";
+}
+
+/**
+ * Fecha e limpa o modal de edição
+ */
+function closeEditReportModal() {
+  if (!elementos.editModal) return;
+  elementos.editModal.classList.remove("active"); // Esconde o modal
+  elementos.editReportForm.reset(); // Limpa o formulário
+  document.body.style.overflow = "";
+}
+
+/**
+ * Inicializa os eventos do modal de edição (fechar e salvar)
+ */
+function initEditModal() {
+  if (!elementos.editModal) return;
+
+  // Eventos para fechar
+  elementos.editModalClose.addEventListener("click", closeEditReportModal);
+  elementos.cancelEditReportBtn.addEventListener("click", closeEditReportModal);
+
+  // Evento para salvar (submit do form)
+  elementos.editReportForm.addEventListener("submit", async (event) => {
+    event.preventDefault(); // Impede o recarregamento da página
+
+    // Pega o ID e os dados do formulário
+    const reportId = elementos.editReportInternalId.value;
+    const updatedData = {
+      endereco: elementos.editBairro.value,
+      data_criacao: elementos.editData.value,
+      nome_categoria: elementos.editCategoria.value,
+      nome_status: elementos.editStatus.value,
+      descricao: elementos.editDescricao.value,
+    };
+
+    // UI de "Carregando"
+    elementos.saveEditedReportBtn.textContent = "Salvando...";
+    elementos.saveEditedReportBtn.disabled = true;
+
+    try {
+      const result = await api.atualizarReport(reportId, updatedData);
+
+      if (!result.success) {
+        throw new Error(result.message || "Erro ao salvar");
+      }
+
+      mostrarNotificacao("Report atualizado com sucesso!", "sucesso");
+      closeEditReportModal();
+
+      // Atualiza a tabela chamando a função de filtro
+      elementos.applyFiltersBtn.click();
+
+      elementos.applyFiltersBtn.click();
+    } catch (error) {
+      console.error("Erro ao salvar edições:", error);
+      mostrarNotificacao(`Erro ao atualizar: ${error.message}`, "erro");
+    } finally {
+      elementos.saveEditedReportBtn.textContent = "Salvar Alterações";
+      elementos.saveEditedReportBtn.disabled = false;
+    }
+  });
+}
+
 // ==================================
 // 5. INTERAÇÕES DA TABELA
 // ==================================
-
 function initTableInteractions() {
-  // Seleção de linhas com checkbox
   const checkboxes = document.querySelectorAll('tbody input[type="checkbox"]');
   const headerCheckbox = document.querySelector('thead input[type="checkbox"]');
-
-  // Selecionar/deselecionar todos
   if (headerCheckbox) {
     headerCheckbox.addEventListener("change", function () {
       const isChecked = this.checked;
@@ -212,15 +257,12 @@ function initTableInteractions() {
       });
     });
   }
-
-  // Selecionar linha individual
   checkboxes.forEach((checkbox) => {
     checkbox.addEventListener("change", function () {
       toggleRowSelection(this);
       updateHeaderCheckbox();
     });
   });
-
   function toggleRowSelection(checkbox) {
     const row = checkbox.closest("tr");
     if (checkbox.checked) {
@@ -229,21 +271,16 @@ function initTableInteractions() {
       row.classList.remove("selected");
     }
   }
-
   function updateHeaderCheckbox() {
     if (!headerCheckbox) return;
-
     const checkedCount = document.querySelectorAll(
       'tbody input[type="checkbox"]:checked'
     ).length;
     const totalCount = checkboxes.length;
-
     headerCheckbox.checked = checkedCount === totalCount;
     headerCheckbox.indeterminate =
       checkedCount > 0 && checkedCount < totalCount;
   }
-
-  // Ordenação de colunas
   const sortButtons = document.querySelectorAll("th i.fa-sort");
   sortButtons.forEach((button) => {
     button.addEventListener("click", function () {
@@ -259,35 +296,23 @@ function sortTable(columnIndex) {
   const tbody = table.querySelector("tbody");
   const rows = Array.from(tbody.querySelectorAll("tr"));
   const isAscending = !table.querySelector("th").classList.contains("asc");
-
   rows.sort((a, b) => {
     const aValue = a.children[columnIndex].textContent.trim();
     const bValue = b.children[columnIndex].textContent.trim();
-
-    // Verificar se são números
     if (!isNaN(aValue) && !isNaN(bValue)) {
       return isAscending ? aValue - bValue : bValue - aValue;
     }
-
-    // Comparação de strings
     return isAscending
       ? aValue.localeCompare(bValue, "pt-BR")
       : bValue.localeCompare(aValue, "pt-BR");
   });
-
-  // Remover linhas existentes
   while (tbody.firstChild) {
     tbody.removeChild(tbody.firstChild);
   }
-
-  // Adicionar linhas ordenadas
   rows.forEach((row) => tbody.appendChild(row));
-
-  // Atualizar indicadores de ordenação
   table.querySelectorAll("th").forEach((th) => {
     th.classList.remove("asc", "desc");
   });
-
   const currentTh = table.querySelectorAll("th")[columnIndex];
   currentTh.classList.add(isAscending ? "asc" : "desc");
 }
@@ -297,26 +322,22 @@ function sortTable(columnIndex) {
 // ==================================
 
 function initFilters() {
-  const searchInput = document.querySelector(".search-field input");
-  const filterInputs = document.querySelectorAll(
-    ".filter-input, .select-field select"
-  );
-  const applyFiltersBtn = document.querySelector(".botao-primario");
-  const clearFiltersBtn = document.querySelector(".botao-secundario");
-
   // Aplicar filtros
-  if (applyFiltersBtn) {
-    applyFiltersBtn.addEventListener("click", applyFilters);
+  if (elementos.applyFiltersBtn) {
+    elementos.applyFiltersBtn.addEventListener("click", applyFilters);
   }
 
   // Limpar filtros
-  if (clearFiltersBtn) {
-    clearFiltersBtn.addEventListener("click", clearFilters);
+  if (elementos.clearFiltersBtn) {
+    elementos.clearFiltersBtn.addEventListener("click", clearFilters);
   }
 
   // Pesquisa em tempo real
-  if (searchInput) {
-    searchInput.addEventListener("input", debounce(applyFilters, 300));
+  if (elementos.searchInput) {
+    elementos.searchInput.addEventListener(
+      "input",
+      debounce(applyFilters, 300)
+    );
   }
 
   async function applyFilters() {
@@ -328,19 +349,18 @@ function initFilters() {
     const dataInput = document.querySelectorAll(".filter-input")[2];
     const statusSelect = document.querySelectorAll(".select-field select")[0];
     const prioridadeSelect = document.querySelectorAll(
+      // --- MODIFICADO: corrigido para 'categoriaSelect' ---
       ".select-field select"
-    )[1];
+    )[1]; // Este é o select de Categoria, não prioridade
 
-    // Garante que tudo existe antes de acessar o valor
     const pesquisar = pesquisarInput?.value?.trim() || "";
     const endereco = bairroInput?.value?.trim() || "";
     const data = dataInput?.value || "";
     const status = statusSelect?.value !== "todos" ? statusSelect?.value : "";
     const categoria =
-      prioridadeSelect?.value !== "todos" ? prioridadeSelect?.value : "";
+      prioridadeSelect?.value !== "" ? prioridadeSelect?.value : "";
 
     try {
-      // Monta os parâmetros de busca
       const params = new URLSearchParams({
         pesquisar,
         endereco,
@@ -389,7 +409,7 @@ function initFilters() {
   }
 
   function renderTable(reports) {
-    const tbody = document.querySelector("tbody");
+    const tbody = elementos.tbody; // --- MODIFICADO: usa o objeto 'elementos'
     tbody.innerHTML = "";
 
     if (!reports || reports.length === 0) {
@@ -404,13 +424,14 @@ function initFilters() {
 
     reports.forEach((report) => {
       const tr = document.createElement("tr");
+      // --- MODIFICADO: Adicionado 'edit-btn' e 'data-id' ao botão de editar ---
       tr.innerHTML = `
       <td><input type="checkbox" /></td>
       <td>#${report.id}</td>
       <td>${report.endereco || "-"}</td>
       <td>${new Date(report.data_criacao).toLocaleDateString("pt-BR")}</td>
       <td><span class="status status-${
-        report.nome_status?.toLowerCase() || "indefinido"
+        report.nome_status?.toLowerCase().replace(" ", "-") || "indefinido" // --- MODIFICADO: replace " "
       }">
         ${report.nome_status || "-"}
       </span></td>
@@ -424,7 +445,7 @@ function initFilters() {
           <button class="botao-acao view-btn" data-id="${report.id}">
             <i class="fas fa-eye"></i>
           </button>
-          <button class="botao-acao">
+          <button class="botao-acao edit-btn" data-id="${report.id}">
             <i class="fas fa-edit"></i>
           </button>
           <button class="botao-acao delete" data-id="${report.id}">
@@ -437,26 +458,80 @@ function initFilters() {
     });
 
     adicionarEventosRemover();
-    reconnectModalListeners(reports);
+    adicionarEventosEditar(reports); // <-- CHAMA A NOVA FUNÇÃO
+    adicionarEventosVisualizar(reports);
+  }
+
+  function adicionarEventosVisualizar(reports) {
+    const viewButtons = document.querySelectorAll(".view-btn");
+    viewButtons.forEach((button) => {
+      button.addEventListener("click", (e) => {
+        const id = e.currentTarget.getAttribute("data-id");
+        const reportData = reports.find((r) => r.id == id);
+
+        if (reportData) {
+          // Preenche o modal de VISUALIZAÇÃO
+          document.getElementById("modalReportId").textContent = reportData.id;
+          document.getElementById("modalBairro").textContent =
+            reportData.endereco;
+          document.getElementById("modalData").textContent = new Date(
+            reportData.data_criacao
+          ).toLocaleDateString("pt-BR");
+          document.getElementById("modalCategoria").textContent =
+            reportData.nome_categoria;
+          document.getElementById("modalDescricao").textContent =
+            reportData.descricao;
+          document.getElementById("modalStatus").textContent =
+            reportData.nome_status;
+
+          // (Dados fictícios que não estão na sua view)
+          document.getElementById("modalPrioridade").textContent = "Alta"; // (Fictício)
+          document.getElementById("modalResponsavel").textContent =
+            "Não atribuído"; // (Fictício)
+          document.getElementById("modalDataPrevista").textContent =
+            "Não definida"; // (Fictício)
+
+          // Mostrar modal
+          elementos.viewModal.classList.add("active");
+          document.body.style.overflow = "hidden";
+        }
+      });
+    });
+  }
+
+  // --- NOVO: Função para adicionar eventos de edição ---
+  function adicionarEventosEditar(reports) {
+    const botoesEditar = document.querySelectorAll(".edit-btn");
+    botoesEditar.forEach((botao) => {
+      botao.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const id = e.currentTarget.getAttribute("data-id");
+
+        const reportData = reports.find((r) => r.id == id);
+
+        if (reportData) {
+          openEditReportModal(reportData);
+        } else {
+          console.error(
+            "Não foi possível encontrar os dados do report para o ID:",
+            id
+          );
+        }
+      });
+    });
   }
 
   function adicionarEventosRemover() {
     const botoesRemover = document.querySelectorAll(".delete");
-
     botoesRemover.forEach((botao) => {
       botao.addEventListener("click", async (e) => {
         e.stopPropagation();
-
         const id = e.currentTarget.getAttribute("data-id");
-
         if (!confirm("Tem certeza que deseja excluir este report?")) return;
-
         try {
           const result = await api.excluirReport(id);
-
           if (result !== null)
             return mostrarNotificacao("erro ao excluir report.", "erro");
-
           mostrarNotificacao("Reporte excluido com sucesso", "sucesso");
           applyFilters();
         } catch (error) {
@@ -468,32 +543,16 @@ function initFilters() {
   }
 
   function clearFilters() {
-    // Limpar inputs
-    filterInputs.forEach((input) => {
+    elementos.filterInputs.forEach((input) => {
       if (input.tagName === "SELECT") {
         input.selectedIndex = 0;
       } else {
         input.value = "";
       }
     });
-
-    // Reaplicar filtros (vazios)
     applyFilters();
   }
 
-  function updateTableInfo() {
-    const visibleRows = document.querySelectorAll(
-      'tbody tr:not([style*="display: none"])'
-    );
-    const totalRows = document.querySelectorAll("tbody tr").length;
-    const infoElement = document.querySelector(".tabela-info span");
-
-    if (infoElement) {
-      infoElement.textContent = `Mostrando 1-${visibleRows.length} de ${totalRows} resultados`;
-    }
-  }
-
-  // Debounce para pesquisa
   function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -506,40 +565,28 @@ function initFilters() {
     };
   }
 
+  // Carga inicial
   applyFilters();
 }
 
 // ==================================
 // 7. PAGINAÇÃO
 // ==================================
-
 function initPagination() {
   const paginationButtons = document.querySelectorAll(".btn-pagina");
-
   paginationButtons.forEach((button) => {
     button.addEventListener("click", function () {
       if (this.classList.contains("active")) return;
-
-      // Remover classe active de todos os botões
       paginationButtons.forEach((btn) => btn.classList.remove("active"));
-
-      // Adicionar classe active ao botão clicado
       this.classList.add("active");
-
-      // Aqui você implementaria a lógica de paginação real
-      // Por enquanto, apenas simula a mudança de página
       simulatePageChange();
     });
   });
-
   function simulatePageChange() {
-    // Simular carregamento de nova página
     const tableBody = document.querySelector("tbody");
     tableBody.style.opacity = "0.5";
-
     setTimeout(() => {
       tableBody.style.opacity = "1";
-      // Aqui você carregaria os dados da nova página
     }, 300);
   }
 }
@@ -547,8 +594,6 @@ function initPagination() {
 // ==================================
 // 8. INICIALIZAÇÃO DA PAGINAÇÃO
 // ==================================
-
-// Chamar a inicialização da paginação
 initPagination();
 
 btnSair.addEventListener("click", async (e) => {

@@ -3,9 +3,9 @@ function mapearCategoria(categoria) {
     buraco: 1,
     iluminação: 2,
     lixo: 3,
-    Semáforo: 4,
+    semáforo: 4,
     "vazamento/esgoto": 5,
-    Transporte: 6,
+    transporte: 6,
     outros: 7,
   };
 

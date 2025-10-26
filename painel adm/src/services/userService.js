@@ -13,6 +13,7 @@
  */
 
 const supabase = require("../config");
+const userRepositorie = require("../repositories/userRepositorie");
 const UserRepositories = require("../repositories/userRepositorie"); //
 
 class UserService {
@@ -34,6 +35,52 @@ class UserService {
       session: data.session,
       user: dados_usuario,
     };
+  }
+
+  async editar_dados(nome, email, token) {
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      throw new Error("Token inválido ou expirado.");
+    }
+
+    const userId = user.id;
+
+    if (email) {
+      const { error: emailAuthError } =
+        await supabase.auth.admin.updateUserById(userId, { email: email });
+
+      if (emailAuthError) {
+        throw new Error(
+          `Erro ao atualizar e-mail de autenticação: ${emailAuthError.message}`
+        );
+      }
+    }
+
+    const profileUpdates = {};
+
+    if (nome) {
+      profileUpdates.nome = nome;
+    }
+    if (email) {
+      profileUpdates.email = email;
+    }
+
+    if (Object.keys(profileUpdates).length > 0) {
+      const { error: profileError } = await supabase
+        .from("users")
+        .update(profileUpdates)
+        .eq("id", userId);
+
+      if (profileError) {
+        throw new Error(
+          `Erro ao atualizar perfil (tabela users): ${profileError.message}`
+        );
+      }
+    }
   }
 
   async enviar_email_de_recuperacao_de_senha(email) {

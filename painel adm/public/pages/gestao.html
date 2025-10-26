@@ -377,6 +377,85 @@
       </div>
     </div>
 
+    <!--- Modal para editar-->
+
+    <div class="modal" id="editReportModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Editar Report #<span id="editModalReportId"></span></h3>
+          <button class="modal-close" id="editModalClose">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <form id="editReportForm">
+          <div class="modal-body">
+            <input type="hidden" id="editReportInternalId" />
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="editBairro">Bairro/Endereço</label>
+                <input
+                  type="text"
+                  id="editBairro"
+                  class="form-input"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="editData">Data</label>
+                <input type="date" id="editData" class="form-input" required />
+              </div>
+
+              <div class="form-group">
+                <label for="editCategoria">Categoria</label>
+                <select id="editCategoria" class="form-select" required>
+                  <option value="Buraco">Buraco</option>
+                  <option value="Iluminação">Iluminação</option>
+                  <option value="Lixo">Lixo</option>
+                  <option value="Semáforo">Semáforo</option>
+                  <option value="Vazamento/esgoto">Vazamento/esgoto</option>
+                  <option value="Transporte">Transporte</option>
+                  <option value="Outros">Outros</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="editStatus">Status</label>
+                <select id="editStatus" class="form-select" required>
+                  <option value="Pendente">Pendente</option>
+                  <option value="Em andamento">Em andamento</option>
+                  <option value="Resolvido">Resolvido</option>
+                </select>
+              </div>
+
+              <div class="form-group form-group-full">
+                <label for="editDescricao">Descrição</label>
+                <textarea
+                  id="editDescricao"
+                  class="form-input"
+                  rows="4"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              id="cancelEditReport"
+            >
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary" id="saveEditedReport">
+              Salvar Alterações
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    
     <!-- Overlay para menu mobile -->
     <div class="overlay" id="overlay"></div>
     <script type="module" src="/Javascript/utils.js"></script>

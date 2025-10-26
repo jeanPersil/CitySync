@@ -59,7 +59,6 @@ class ReportService {
       descricao: descricao.trim(),
       fk_categoria: mapearCategoria(categoria),
       fk_status: mapearStatus(status),
-      url_imagem,
     };
 
     const reportAtualizado = await reportRepositories.editar(

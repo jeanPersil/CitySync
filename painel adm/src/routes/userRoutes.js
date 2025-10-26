@@ -29,4 +29,6 @@ router.post(
   userController.solicitar_recuperacao_senha
 );
 
+router.put("/atualizar_dados", userController.editar_dados);
+
 module.exports = router;
