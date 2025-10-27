@@ -449,7 +449,7 @@ class _TelaCadastroState extends State<TelaCadastro>
         ],
       ),
       child: DropdownButtonFormField<int>(
-        value: _cidadeSelecionada,
+        initialValue: _cidadeSelecionada,
         dropdownColor: const Color(0xFF1E3A5F),
         decoration: _buildInputDecoration(
           labelText: "Cidade",
