@@ -6,14 +6,20 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:citysync/Tema/color_extension.dart';
 
 class TelaReport extends StatefulWidget {
-  const TelaReport(
-      {super.key, required this.usuarioId, required this.categoria});
+  const TelaReport({
+    super.key, 
+    required this.usuarioId, 
+    required this.categoria,
+    required this.selectedLocation,
+    required this.selectedAddress,
+  });
 
   final String usuarioId;
   final String categoria;
+  final LatLng selectedLocation;
+  final String selectedAddress;
 
   @override
   TelaReportState createState() => TelaReportState();
@@ -24,10 +30,13 @@ class TelaReportState extends State<TelaReport> {
   final TextEditingController problemController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
 
-  final LatLng _initialPosicao = LatLng(-12.2664, -38.9668);
+  late LatLng _currentLocation;
 
+  @override
   void initState() {
     super.initState();
+    _currentLocation = widget.selectedLocation;
+    addressController.text = widget.selectedAddress;
     problemController.text = widget.categoria;
   }
 
@@ -36,41 +45,44 @@ class TelaReportState extends State<TelaReport> {
   String? imageName;
 
   Future<void> pickImage() async {
-    if (kIsWeb) {
-      // Web
-      print("testando");
-    } else {
-      // Mobile
-      final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(source: ImageSource.camera);
+    try {
+      if (kIsWeb) {
+        final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+        if (pickedFile != null) {
+          final bytes = await pickedFile.readAsBytes();
+          if (!mounted) return;
+          setState(() {
+            imageBytes = bytes;
+            imageName = pickedFile.name;
+          });
+        }
+      } else {
+        final picker = ImagePicker();
+        final pickedFile = await picker.pickImage(source: ImageSource.camera);
 
-      if (pickedFile != null) {
-        setState(() {
-          imageFile = io.File(pickedFile.path);
-          imageName = pickedFile.name;
-        });
+        if (pickedFile != null) {
+          if (!mounted) return;
+          setState(() {
+            imageFile = io.File(pickedFile.path);
+            imageName = pickedFile.name;
+          });
+        }
       }
+    } catch (e) {
+      _showErrorSnackBar('Erro ao selecionar imagem: $e');
     }
   }
 
   int mapearCategoriaId(String nome) {
     switch (nome.toLowerCase()) {
-      case 'buraco':
-        return 1;
-      case 'iluminação':
-        return 2;
-      case 'lixo':
-        return 3;
-      case 'semafaro':
-        return 4;
-      case 'vazamento/esgoto':
-        return 5;
-      case 'transporte':
-        return 6;
-      case 'outros':
-        return 7;
-      default:
-        return 0;
+      case 'buraco': return 1;
+      case 'iluminação': return 2;
+      case 'lixo': return 3;
+      case 'semafaro': return 4;
+      case 'vazamento/esgoto': return 5;
+      case 'transporte': return 6;
+      case 'outros': return 7;
+      default: return 0;
     }
   }
 
@@ -79,12 +91,13 @@ class TelaReportState extends State<TelaReport> {
       context: context,
       builder: (context) {
         return Scaffold(
-          backgroundColor: Colors.black.withOpacidade(0.9),
+          backgroundColor: Colors.black.withValues(alpha: 0.9),
           body: Stack(
             children: [
               Center(
-                child:
-                    kIsWeb ? Image.memory(imageBytes!) : Image.file(imageFile!),
+                child: kIsWeb 
+                  ? Image.memory(imageBytes!) 
+                  : Image.file(imageFile!),
               ),
               Positioned(
                 top: 40,
@@ -94,7 +107,7 @@ class TelaReportState extends State<TelaReport> {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacidade(0.5),
+                      color: Colors.white.withValues(alpha: 0.5),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -113,8 +126,12 @@ class TelaReportState extends State<TelaReport> {
   }
 
   void _reportarProblema() async {
-    if (addressController.text.isNotEmpty &&
-        problemController.text.isNotEmpty) {
+    if (addressController.text.isEmpty || problemController.text.isEmpty) {
+      _showErrorSnackBar('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+
+    try {
       final resultado = await ReportApiService().enviarReport(
         endereco: addressController.text,
         categoriaId: mapearCategoriaId(widget.categoria),
@@ -123,24 +140,29 @@ class TelaReportState extends State<TelaReport> {
         urlImagem: imageName,
       );
 
+      if (!mounted) return;
+
       if (resultado == null) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Seu problema foi reportado!")),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Erro: $resultado")),
-        );
+        _showErrorSnackBar("Erro: $resultado");
       }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, preencha todos os campos obrigatórios.'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+    } catch (e) {
+      _showErrorSnackBar('Erro ao reportar problema: $e');
     }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 3),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   void _cancelarReport() {
@@ -163,17 +185,23 @@ class TelaReportState extends State<TelaReport> {
               children: [
                 GoogleMap(
                   initialCameraPosition: CameraPosition(
-                    target: _initialPosicao,
+                    target: _currentLocation,
                     zoom: 16,
                   ),
+                  markers: {
+                    Marker(
+                      markerId: const MarkerId('problem_location'),
+                      position: _currentLocation,
+                      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+                    ),
+                  },
                   onMapCreated: (controller) {},
                 ),
                 Positioned(
                   top: 16,
                   left: 16,
                   child: CircleAvatar(
-                    backgroundColor:
-                        isDark ? Colors.grey[700] : Colors.grey[300],
+                    backgroundColor: isDark ? Colors.grey[700] : Colors.grey[300],
                     child: Icon(Icons.person,
                         color: isDark ? Colors.black : Colors.white),
                   ),
@@ -206,8 +234,7 @@ class TelaReportState extends State<TelaReport> {
                       descriptionController, "Descreva o problema...", isDark),
                   const SizedBox(height: 10),
                   GestureDetector(
-                    onTap:
-                        pickImage, // Tocar aqui para tirar ou selecionar uma nova imagem
+                    onTap: pickImage,
                     child: Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
@@ -293,8 +320,7 @@ class TelaReportState extends State<TelaReport> {
                         child: ElevatedButton(
                           onPressed: _cancelarReport,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                isDark ? Colors.grey[800] : Colors.white,
+                            backgroundColor: isDark ? Colors.grey[800] : Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                               side: BorderSide(

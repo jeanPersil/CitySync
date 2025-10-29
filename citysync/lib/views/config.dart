@@ -61,7 +61,7 @@ class _TelaConfigState extends State<TelaConfig> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      color: isDark ? Colors.grey[800] : Colors.white.withOpacity(0.9),
+                      color: isDark ? Colors.grey[800] : Colors.white.withValues(alpha: 0.9),
                       child: ListTile(
                         leading: Icon(Icons.brightness_6, color: isDark ? Colors.white : Colors.blueGrey[700]),
                         title: Text(
@@ -76,7 +76,14 @@ class _TelaConfigState extends State<TelaConfig> {
                           onChanged: (value) {
                             themeProvider.toggleTheme();
                           },
-                          activeColor: const Color(0xFF20C997), 
+                          thumbColor: WidgetStateProperty.resolveWith<Color>(
+                            (states) {
+                              if (states.contains(WidgetState.selected)) {
+                                return const Color(0xFF20C997); // cor quando o switch está ativo ✅
+                              }
+                              return Colors.grey.shade400; // cor quando está desativado
+                            },
+                          ),
                         ),
                       ),
                     ),
@@ -87,7 +94,7 @@ class _TelaConfigState extends State<TelaConfig> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      color: isDark ? Colors.grey[800] : Colors.white.withOpacity(0.9),
+                      color: isDark ? Colors.grey[800] : Colors.white.withValues(alpha: 0.9),
                       child: ListTile(
                         leading: Icon(Icons.language, color: isDark ? Colors.white : Colors.blueGrey[700]),
                         title: Text(
@@ -132,7 +139,7 @@ class _TelaConfigState extends State<TelaConfig> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      color: isDark ? Colors.grey[800] : Colors.white.withOpacity(0.9),
+                      color: isDark ? Colors.grey[800] : Colors.white.withValues(alpha: 0.9),
                       child: ListTile(
                         leading: Icon(Icons.policy, color: isDark ? Colors.white : Colors.blueGrey[700]),
                         title: Text(
@@ -158,7 +165,7 @@ class _TelaConfigState extends State<TelaConfig> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      color: isDark ? Colors.grey[800] : Colors.white.withOpacity(0.9),
+                      color: isDark ? Colors.grey[800] : Colors.white.withValues(alpha: 0.9),
                       child: ListTile(
                         leading: Icon(Icons.help_outline, color: isDark ? Colors.white : Colors.blueGrey[700]),
                         title: Text(
@@ -184,7 +191,7 @@ class _TelaConfigState extends State<TelaConfig> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      color: isDark ? Colors.red[900]!.withOpacity(0.8) : Colors.red[700]!.withOpacity(0.9), // Cor de destaque para Logout
+                      color: isDark ? Colors.red[900]!.withValues(alpha: 0.8) : Colors.red[700]!.withValues(alpha: 0.9), // Cor de destaque para Logout
                       child: ListTile(
                         leading: const Icon(Icons.exit_to_app, color: Colors.white),
                         title: const Text(
