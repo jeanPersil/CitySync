@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -10,13 +11,12 @@ const Color kDialogBlue = Color(0xFF1E3A5F);
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
-
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final SupabaseClient _supabase = Supabase.instance.client;
+  final _supabase = Supabase.instance.client;
   late Future<Map<String, dynamic>?> _profileFuture;
   StreamSubscription<AuthState>? _authSub;
   String? _lastUserId;
@@ -67,16 +67,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (!mounted) return;
         _goToLogin();
       } else {
+        if (event == AuthChangeEvent.userUpdated) {
+          _syncEmailFromAuthToProfile();
+        }
         if (mounted) setState(() => _profileFuture = _loadProfile());
       }
     });
   }
 
-  void _loadProfile() {
-    _profileFuture = _fetchProfile();
+  @override
+  void dispose() {
+    _authSub?.cancel();
+    super.dispose();
   }
 
-  Future<Map<String, dynamic>?> _fetchProfile() async {
+  Future<Map<String, dynamic>?> _loadProfile() async {
     final user = _supabase.auth.currentUser;
     if (user == null) {
       _goToLogin();
@@ -114,7 +119,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _goToLogin() {
-    if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const TelaLogin()),
       (r) => false,
@@ -122,6 +126,125 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   String _digitsOnly(String v) => v.replaceAll(RegExp(r'\D'), '');
+
+
+  String _normalizeEmailInput(String v) {
+    final trimmed = v.trim();
+    final atIndex = trimmed.lastIndexOf('@');
+    if (atIndex < 1) return trimmed; 
+
+    final local = trimmed.substring(0, atIndex);
+    final rawDomain = trimmed.substring(atIndex + 1);
+
+    final domain = rawDomain.replaceAll(' ', '').toLowerCase();
+
+    return '$local@$domain';
+  }
+
+  bool _isValidEmail(String v) {
+    final re = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
+    if (!re.hasMatch(v)) return false;
+
+    final parts = v.split('@');
+    if (parts.length != 2) return false;
+
+    final domain = parts[1].toLowerCase();
+
+    if (_looksLikeGmail(domain) && domain != 'gmail.com') {
+      return false;
+    }
+    return true;
+  }
+
+  bool _looksLikeGmail(String domain) {
+    return domain.contains('gmail');
+  }
+
+  String? _validaEmail(String? v) {
+    if (v == null || v.trim().isEmpty) return 'Preencha o e-mail';
+    final normalized = _normalizeEmailInput(v);
+    return _isValidEmail(normalized) ? null : 'E-mail inválido';
+  }
+
+
+  Future<void> _syncEmailFromAuthToProfile() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return;
+
+    try {
+      final data = await _supabase
+          .from('users')
+          .select('email')
+          .eq('id', user.id)
+          .maybeSingle();
+
+      final String tableEmail = (data?['email'] ?? '') as String;
+      final String authEmail = user.email ?? '';
+
+      if (authEmail.isNotEmpty && authEmail != tableEmail) {
+        await _supabase.from('users').update({'email': authEmail}).eq('id', user.id);
+        if (mounted) {
+          setState(() => _profileFuture = _loadProfile());
+        }
+      }
+    } catch (e) {
+      debugPrint('Falha ao sincronizar email da tabela com Auth: $e');
+    }
+  }
+
+  Future<void> _changeEmail(String input) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) {
+      _goToLogin();
+      return;
+    }
+
+    final newEmail = _normalizeEmailInput(input);
+    if (!_isValidEmail(newEmail)) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('E-mail inválido')),
+      );
+      return;
+    }
+
+    try {
+      final res = await _supabase.auth.updateUser(UserAttributes(email: newEmail));
+      final updatedAuthEmail = res.user?.email ?? _supabase.auth.currentUser?.email;
+
+      if (!mounted) return;
+
+      if (updatedAuthEmail == newEmail) {
+        await _supabase.from('users').update({'email': newEmail}).eq('id', user.id);
+        setState(() => _profileFuture = _loadProfile());
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('E-mail atualizado com sucesso!')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Enviamos um link de confirmação para o novo e-mail. '
+              'Conclua a confirmação para finalizar a troca.',
+            ),
+          ),
+        );
+      }
+    } on AuthException catch (e) {
+      debugPrint('AuthException ao atualizar email: ${e.message}');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Não foi possível atualizar o e-mail: ${e.message}')),
+      );
+    } catch (e) {
+      debugPrint('Erro inesperado ao atualizar email: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro inesperado ao atualizar o e-mail.')),
+      );
+    }
+  }
+
 
   Future<void> _updateUserField({
     required String column,
@@ -136,37 +259,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (column == 'telefone' || column == 'cep') {
       toSave = _digitsOnly(value);
     }
-    if (column == 'email') {
-      try {
-        await _supabase.auth.updateUser(UserAttributes(email: value));
-      }
 
-      // Atualiza no banco de dados
-      final updated = await _supabase
-          .from('users')
-          .update({column: value})
-          .eq('id', user.id)
-          .select()
-          .maybeSingle();
-
-      if (!mounted) return;
-
-      setState(() {
-        _profileFuture = Future.value(
-          updated == null ? null : Map<String, dynamic>.from(updated),
-        );
-      });
-
-      _showSnackBar('Informação atualizada com sucesso!');
-    } catch (e) {
-      if (mounted) {
-        _showSnackBar('Erro ao atualizar: $e');
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
     try {
       final updated = await _supabase
           .from('users')
@@ -174,6 +267,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .eq('id', user.id)
           .select()
           .maybeSingle() as Map<String, dynamic>?;
+
       if (!mounted) return;
       setState(() {
         _profileFuture = Future.value(
@@ -193,8 +287,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+
   Future<void> _openEditDialog({
-    required String title,
+    required String titulo,
     required String column,
     required String initialValue,
     TextInputType keyboardType = TextInputType.text,
@@ -203,6 +298,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }) async {
     final controller = TextEditingController(text: initialValue);
     final formKey = GlobalKey<FormState>();
+
+    final effectiveFormatters = <TextInputFormatter>[
+      if (column == 'email') _EmailSanitizerFormatter(),
+      ...?inputFormatters,
+    ];
 
     await showDialog(
       context: context,
@@ -263,8 +363,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               autofocus: true,
               style: const TextStyle(color: kTextMain),
               decoration: const InputDecoration(labelText: 'Novo valor'),
-              validator: validator,
-              inputFormatters: inputFormatters,
+              validator: (val) {
+                if (column == 'email') {
+                  return _validaEmail(val);
+                }
+                return validator?.call(val);
+              },
+              inputFormatters: effectiveFormatters,
             ),
           ),
           actions: [
@@ -281,74 +386,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onPressed: () async {
                 if (formKey.currentState!.validate()) {
                   Navigator.of(ctx).pop();
-                  await _updateUserField(
-                    column: column,
-                    value: controller.text.trim(),
-                  );
+                  final newValue = controller.text.trim();
+                  if (column == 'email') {
+                    await _changeEmail(newValue); // fluxo especializado
+                  } else {
+                    await _updateUserField(column: column, value: newValue);
+                  }
                 }
               },
               child: const Text('Salvar'),
             ),
           ],
         ),
-        content: Form(
-          key: formKey,
-          child: TextFormField(
-            controller: controller,
-            keyboardType: keyboardType,
-            autofocus: true,
-            style: const TextStyle(color: kTextMain),
-            decoration: InputDecoration(
-              labelText: 'Novo valor',
-              labelStyle: const TextStyle(color: Colors.white70),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.white.withValues( alpha: 0.5)),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              focusedBorder: const OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.white),
-                borderRadius: BorderRadius.all(Radius.circular(12)),
-              ),
-              errorBorder: const OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.redAccent),
-                borderRadius: BorderRadius.all(Radius.circular(12)),
-              ),
-              focusedErrorBorder: const OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.redAccent),
-                borderRadius: BorderRadius.all(Radius.circular(12)),
-              ),
-              filled: true,
-              fillColor: Colors.white.withValues( alpha: 0.10),
-            ),
-            validator: validator,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text(
-              'Cancelar',
-              style: TextStyle(color: Colors.white70),
-            ),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.white.withValues( alpha: 0.15),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-            onPressed: () {
-              if (formKey.currentState!.validate()) {
-                Navigator.of(context).pop();
-                _updateUserField(
-                  column: column,
-                  value: controller.text.trim(),
-                );
-              }
-            },
-            child: const Text('Salvar'),
-          ),
-        ],
       ),
     );
   }
@@ -381,12 +430,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String? _vazio(String? v) =>
       (v == null || v.trim().isEmpty) ? 'Preencha este campo' : null;
 
-  String? _validaEmail(String? v) {
-    if (v == null || v.trim().isEmpty) return 'Preencha o e-mail';
-    final ok = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(v.trim());
-    return ok ? null : 'E-mail inválido';
-  }
-
   String? _validaTelefone(String? v) {
     final d = (v ?? '').replaceAll(RegExp(r'\D'), '');
     return (d.length == 10 || d.length == 11) ? null : 'Telefone deve ter 10–11 dígitos';
@@ -416,7 +459,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     const Text('Perfil não encontrado.', style: TextStyle(color: kTextMain)),
                     const SizedBox(height: 8),
-                    Text('Usuário ID = ${_lastUserId ?? '-'}', style: const TextStyle(color: Colors.white70)),
+                    Text('Usuário ID = ${_lastUserId ?? '-'}',
+                        style: const TextStyle(color: Colors.white70)),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () => setState(() => _profileFuture = _loadProfile()),
@@ -494,7 +538,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       column: 'email',
                       initialValue: email,
                       keyboardType: TextInputType.emailAddress,
-                      validator: _validaEmail,
                     ),
                   ),
                   _buildInfoTile(
@@ -563,205 +606,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           },
         ),
       ),
-      body: FutureBuilder<Map<String, dynamic>?>(
-        future: _profileFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting || _isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: kCardBg),
-            );
-          }
-
-          if (!snapshot.hasData || snapshot.data == null) {
-            return _buildErrorState();
-          }
-
-          return _buildProfileContent(snapshot.data!);
-        },
-      ),
-    );
-  }
-
-  Widget _buildErrorState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            'Não foi possível carregar o perfil.',
-            style: TextStyle(color: kTextMain),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _handleRefresh,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: kCardBg,
-              foregroundColor: kBgNavy,
-            ),
-            child: const Text('Tentar Novamente'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProfileContent(Map<String, dynamic> data) {
-    final nome = (data['nome'] ?? '') as String;
-    final email = (data['email'] ?? '') as String;
-    final cpf = (data['cpf'] ?? '') as String;
-    final telefone = (data['telefone'] ?? '') as String;
-    final cep = (data['cep'] ?? '') as String;
-
-    return RefreshIndicator(
-      onRefresh: _handleRefresh,
-      color: kCardBg,
-      backgroundColor: kBgNavy,
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _buildProfileHeader(nome),
-          const SizedBox(height: 24),
-          _buildPersonalInfoSection(nome, email, cpf, telefone),
-          const SizedBox(height: 20),
-          _buildAddressSection(cep),
-          const SizedBox(height: 32),
-          _buildSignOutButton(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProfileHeader(String nome) {
-    return Column(
-      children: [
-        const SizedBox(height: 12),
-        CircleAvatar(
-          radius: 36,
-          backgroundColor: kCardBg,
-          child: Text(
-            (nome.isNotEmpty ? nome[0] : '?').toUpperCase(),
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          nome.isEmpty ? 'Usuário' : nome,
-          style: const TextStyle(
-            color: kTextMain,
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPersonalInfoSection(
-    String nome,
-    String email,
-    String cpf,
-    String telefone,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SectionTitle('Informações pessoais'),
-        InfoTileEditable(
-          icon: Icons.badge_outlined,
-          label: 'Nome',
-          value: nome,
-          onEdit: () => _openEditDialog(
-            title: 'Editar nome',
-            column: 'nome',
-            initialValue: nome,
-            validator: _validateNotEmpty,
-          ),
-        ),
-        InfoTileEditable(
-          icon: Icons.email_outlined,
-          label: 'E-mail',
-          value: email,
-          onEdit: () => _openEditDialog(
-            title: 'Editar e-mail',
-            column: 'email',
-            initialValue: email,
-            keyboardType: TextInputType.emailAddress,
-            validator: _validateEmail,
-          ),
-        ),
-        InfoTileEditable(
-          icon: Icons.credit_card,
-          label: 'CPF',
-          value: _maskCPF(cpf),
-          onEdit: () => _openEditDialog(
-            title: 'Editar CPF',
-            column: 'cpf',
-            initialValue: cpf,
-            keyboardType: TextInputType.number,
-            validator: _validateCPF,
-          ),
-        ),
-        InfoTileEditable(
-          icon: Icons.phone_outlined,
-          label: 'Telefone',
-          value: _maskPhoneBR(telefone),
-          onEdit: () => _openEditDialog(
-            title: 'Editar telefone',
-            column: 'telefone',
-            initialValue: telefone,
-            keyboardType: TextInputType.phone,
-            validator: _validatePhone,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAddressSection(String cep) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SectionTitle('Endereço'),
-        InfoTileEditable(
-          icon: Icons.location_on_outlined,
-          label: 'CEP',
-          value: _maskCEP(cep),
-          onEdit: () => _openEditDialog(
-            title: 'Editar CEP',
-            column: 'cep',
-            initialValue: cep,
-            keyboardType: TextInputType.number,
-            validator: _validateCEP,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSignOutButton() {
-    return OutlinedButton.icon(
-      style: OutlinedButton.styleFrom(
-        foregroundColor: kTextMain,
-        side: BorderSide(color: kTextMain.withValues( alpha: 0.7)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        padding: const EdgeInsets.symmetric(vertical: 14),
-      ),
-      onPressed: _isLoading ? null : _handleSignOut,
-      icon: _isLoading 
-          ? SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: kTextMain,
-              ),
-            )
-          : const Icon(Icons.exit_to_app),
-      label: _isLoading ? const Text('Saindo...') : const Text('Sair'),
     );
   }
 
@@ -874,6 +718,29 @@ class _PhoneBrInputFormatter extends TextInputFormatter {
     return TextEditingValue(
       text: out,
       selection: TextSelection.collapsed(offset: offset),
+    );
+  }
+}
+
+class _EmailSanitizerFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    String text = newValue.text;
+    text = text.replaceAll(' ', '');
+
+    final at = text.lastIndexOf('@');
+    if (at > 0 && at < text.length - 1) {
+      final local = text.substring(0, at);
+      final domain = text.substring(at + 1).toLowerCase();
+      text = '$local@$domain';
+    }
+
+    return TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
     );
   }
 }
