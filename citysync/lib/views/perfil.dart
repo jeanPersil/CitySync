@@ -60,6 +60,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _profileFuture = _loadProfile();
 
+    
     _authSub = _supabase.auth.onAuthStateChange.listen((data) {
       final event = data.event;
       final session = data.session;
@@ -69,7 +70,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _goToLogin();
         return;
       }
-      if (mounted) setState(() => _profileFuture = _loadProfile());
+      
+      
+      if (mounted) {
+        _recarregarPerfil();
+      }
+    });
+  }
+
+  
+  void _recarregarPerfil() {
+    final novoPerfil = _loadProfile();
+    setState(() {
+      _profileFuture = novoPerfil;
     });
   }
 
@@ -129,7 +142,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (!mounted) return;
 
-    // ✅ empurra o registro atualizado direto para o FutureBuilder
+    
     setState(() {
       _profileFuture = Future.value(
         updated == null ? null : Map<String, dynamic>.from(updated),
@@ -315,7 +328,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             return RefreshIndicator(
               onRefresh: () async {
-                setState(() => _profileFuture = _loadProfile());
+                // CORREÇÃO: Usar o novo método
+                _recarregarPerfil();
                 await _profileFuture;
               },
               color: kCardBg,

@@ -2,6 +2,8 @@ import 'package:citysync/widgets/modal_pagina_inicial.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:citysync/views/perfil.dart';
+import 'package:citysync/services/reports.dart';
+import 'package:citysync/model/modelReport.dart';
 
 class Telaprincipal extends StatefulWidget {
   const Telaprincipal({
@@ -23,6 +25,12 @@ class _TelaprincipalState extends State<Telaprincipal>
   late AnimationController _animationController;
   late Animation<double> _fabAnimation;
   late Animation<double> _appBarFadeAnimation;
+  
+  GoogleMapController? _mapController;
+  Set<Marker> _markers = {};
+  List<Report> _reports = [];
+  bool _isLoading = true;
+  bool _disposed = false; // NOVA FLAG PARA CONTROLAR DISPOSE
 
   @override
   void initState() {
@@ -48,11 +56,147 @@ class _TelaprincipalState extends State<Telaprincipal>
     );
 
     _animationController.forward();
+    _carregarReports();
+  }
+
+  Future<void> _carregarReports() async {
+    if (_disposed) return; 
+    
+    try {
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
+        });
+      }
+      
+      final reports = await ReportApiService().obterTodosReports();
+      
+      if (mounted && !_disposed) {
+        setState(() {
+          _reports = reports;
+          _adicionarMarcadores();
+          _isLoading = false;
+        });
+      }
+      
+    } catch (e) {
+      print("Erro ao carregar reports: $e");
+      if (mounted && !_disposed) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _adicionarMarcadores() {
+    Set<Marker> novosMarcadores = {};
+
+    for (var report in _reports) {
+      BitmapDescriptor markerIcon = _getMarkerIconByCategory(report.nomeCategoria);
+
+      novosMarcadores.add(
+        Marker(
+          markerId: MarkerId('report_${report.id}'),
+          position: report.toLatLng(),
+          icon: markerIcon,
+          infoWindow: InfoWindow(
+            title: report.nomeCategoria,
+            snippet: report.endereco,
+            onTap: () {
+              _mostrarDetalhesReport(report);
+            },
+          ),
+        ),
+      );
+    }
+
+    if (mounted && !_disposed) {
+      setState(() {
+        _markers = novosMarcadores;
+      });
+    }
+  }
+
+  BitmapDescriptor _getMarkerIconByCategory(String categoria) {
+    Color color;
+    
+    switch (categoria.toLowerCase()) {
+      case 'buraco':
+        color = Colors.orange;
+        break;
+      case 'iluminação':
+        color = Colors.yellow;
+        break;
+      case 'lixo':
+        color = Colors.green;
+        break;
+      case 'semafaro':
+        color = Colors.red;
+        break;
+      case 'vazamento/esgoto':
+        color = Colors.blue;
+        break;
+      case 'transporte':
+        color = Colors.purple;
+        break;
+      case 'outros':
+        color = Colors.grey;
+        break;
+      default:
+        color = Colors.black;
+    }
+    
+    return BitmapDescriptor.defaultMarkerWithHue(_colorToHue(color));
+  }
+
+  double _colorToHue(Color color) {
+    if (color == Colors.orange) return BitmapDescriptor.hueOrange;
+    if (color == Colors.yellow) return BitmapDescriptor.hueYellow;
+    if (color == Colors.green) return BitmapDescriptor.hueGreen;
+    if (color == Colors.red) return BitmapDescriptor.hueRed;
+    if (color == Colors.blue) return BitmapDescriptor.hueBlue;
+    if (color == Colors.purple) return BitmapDescriptor.hueViolet;
+    if (color == Colors.grey) return BitmapDescriptor.hueRose;
+    return BitmapDescriptor.hueAzure;
+  }
+
+  void _mostrarDetalhesReport(Report report) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(report.nomeCategoria),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Endereço: ${report.endereco}'),
+              Text('Status: ${report.nomeStatus}'),
+              if (report.descricao.isNotEmpty)
+                Text('Descrição: ${report.descricao}'),
+              Text('Data: ${report.dataCriacao}'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Fechar'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   void dispose() {
+    _disposed = true; 
     _animationController.dispose();
+    
+    
+    _mapController = null;
+    
     super.dispose();
   }
 
@@ -116,6 +260,13 @@ class _TelaprincipalState extends State<Telaprincipal>
                 ),
               ],
             ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.refresh, color: Colors.white),
+                onPressed: _carregarReports,
+                tooltip: 'Atualizar reports',
+              ),
+            ],
           ),
         ),
       ),
@@ -154,30 +305,88 @@ class _TelaprincipalState extends State<Telaprincipal>
                 scrollGesturesEnabled: true,
                 tiltGesturesEnabled: true,
                 zoomGesturesEnabled: true,
+                markers: _markers,
+                onMapCreated: (controller) {
+                  if (!_disposed) {
+                    _mapController = controller;
+                  }
+                },
               ),
             ),
           ),
+          
+          if (_isLoading)
+            const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1E3A5F)),
+              ),
+            ),
+
+          Positioned(
+            top: 16,
+            left: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Text(
+                '${_reports.length} reports',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1E3A5F),
+                ),
+              ),
+            ),
+          ),
+
           Positioned(
             right: 16,
             bottom: 100,
             child: Column(
               children: [
                 FloatingActionButton.small(
-                  onPressed: () {},
+                  onPressed: () {
+                    if (!_disposed) {
+                      _mapController?.animateCamera(
+                        CameraUpdate.zoomIn(),
+                      );
+                    }
+                  },
                   backgroundColor: Colors.white,
                   child: const Icon(Icons.add, color: Color(0xFF1E3A5F)),
                   heroTag: "zoom_in",
                 ),
                 const SizedBox(height: 10),
                 FloatingActionButton.small(
-                  onPressed: () {},
+                  onPressed: () {
+                    if (!_disposed) {
+                      _mapController?.animateCamera(
+                        CameraUpdate.zoomOut(),
+                      );
+                    }
+                  },
                   backgroundColor: Colors.white,
                   child: const Icon(Icons.remove, color: Color(0xFF1E3A5F)),
                   heroTag: "zoom_out",
                 ),
                 const SizedBox(height: 10),
                 FloatingActionButton.small(
-                  onPressed: () {},
+                  onPressed: () {
+                    if (!_disposed) {
+                      _mapController?.animateCamera(
+                        CameraUpdate.newLatLng(_senaiFeiraDeSantana),
+                      );
+                    }
+                  },
                   backgroundColor: Colors.white,
                   child: const Icon(Icons.my_location, color: Color(0xFF1E3A5F)),
                   heroTag: "location",
@@ -202,7 +411,14 @@ class _TelaprincipalState extends State<Telaprincipal>
             ],
           ),
           child: FloatingActionButton.extended(
-            onPressed: () => mostrarModal(context, widget.usuarioID),
+            onPressed: () {
+              mostrarModal(context, widget.usuarioID);
+              Future.delayed(const Duration(seconds: 2), () {
+                if (!_disposed) {
+                  _carregarReports();
+                }
+              });
+            },
             backgroundColor: Colors.redAccent,
             icon: const Icon(Icons.warning_amber_rounded, color: Colors.white),
             label: const Text(

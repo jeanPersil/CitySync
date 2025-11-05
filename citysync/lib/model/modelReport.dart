@@ -1,3 +1,5 @@
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 class Report {
   final int id;
   final String endereco;
@@ -27,8 +29,12 @@ class Report {
     return Report(
       id: json['id'] ?? 0,
       endereco: json['endereco'] ?? '',
-      latitude: json['latitude'] ?? '',
-      longitude: json['longitude'] ?? '',
+      latitude: (json['latitude'] is String) 
+          ? double.tryParse(json['latitude']) ?? 0.0 
+          : (json['latitude'] ?? 0.0).toDouble(),
+      longitude: (json['longitude'] is String)
+          ? double.tryParse(json['longitude']) ?? 0.0
+          : (json['longitude'] ?? 0.0).toDouble(),
       nomeCategoria: json['nome_categoria'] ?? '',
       nomeStatus: json['nome_status'] ?? '',
       idUsuario: json['fk_usuario'] ?? '',
@@ -36,5 +42,10 @@ class Report {
       dataCriacao: json['data_criacao'] ?? '',
       descricao: json['descricao'] ?? '',
     );
+  }
+
+  
+  LatLng toLatLng() {
+    return LatLng(latitude, longitude);
   }
 }

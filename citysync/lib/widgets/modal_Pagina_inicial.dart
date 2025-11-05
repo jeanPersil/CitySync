@@ -1,7 +1,7 @@
 import 'package:citysync/views/report_problema.dart';
 import 'package:citysync/widgets/botao_categoria.dart';
 import 'package:flutter/material.dart';
-import 'package:citysync/Tema/color_extension.dart';
+
 
 int mapearCategoriaId(String nome) {
   switch (nome.toLowerCase()) {
@@ -24,11 +24,12 @@ int mapearCategoriaId(String nome) {
   }
 }
 
-void mostrarModal(BuildContext context, String id_usuario) {
+// MUDANÇA PRINCIPAL: Retorna Future<void> em vez de void
+Future<void> mostrarModal(BuildContext context, String id_usuario) async {
   String? categoriaSelecionada;
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
-  showModalBottomSheet(
+  await showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
@@ -42,7 +43,7 @@ void mostrarModal(BuildContext context, String id_usuario) {
             return Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isDark ? Colors.grey[900] : Color(0xFF1E3A5F),
+                color: isDark ? Colors.grey[900] : const Color(0xFF1E3A5F),
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(16)),
               ),
@@ -167,8 +168,8 @@ void mostrarModal(BuildContext context, String id_usuario) {
                       backgroundColor: isDark ? Colors.white : Colors.white,
                       foregroundColor: isDark ? Colors.black : Colors.black,
                       disabledBackgroundColor: isDark
-                          ? Colors.white.withOpacidade(0.4)
-                          : Colors.white.withOpacidade(0.6),
+                          ? Colors.white.withOpacity(0.4)
+                          : Colors.white.withOpacity(0.6),
                       disabledForegroundColor:
                           isDark ? Colors.black38 : Colors.black45,
                       shape: RoundedRectangleBorder(
