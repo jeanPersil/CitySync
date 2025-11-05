@@ -41,7 +41,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           onSecondary: kTextMain,
         ),
         cardColor: kCardBg,
-        dialogBackgroundColor: kDialogBlue,
         textTheme: const TextTheme(
           bodyLarge: TextStyle(color: kTextMain),
           bodyMedium: TextStyle(color: kTextMain),
@@ -53,7 +52,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           titleTextStyle:
               TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 15),
           subtitleTextStyle: TextStyle(color: Colors.black87),
-        ),
+        ), dialogTheme: DialogThemeData(backgroundColor: kDialogBlue),
       );
 
   @override
@@ -109,9 +108,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           debugPrint('ProfileScreen: failed to insert new user record for id = $_lastUserId');
           return null;
         }
-        return Map<String, dynamic>.from(insertResult);
+        return insertResult;
       }
-      return Map<String, dynamic>.from(data);
+      return data;
     } catch (e) {
       debugPrint('ProfileScreen _loadProfile error: $e');
       return null;
@@ -178,7 +177,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .eq('id', user.id)
           .maybeSingle();
 
-      final String tableEmail = (data?['email'] ?? '') as String;
+      final String tableEmail = data?['email'] ?? '';
       final String authEmail = user.email ?? '';
 
       if (authEmail.isNotEmpty && authEmail != tableEmail) {
@@ -216,19 +215,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       if (updatedAuthEmail == newEmail) {
         await _supabase.from('users').update({'email': newEmail}).eq('id', user.id);
-        setState(() => _profileFuture = _loadProfile());
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('E-mail atualizado com sucesso!')),
-        );
+        if (mounted) {
+          setState(() => _profileFuture = _loadProfile());
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('E-mail atualizado com sucesso!')),
+          );
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Enviamos um link de confirmação para o novo e-mail. '
-              'Conclua a confirmação para finalizar a troca.',
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Enviamos um link de confirmação para o novo e-mail. '
+                'Conclua a confirmação para finalizar a troca.',
+              ),
             ),
-          ),
-        );
+          );
+        }
       }
     } on AuthException catch (e) {
       debugPrint('AuthException ao atualizar email: ${e.message}');
@@ -266,13 +269,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .update({column: toSave})
           .eq('id', user.id)
           .select()
-          .maybeSingle() as Map<String, dynamic>?;
+          .maybeSingle();
 
       if (!mounted) return;
       setState(() {
-        _profileFuture = Future.value(
-          updated == null ? null : Map<String, dynamic>.from(updated),
-        );
+        _profileFuture = Future.value(updated);
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Informação atualizada com sucesso!')),
@@ -308,7 +309,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (ctx) => Theme(
         data: _lockedTheme.copyWith(
-          dialogBackgroundColor: kDialogBlue,
           colorScheme: _lockedTheme.colorScheme.copyWith(
             surface: kDialogBlue,
             onSurface: kTextMain,
@@ -319,7 +319,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             labelStyle: const TextStyle(color: Colors.white70),
             hintStyle: const TextStyle(color: Colors.white70),
             enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.white.withOpacity(0.5)),
+              borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.5)),
               borderRadius: BorderRadius.circular(12),
             ),
             focusedBorder: const OutlineInputBorder(
@@ -335,8 +335,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               borderRadius: BorderRadius.all(Radius.circular(12)),
             ),
             filled: true,
-            fillColor: Colors.white.withOpacity(0.10),
-          ),
+            fillColor: Colors.white.withValues(alpha: 0.10),
+          ), dialogTheme: DialogThemeData(backgroundColor: kDialogBlue),
         ),
         child: AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -379,7 +379,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             FilledButton(
               style: FilledButton.styleFrom(
-                backgroundColor: Colors.white.withOpacity(0.15),
+                backgroundColor: Colors.white.withValues(alpha: 0.15),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
@@ -388,7 +388,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Navigator.of(ctx).pop();
                   final newValue = controller.text.trim();
                   if (column == 'email') {
-                    await _changeEmail(newValue); // fluxo especializado
+                    await _changeEmail(newValue);
                   } else {
                     await _updateUserField(column: column, value: newValue);
                   }
@@ -472,11 +472,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             }
 
             final data = snap.data!;
-            final nome = (data['nome'] ?? '') as String;
-            final email = (data['email'] ?? '') as String;
-            final cpf = (data['cpf'] ?? '') as String;
-            final telefone = (data['telefone'] ?? '') as String;
-            final cep = (data['cep'] ?? '') as String;
+            final nome = data['nome'] ?? '';
+            final email = data['email'] ?? '';
+            final cpf = data['cpf'] ?? '';
+            final telefone = data['telefone'] ?? '';
+            final cep = data['cep'] ?? '';
 
             return RefreshIndicator(
               onRefresh: () async {
@@ -586,7 +586,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       foregroundColor: kTextMain,
-                      side: BorderSide(color: kTextMain.withOpacity(0.7)),
+                      side: BorderSide(color: kTextMain.withValues(alpha: 0.7)),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
@@ -648,7 +648,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
 class _SectionTitle extends StatelessWidget {
   final String text;
-  const _SectionTitle(this.text, {Key? key}) : super(key: key);
+  const _SectionTitle(this.text);
 
   @override
   Widget build(BuildContext context) {

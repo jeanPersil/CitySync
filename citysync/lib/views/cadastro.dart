@@ -142,7 +142,7 @@ class _TelaCadastroState extends State<TelaCadastro> with TickerProviderStateMix
       prefixIcon: Icon(icon, color: Colors.white70),
       suffixIcon: suffixIcon,
       filled: true,
-      fillColor: Colors.white.withOpacity(0.08),
+      fillColor: Colors.white.withValues(alpha: 0.08),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
       focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF20C997), width: 2)),
@@ -281,7 +281,7 @@ class _TelaCadastroState extends State<TelaCadastro> with TickerProviderStateMix
                     ),
                     const SizedBox(height: 14),
                     DropdownButtonFormField<int>(
-                      value: _cidadeSelecionada,
+                      initialValue: _cidadeSelecionada,
                       dropdownColor: const Color(0xFF1E3A5F),
                       decoration: _decoration(label: "Cidade", icon: Icons.location_city),
                       items: const [
@@ -330,7 +330,7 @@ class _TelaCadastroState extends State<TelaCadastro> with TickerProviderStateMix
                           borderRadius: BorderRadius.circular(14),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF20C997).withOpacity(_isLoading ? 0.3 : 0.6),
+                              color: const Color(0xFF20C997).withValues(alpha: _isLoading ? 0.3 : 0.6),
                               blurRadius: 10,
                               offset: const Offset(0, 5),
                             ),
