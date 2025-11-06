@@ -9,27 +9,35 @@ class ReportApiService {
   static const double _maxLatitude = -12.20;
   static const double _minLongitude = -39.10;
   static const double _maxLongitude = -38.80;
+  static const int tamanhoDaPagina = 10;
 
-  
-  Future<List<Report>> obterListaReports(String idUsuario) async {
-    final response = await supabase
-        .from("listar_reportes")
-        .select()
-        .eq("fk_usuario", idUsuario);
+  Future<List<Report>> obterListaReports(String idUsuario, int pagina) async {
+    try {
+      final int from = (pagina - 1) * tamanhoDaPagina;
+      final int to = (pagina * tamanhoDaPagina) - 1;
 
-    if (response == null || response.isEmpty) {
+      final response = await supabase
+          .from("listar_reportes")
+          .select()
+          .eq('fk_usuario', idUsuario)
+          .order('data_criacao', ascending: false)
+          .range(from, to);
+
+      if (response.isEmpty) {
+        return [];
+      }
+
+      final reportsDaPagina = (response as List)
+          .map((item) => Report.fromJson(item as Map<String, dynamic>))
+          .toList();
+
+      return reportsDaPagina;
+    } catch (e) {
+      print("Erro ao buscar reports do usuário: $e");
       return [];
     }
-    
-    
-    final todosReports = (response as List)
-        .map((item) => Report.fromJson(item as Map<String, dynamic>))
-        .toList();
-    
-    return _filtrarPorFeiraDeSantana(todosReports);
   }
 
- 
   Future<List<Report>> obterTodosReports() async {
     try {
       final response = await supabase
@@ -37,14 +45,14 @@ class ReportApiService {
           .select()
           .order('data_criacao', ascending: false);
 
-      if (response == null || response.isEmpty) {
+      if (response.isEmpty) {
         return [];
       }
-      
+
       final todosReports = (response as List)
           .map((item) => Report.fromJson(item as Map<String, dynamic>))
           .toList();
-      
+
       return _filtrarPorFeiraDeSantana(todosReports);
     } catch (e) {
       print("Erro ao buscar todos os reports: $e");
@@ -62,17 +70,16 @@ class ReportApiService {
   // MÉTODO PARA VERIFICAR SE AS COORDENADAS ESTÃO EM FEIRA DE SANTANA
   bool _estaEmFeiraDeSantana(double latitude, double longitude) {
     return latitude >= _minLatitude &&
-           latitude <= _maxLatitude &&
-           longitude >= _minLongitude &&
-           longitude <= _maxLongitude;
+        latitude <= _maxLatitude &&
+        longitude >= _minLongitude &&
+        longitude <= _maxLongitude;
   }
 
-  
   bool _validarEnderecoFeiraDeSantana(String endereco) {
     final enderecoLower = endereco.toLowerCase();
     return enderecoLower.contains('feira de santana') ||
-           enderecoLower.contains('feira santana') ||
-           enderecoLower.contains('fsa');
+        enderecoLower.contains('feira santana') ||
+        enderecoLower.contains('fsa');
   }
 
   Future<String?> enviarReport({
@@ -89,12 +96,10 @@ class ReportApiService {
         return "Endereço e categoria são obrigatórios.";
       }
 
-      
       if (!_estaEmFeiraDeSantana(latitude, longitude)) {
         return "Apenas são permitidos reports dentro dos limites de Feira de Santana.";
       }
 
-      
       if (!_validarEnderecoFeiraDeSantana(endereco)) {
         return "O endereço deve estar localizado em Feira de Santana.";
       }
