@@ -1,5 +1,8 @@
+import 'dart:typed_data';
+import 'dart:io' as io;
 import 'package:citysync/model/modelReport.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ReportApiService {
   final supabase = Supabase.instance.client;
@@ -10,6 +13,49 @@ class ReportApiService {
   static const double _minLongitude = -39.10;
   static const double _maxLongitude = -38.80;
   static const int tamanhoDaPagina = 10;
+
+  
+  static const String _bucketName = 'imagens';
+
+  
+  Future<String?> uploadImagem({
+    io.File? imageFile,
+    Uint8List? imageBytes,
+    required String imageName,
+  }) async {
+    try {
+      
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final extensao = imageName.split('.').last;
+      final nomeArquivo = '${timestamp}_$imageName';
+
+      String caminho;
+
+      if (kIsWeb && imageBytes != null) {
+        // Upload para web usando bytes
+        caminho = await supabase.storage
+            .from(_bucketName)
+            .uploadBinary(nomeArquivo, imageBytes);
+      } else if (imageFile != null) {
+        // Upload para mobile usando arquivo
+        caminho = await supabase.storage
+            .from(_bucketName)
+            .upload(nomeArquivo, imageFile);
+      } else {
+        return null;
+      }
+
+     
+      final urlPublica = supabase.storage
+          .from(_bucketName)
+          .getPublicUrl(nomeArquivo);
+
+      return urlPublica;
+    } catch (e) {
+      print("Erro ao fazer upload da imagem: $e");
+      return null;
+    }
+  }
 
   Future<List<Report>> obterListaReports(String idUsuario, int pagina) async {
     try {
@@ -109,7 +155,7 @@ class ReportApiService {
         'fk_categoria': categoriaId,
         'fk_usuario': usuarioId,
         'descricao': descricao,
-        'url_imagem': urlImagem,
+        'url_imagem': urlImagem ?? '',
         'latitude': latitude,
         'longitude': longitude,
       });

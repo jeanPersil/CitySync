@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:citysync/Tema/color_extension.dart';
 import 'package:http/http.dart' as http;
 
 class TelaReport extends StatefulWidget {
@@ -174,16 +173,30 @@ class TelaReportState extends State<TelaReport> {
   }
 
   Future<void> pickImage() async {
+    final picker = ImagePicker();
+    
     if (kIsWeb) {
-      print("testando");
+      
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+      if (pickedFile != null) {
+        
+        final bytes = await pickedFile.readAsBytes();
+        setState(() {
+          imageBytes = bytes;
+          imageName = pickedFile.name;
+          imageFile = null; 
+        });
+      }
     } else {
-      final picker = ImagePicker();
+     
       final pickedFile = await picker.pickImage(source: ImageSource.camera);
 
       if (pickedFile != null) {
         setState(() {
           imageFile = io.File(pickedFile.path);
           imageName = pickedFile.name;
+          imageBytes = null; 
         });
       }
     }
@@ -248,37 +261,69 @@ class TelaReportState extends State<TelaReport> {
   }
 
   void _reportarProblema() async {
-    if (addressController.text.isNotEmpty &&
-        problemController.text.isNotEmpty) {
-      final resultado = await ReportApiService().enviarReport(
-        endereco: addressController.text,
-        categoriaId: mapearCategoriaId(widget.categoria),
-        usuarioId: widget.usuarioId,
-        descricao: descriptionController.text,
-        urlImagem: imageName,
-        latitude: _posicaoSelecionada.latitude,
-        longitude: _posicaoSelecionada.longitude,
+  if (addressController.text.isNotEmpty &&
+      problemController.text.isNotEmpty) {
+    
+    // Mostrar loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    String? urlImagem;
+
+    // Fazer upload da imagem ANTES de enviar o report
+    if (imageName != null) {
+      urlImagem = await ReportApiService().uploadImagem(
+        imageFile: imageFile,
+        imageBytes: imageBytes,
+        imageName: imageName!,
       );
 
-      if (resultado == null) {
-        Navigator.of(context).pop();
+      if (urlImagem == null) {
+        Navigator.of(context).pop(); // Fechar loading
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Seu problema foi reportado!")),
+          const SnackBar(content: Text("Erro ao fazer upload da imagem")),
         );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Erro: $resultado")),
-        );
+        return;
       }
+    }
+
+    // Enviar o report com a URL da imagem
+    final resultado = await ReportApiService().enviarReport(
+      endereco: addressController.text,
+      categoriaId: mapearCategoriaId(widget.categoria),
+      usuarioId: widget.usuarioId,
+      descricao: descriptionController.text,
+      urlImagem: urlImagem, 
+      latitude: _posicaoSelecionada.latitude,
+      longitude: _posicaoSelecionada.longitude,
+    );
+
+    Navigator.of(context).pop(); 
+
+    if (resultado == null) {
+      Navigator.of(context).pop(); 
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Seu problema foi reportado!")),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, preencha todos os campos obrigatórios.'),
-          duration: Duration(seconds: 2),
-        ),
+        SnackBar(content: Text("Erro: $resultado")),
       );
     }
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Por favor, preencha todos os campos obrigatórios.'),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
+}
 
   void _cancelarReport() {
     Navigator.pop(context);

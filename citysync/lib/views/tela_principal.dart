@@ -162,32 +162,89 @@ class _TelaprincipalState extends State<Telaprincipal>
   }
 
   void _mostrarDetalhesReport(Report report) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(report.nomeCategoria),
-        content: SingleChildScrollView(
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(report.nomeCategoria),
+      content: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.8,
+          maxHeight: MediaQuery.of(context).size.height * 0.6,
+        ),
+        child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Exibir imagem se existir
+              if (report.urlImagem.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      report.urlImagem,
+                      width: MediaQuery.of(context).size.width * 0.7,
+                      height: 200,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Container(
+                          width: MediaQuery.of(context).size.width * 0.7,
+                          height: 200,
+                          alignment: Alignment.center,
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                                : null,
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: MediaQuery.of(context).size.width * 0.7,
+                          height: 200,
+                          color: Colors.grey[300],
+                          alignment: Alignment.center,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                              SizedBox(height: 8),
+                              Text(
+                                'Erro ao carregar imagem',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
               Text('Endereço: ${report.endereco}'),
+              const SizedBox(height: 8),
               Text('Status: ${report.nomeStatus}'),
-              if (report.descricao.isNotEmpty)
+              if (report.descricao.isNotEmpty) ...[
+                const SizedBox(height: 8),
                 Text('Descrição: ${report.descricao}'),
+              ],
+              const SizedBox(height: 8),
               Text('Data: ${report.dataCriacao}'),
             ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Fechar'),
-          ),
-        ],
       ),
-    );
-  }
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Fechar'),
+        ),
+      ],
+    ),
+  );
+}
 
   @override
   void dispose() {
