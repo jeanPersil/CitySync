@@ -8,6 +8,9 @@ class ProblemasReportController extends ChangeNotifier {
   final ReportApiService reportApiService;
   final String usuarioID;
 
+  // Flag crítica para controlar dispose
+  bool _disposed = false;
+
   ProblemasReportController({
     required this.reportApiService,
     required this.usuarioID,
@@ -29,42 +32,116 @@ class ProblemasReportController extends ChangeNotifier {
   String? _error;
   String? get error => _error;
 
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_disposed) {
+      super.notifyListeners();
+    }
+  }
+
+  // Método auxiliar para atualizar estado com segurança
+  void _safeSetState(VoidCallback fn) {
+    if (!_disposed) {
+      fn();
+      notifyListeners();
+    }
+  }
+
   Future<void> loadReports({bool refresh = false}) async {
+    // Verifica se foi disposed antes de começar
+    if (_disposed) return;
+
+    // Evita múltiplas requisições simultâneas
     if (_isLoadingMore) return;
 
     if (refresh) {
-      _reports.clear();
-      _currentPage = 1;
-      _hasMoreData = true;
-      _error = null;
-      _isInitialLoading = true;
-      notifyListeners();
+      _safeSetState(() {
+        _reports.clear();
+        _currentPage = 1;
+        _hasMoreData = true;
+        _error = null;
+        _isInitialLoading = true;
+      });
     } else if (_isInitialLoading) {
-      _isInitialLoading = true;
-      notifyListeners();
+      _safeSetState(() {
+        _isInitialLoading = true;
+      });
     } else {
-      _isLoadingMore = true;
-      notifyListeners();
+      _safeSetState(() {
+        _isLoadingMore = true;
+      });
     }
 
     try {
       final newReports =
           await reportApiService.obterListaReports(usuarioID, _currentPage);
 
-      _reports.addAll(newReports);
-      _currentPage++;
-      _isInitialLoading = false;
-      _isLoadingMore = false;
+      // CRÍTICO: Verifica se foi disposed após operação assíncrona
+      if (_disposed) return;
 
-      if (newReports.length < kPageSize) _hasMoreData = false;
+      _safeSetState(() {
+        _reports.addAll(newReports);
+        _currentPage++;
+        _isInitialLoading = false;
+        _isLoadingMore = false;
 
-      notifyListeners();
+        if (newReports.length < kPageSize) {
+          _hasMoreData = false;
+        }
+      });
       
     } catch (e) {
-      _isInitialLoading = false;
-      _isLoadingMore = false;
-      _error = "Erro ao carregar reports: $e";
-      notifyListeners();
+      // CRÍTICO: Verifica se foi disposed antes de atualizar erro
+      if (_disposed) return;
+
+      _safeSetState(() {
+        _isInitialLoading = false;
+        _isLoadingMore = false;
+        _error = "Erro ao carregar reports: $e";
+      });
     }
+  }
+
+  // Método adicional para limpar erro
+  void clearError() {
+    _safeSetState(() {
+      _error = null;
+    });
+  }
+
+  // Método adicional para adicionar report manualmente (útil após criar novo)
+  void addReport(Report newReport) {
+    if (_disposed) return;
+    
+    _safeSetState(() {
+      _reports.insert(0, newReport);
+    });
+  }
+
+  // Método adicional para remover report
+  void removeReport(String reportId) {
+    if (_disposed) return;
+    
+    _safeSetState(() {
+      _reports.removeWhere((report) => report.id == reportId);
+    });
+  }
+
+  // Método adicional para atualizar report
+  void updateReport(Report updatedReport) {
+    if (_disposed) return;
+    
+    _safeSetState(() {
+      final index = _reports.indexWhere((r) => r.id == updatedReport.id);
+      if (index != -1) {
+        _reports[index] = updatedReport;
+      }
+    });
   }
 }

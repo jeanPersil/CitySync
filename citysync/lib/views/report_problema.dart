@@ -28,7 +28,7 @@ class TelaReportState extends State<TelaReport> {
 
   final LatLng _initialPosicao = LatLng(-12.2664, -38.9668);
   LatLng _posicaoSelecionada = LatLng(-12.2664, -38.9668);
-  
+
   GoogleMapController? _mapController;
   Set<Marker> _markers = {};
   bool _isUpdatingFromMap = false;
@@ -36,6 +36,23 @@ class TelaReportState extends State<TelaReport> {
 
   // Google API Key do projeto
   static const String _googleApiKey = "AIzaSyBuuPoXMIcbCOMSgIzTnHENU9jzfzb22nc";
+
+  // ========== ADIÇÃO: LIMITES DO MAPA ==========
+
+  // Define os limites geográficos (Bounds) para Feira de Santana
+  // 
+  static final LatLngBounds _fsaBounds = LatLngBounds(
+    southwest: const LatLng(-12.35, -39.05), // Ponto Sudoeste
+    northeast: const LatLng(-12.15, -38.85), // Ponto Nordeste
+  );
+
+  // Define os limites de zoom
+  static const MinMaxZoomPreference _zoomPreference = MinMaxZoomPreference(
+    13.0, // Nível MÍNIMO de zoom (para não se afastar muito)
+    20.0, // Nível MÁXIMO de zoom (para não aproximar demais)
+  );
+
+  // ===============================================
 
   @override
   void initState() {
@@ -72,7 +89,7 @@ class TelaReportState extends State<TelaReport> {
       _posicaoSelecionada = novaPosicao;
       _isUpdatingFromMap = true;
     });
-    
+
     _adicionarMarcador(novaPosicao);
     _mapController?.animateCamera(
       CameraUpdate.newLatLng(novaPosicao),
@@ -82,30 +99,32 @@ class TelaReportState extends State<TelaReport> {
     try {
       // Verifica se a API key está configurada
       if (_googleApiKey == "SUA_API_KEY_AQUI" || _googleApiKey.isEmpty) {
-        print("⚠️ API Key não configurada! Configure a chave na constante _googleApiKey");
-        addressController.text = "Lat: ${novaPosicao.latitude.toStringAsFixed(6)}, Lng: ${novaPosicao.longitude.toStringAsFixed(6)}";
+        print(
+            "⚠️ API Key não configurada! Configure a chave na constante _googleApiKey");
+        addressController.text =
+            "Lat: ${novaPosicao.latitude.toStringAsFixed(6)}, Lng: ${novaPosicao.longitude.toStringAsFixed(6)}";
         _isUpdatingFromMap = false;
         return;
       }
 
       final url = Uri.parse(
-        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${novaPosicao.latitude},${novaPosicao.longitude}&key=$_googleApiKey&language=pt-BR'
-      );
-      
-      print("🔍 Buscando endereço para: ${novaPosicao.latitude}, ${novaPosicao.longitude}");
-      
+          'https://maps.googleapis.com/maps/api/geocode/json?latlng=${novaPosicao.latitude},${novaPosicao.longitude}&key=$_googleApiKey&language=pt-BR');
+
+      print(
+          "🔍 Buscando endereço para: ${novaPosicao.latitude}, ${novaPosicao.longitude}");
+
       final response = await http.get(url);
-      
+
       print("📡 Status da resposta: ${response.statusCode}");
-      
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         print("📦 Resposta da API: ${data['status']}");
-        
+
         if (data['status'] == 'OK' && data['results'].isNotEmpty) {
           String endereco = data['results'][0]['formatted_address'];
           endereco = endereco.replaceAll(', Brasil', '');
-          
+
           print("✅ Endereço encontrado: $endereco");
           addressController.text = endereco;
         } else if (data['status'] == 'REQUEST_DENIED') {
@@ -113,7 +132,8 @@ class TelaReportState extends State<TelaReport> {
           addressController.text = "Erro: API Key inválida";
         } else if (data['status'] == 'ZERO_RESULTS') {
           print("⚠️ Nenhum endereço encontrado para esta localização");
-          addressController.text = "Lat: ${novaPosicao.latitude.toStringAsFixed(6)}, Lng: ${novaPosicao.longitude.toStringAsFixed(6)}";
+          addressController.text =
+              "Lat: ${novaPosicao.latitude.toStringAsFixed(6)}, Lng: ${novaPosicao.longitude.toStringAsFixed(6)}";
         } else {
           throw Exception('Status: ${data['status']}');
         }
@@ -122,7 +142,8 @@ class TelaReportState extends State<TelaReport> {
       }
     } catch (e) {
       print("❌ Erro ao buscar endereço: $e");
-      addressController.text = "Lat: ${novaPosicao.latitude.toStringAsFixed(6)}, Lng: ${novaPosicao.longitude.toStringAsFixed(6)}";
+      addressController.text =
+          "Lat: ${novaPosicao.latitude.toStringAsFixed(6)}, Lng: ${novaPosicao.longitude.toStringAsFixed(6)}";
     } finally {
       _isUpdatingFromMap = false;
     }
@@ -131,7 +152,7 @@ class TelaReportState extends State<TelaReport> {
   // Busca coordenadas a partir do endereço digitado
   void _buscarLocalizacaoPorEndereco(String endereco) async {
     if (endereco.isEmpty || _isUpdatingFromMap || endereco.length < 3) return;
-    
+
     setState(() {
       _isUpdatingFromTextField = true;
     });
@@ -143,22 +164,21 @@ class TelaReportState extends State<TelaReport> {
       }
 
       final url = Uri.parse(
-        'https://maps.googleapis.com/maps/api/geocode/json?address=${Uri.encodeComponent(enderecoCompleto)}&key=$_googleApiKey&language=pt-BR'
-      );
-      
+          'https://maps.googleapis.com/maps/api/geocode/json?address=${Uri.encodeComponent(enderecoCompleto)}&key=$_googleApiKey&language=pt-BR');
+
       final response = await http.get(url);
-      
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        
+
         if (data['status'] == 'OK' && data['results'].isNotEmpty) {
           final location = data['results'][0]['geometry']['location'];
           LatLng novaPosicao = LatLng(location['lat'], location['lng']);
-          
+
           setState(() {
             _posicaoSelecionada = novaPosicao;
           });
-          
+
           _adicionarMarcador(novaPosicao);
           _mapController?.animateCamera(
             CameraUpdate.newLatLngZoom(novaPosicao, 16),
@@ -174,29 +194,26 @@ class TelaReportState extends State<TelaReport> {
 
   Future<void> pickImage() async {
     final picker = ImagePicker();
-    
+
     if (kIsWeb) {
-      
       final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
       if (pickedFile != null) {
-        
         final bytes = await pickedFile.readAsBytes();
         setState(() {
           imageBytes = bytes;
           imageName = pickedFile.name;
-          imageFile = null; 
+          imageFile = null;
         });
       }
     } else {
-     
       final pickedFile = await picker.pickImage(source: ImageSource.camera);
 
       if (pickedFile != null) {
         setState(() {
           imageFile = io.File(pickedFile.path);
           imageName = pickedFile.name;
-          imageBytes = null; 
+          imageBytes = null;
         });
       }
     }
@@ -232,7 +249,8 @@ class TelaReportState extends State<TelaReport> {
           body: Stack(
             children: [
               Center(
-                child: kIsWeb ? Image.memory(imageBytes!) : Image.file(imageFile!),
+                child:
+                    kIsWeb ? Image.memory(imageBytes!) : Image.file(imageFile!),
               ),
               Positioned(
                 top: 40,
@@ -261,69 +279,68 @@ class TelaReportState extends State<TelaReport> {
   }
 
   void _reportarProblema() async {
-  if (addressController.text.isNotEmpty &&
-      problemController.text.isNotEmpty) {
-    
-    // Mostrar loading
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
-
-    String? urlImagem;
-
-    // Fazer upload da imagem ANTES de enviar o report
-    if (imageName != null) {
-      urlImagem = await ReportApiService().uploadImagem(
-        imageFile: imageFile,
-        imageBytes: imageBytes,
-        imageName: imageName!,
+    if (addressController.text.isNotEmpty &&
+        problemController.text.isNotEmpty) {
+      // Mostrar loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
       );
 
-      if (urlImagem == null) {
-        Navigator.of(context).pop(); // Fechar loading
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Erro ao fazer upload da imagem")),
+      String? urlImagem;
+
+      // Fazer upload da imagem ANTES de enviar o report
+      if (imageName != null) {
+        urlImagem = await ReportApiService().uploadImagem(
+          imageFile: imageFile,
+          imageBytes: imageBytes,
+          imageName: imageName!,
         );
-        return;
+
+        if (urlImagem == null) {
+          Navigator.of(context).pop(); // Fechar loading
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Erro ao fazer upload da imagem")),
+          );
+          return;
+        }
       }
-    }
 
-    // Enviar o report com a URL da imagem
-    final resultado = await ReportApiService().enviarReport(
-      endereco: addressController.text,
-      categoriaId: mapearCategoriaId(widget.categoria),
-      usuarioId: widget.usuarioId,
-      descricao: descriptionController.text,
-      urlImagem: urlImagem, 
-      latitude: _posicaoSelecionada.latitude,
-      longitude: _posicaoSelecionada.longitude,
-    );
-
-    Navigator.of(context).pop(); 
-
-    if (resultado == null) {
-      Navigator.of(context).pop(); 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Seu problema foi reportado!")),
+      // Enviar o report com a URL da imagem
+      final resultado = await ReportApiService().enviarReport(
+        endereco: addressController.text,
+        categoriaId: mapearCategoriaId(widget.categoria),
+        usuarioId: widget.usuarioId,
+        descricao: descriptionController.text,
+        urlImagem: urlImagem,
+        latitude: _posicaoSelecionada.latitude,
+        longitude: _posicaoSelecionada.longitude,
       );
+
+      Navigator.of(context).pop();
+
+      if (resultado == null) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Seu problema foi reportado!")),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Erro: $resultado")),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erro: $resultado")),
+        const SnackBar(
+          content: Text('Por favor, preencha todos os campos obrigatórios.'),
+          duration: Duration(seconds: 2),
+        ),
       );
     }
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Por favor, preencha todos os campos obrigatórios.'),
-        duration: Duration(seconds: 2),
-      ),
-    );
   }
-}
 
   void _cancelarReport() {
     Navigator.pop(context);
@@ -352,6 +369,15 @@ class TelaReportState extends State<TelaReport> {
                   onTap: (posicao) {
                     _atualizarPosicao(posicao);
                   },
+
+                  // ========== LINHAS ADICIONADAS ==========
+                  // Restringe a área de visualização do mapa
+                  cameraTargetBounds: CameraTargetBounds(_fsaBounds),
+
+                  // Restringe os níveis de zoom
+                  minMaxZoomPreference: _zoomPreference,
+                  // ======================================
+                  
                 ),
                 Positioned(
                   top: 16,
@@ -390,9 +416,11 @@ class TelaReportState extends State<TelaReport> {
                     },
                   ),
                   _buildSectionTitle("Problema relatado"),
-                  _buildTextField(problemController, "EX: Buraco", readOnly: true),
+                  _buildTextField(problemController, "EX: Buraco",
+                      readOnly: true),
                   _buildSectionTitle("Descrição (opcional)"),
-                  _buildTextField(descriptionController, "Descreva o problema..."),
+                  _buildTextField(
+                      descriptionController, "Descreva o problema..."),
                   const SizedBox(height: 10),
                   GestureDetector(
                     onTap: pickImage,
@@ -405,7 +433,8 @@ class TelaReportState extends State<TelaReport> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.camera_alt, color: Colors.black, size: 30),
+                          const Icon(Icons.camera_alt,
+                              color: Colors.black, size: 30),
                           if (imageName != null) ...[
                             const SizedBox(width: 8),
                             Text(
@@ -467,7 +496,8 @@ class TelaReportState extends State<TelaReport> {
                           ),
                           child: const Text(
                             "Reportar",
-                            style: TextStyle(color: Colors.white, fontSize: 14),
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 14),
                           ),
                         ),
                       ),
@@ -485,7 +515,8 @@ class TelaReportState extends State<TelaReport> {
                           ),
                           child: const Text(
                             "Cancelar",
-                            style: TextStyle(color: Colors.black, fontSize: 14),
+                            style:
+                                TextStyle(color: Colors.black, fontSize: 14),
                           ),
                         ),
                       ),
