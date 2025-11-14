@@ -1,3 +1,4 @@
+import 'package:supabase/supabase.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'validator.dart';
 
@@ -45,7 +46,7 @@ class AutenticacaoUsuario {
 
       final response = await supabase.auth.signUp(
         password: dados["senha"],
-        email: dados["email"]
+        email: dados["email"],
       );
 
       if (response.user != null) {
@@ -96,7 +97,7 @@ class AutenticacaoUsuario {
     }
   }
 
-  Future<String> recuperarSenha(String email) async {
+  Future<String> recuperar_senha(String email) async {
     try {
       final supabase = Supabase.instance.client;
 
