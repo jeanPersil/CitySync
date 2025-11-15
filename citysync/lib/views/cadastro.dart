@@ -201,7 +201,7 @@ class _TelaCadastroState extends State<TelaCadastro>
       if (resultado != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Erro ao cadastrar usuario: ${resultado}."),
+            content: Text("Erro ao cadastrar usuario: $resultado."),
             backgroundColor: Colors.redAccent,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -435,7 +435,7 @@ class _TelaCadastroState extends State<TelaCadastro>
                               ],
                             ),
                             child: DropdownButtonFormField<int>(
-                              value: _cidadeSelecionada,
+                              initialValue: _cidadeSelecionada,
                               dropdownColor: const Color(0xFF1E3A5F),
                               decoration: _buildInputDecoration(
                                 labelText: "Cidade",

@@ -1,4 +1,4 @@
-import 'package:citysync/views/modificarSenha/alterarSenha.dart';
+import 'package:citysync/views/modificarSenha/alterar_senha.dart';
 import 'package:flutter/material.dart';
 import '../../services/auth.dart';
 

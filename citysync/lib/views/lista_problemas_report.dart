@@ -1,6 +1,6 @@
-import 'package:citysync/controller/reportController.dart';
+import 'package:citysync/controller/report_controller.dart';
 import 'package:citysync/services/reports.dart';
-import 'package:citysync/widgets/listaDeReports.dart';
+import 'package:citysync/widgets/lista_reports.dart';
 import 'package:citysync/widgets/report_header.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

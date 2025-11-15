@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:citysync/views/perfil.dart';
 import 'package:citysync/services/reports.dart';
-import 'package:citysync/model/modelReport.dart';
+import 'package:citysync/model/model_report.dart';
 
 class Telaprincipal extends StatefulWidget {
   const Telaprincipal({
@@ -419,8 +419,8 @@ class _TelaprincipalState extends State<Telaprincipal>
                     }
                   },
                   backgroundColor: Colors.white,
-                  child: const Icon(Icons.add, color: Color(0xFF1E3A5F)),
                   heroTag: "zoom_in",
+                  child: const Icon(Icons.add, color: Color(0xFF1E3A5F)),
                 ),
                 const SizedBox(height: 10),
                 FloatingActionButton.small(
@@ -432,8 +432,8 @@ class _TelaprincipalState extends State<Telaprincipal>
                     }
                   },
                   backgroundColor: Colors.white,
-                  child: const Icon(Icons.remove, color: Color(0xFF1E3A5F)),
                   heroTag: "zoom_out",
+                  child: const Icon(Icons.remove, color: Color(0xFF1E3A5F)),
                 ),
                 const SizedBox(height: 10),
                 FloatingActionButton.small(
@@ -445,8 +445,8 @@ class _TelaprincipalState extends State<Telaprincipal>
                     }
                   },
                   backgroundColor: Colors.white,
-                  child: const Icon(Icons.my_location, color: Color(0xFF1E3A5F)),
                   heroTag: "location",
+                  child: const Icon(Icons.my_location, color: Color(0xFF1E3A5F)),
                 ),
               ],
             ),

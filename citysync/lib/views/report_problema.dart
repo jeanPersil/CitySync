@@ -30,7 +30,7 @@ class TelaReportState extends State<TelaReport> {
   LatLng _posicaoSelecionada = LatLng(-12.2664, -38.9668);
 
   GoogleMapController? _mapController;
-  Set<Marker> _markers = {};
+  final Set<Marker> _markers = {};
   bool _isUpdatingFromMap = false;
   bool _isUpdatingFromTextField = false;
 
@@ -245,7 +245,7 @@ class TelaReportState extends State<TelaReport> {
       context: context,
       builder: (context) {
         return Scaffold(
-          backgroundColor: Colors.black.withOpacity(0.9),
+          backgroundColor: Colors.black.withValues(alpha: 0.9),
           body: Stack(
             children: [
               Center(
@@ -260,7 +260,7 @@ class TelaReportState extends State<TelaReport> {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withValues(alpha: 0.5),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
