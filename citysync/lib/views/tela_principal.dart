@@ -30,7 +30,8 @@ class _TelaprincipalState extends State<Telaprincipal>
   Set<Marker> _markers = {};
   List<Report> _reports = [];
   bool _isLoading = true;
-  bool _disposed = false; // NOVA FLAG PARA CONTROLAR DISPOSE
+  bool _disposed = false;
+  bool _mapaHabilitado = true;
 
   @override
   void initState() {
@@ -162,98 +163,114 @@ class _TelaprincipalState extends State<Telaprincipal>
   }
 
   void _mostrarDetalhesReport(Report report) {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Text(report.nomeCategoria),
-      content: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.8,
-          maxHeight: MediaQuery.of(context).size.height * 0.6,
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Exibir imagem se existir
-              if (report.urlImagem.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      report.urlImagem,
-                      width: MediaQuery.of(context).size.width * 0.7,
-                      height: 200,
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Container(
-                          width: MediaQuery.of(context).size.width * 0.7,
-                          height: 200,
-                          alignment: Alignment.center,
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes!
-                                : null,
-                          ),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: MediaQuery.of(context).size.width * 0.7,
-                          height: 200,
-                          color: Colors.grey[300],
-                          alignment: Alignment.center,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(Icons.broken_image, size: 50, color: Colors.grey),
-                              SizedBox(height: 8),
-                              Text(
-                                'Erro ao carregar imagem',
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(report.nomeCategoria),
+        content: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.8,
+            maxHeight: MediaQuery.of(context).size.height * 0.6,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (report.urlImagem.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        report.urlImagem,
+                        width: MediaQuery.of(context).size.width * 0.7,
+                        height: 200,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Container(
+                            width: MediaQuery.of(context).size.width * 0.7,
+                            height: 200,
+                            alignment: Alignment.center,
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: MediaQuery.of(context).size.width * 0.7,
+                            height: 200,
+                            color: Colors.grey[300],
+                            alignment: Alignment.center,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                                SizedBox(height: 8),
+                                Text(
+                                  'Erro ao carregar imagem',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
-                ),
-              Text('Endereço: ${report.endereco}'),
-              const SizedBox(height: 8),
-              Text('Status: ${report.nomeStatus}'),
-              if (report.descricao.isNotEmpty) ...[
+                Text('Endereço: ${report.endereco}'),
                 const SizedBox(height: 8),
-                Text('Descrição: ${report.descricao}'),
+                Text('Status: ${report.nomeStatus}'),
+                if (report.descricao.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text('Descrição: ${report.descricao}'),
+                ],
+                const SizedBox(height: 8),
+                Text('Data: ${report.dataSimples}'),
               ],
-              const SizedBox(height: 8),
-              Text('Data: ${report.dataCriacao}'),
-            ],
+            ),
           ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Fechar'),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Fechar'),
-        ),
-      ],
-    ),
-  );
-}
+    );
+  }
+
+  Future<void> _abrirModalReport() async {
+    setState(() {
+      _mapaHabilitado = false;
+    });
+
+    await mostrarModal(context, widget.usuarioID);
+
+    if (mounted && !_disposed) {
+      setState(() {
+        _mapaHabilitado = true;
+      });
+      
+      Future.delayed(const Duration(seconds: 2), () {
+        if (!_disposed) {
+          _carregarReports();
+        }
+      });
+    }
+  }
 
   @override
   void dispose() {
     _disposed = true; 
     _animationController.dispose();
-    
-    
     _mapController = null;
-    
     super.dispose();
   }
 
@@ -345,29 +362,32 @@ class _TelaprincipalState extends State<Telaprincipal>
                 bottomLeft: Radius.circular(20),
                 bottomRight: Radius.circular(20),
               ),
-              child: GoogleMap(
-                initialCameraPosition: CameraPosition(
-                  target: _senaiFeiraDeSantana,
-                  zoom: 18,
+              child: AbsorbPointer(
+                absorbing: !_mapaHabilitado,
+                child: GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: _senaiFeiraDeSantana,
+                    zoom: 18,
+                  ),
+                  mapType: MapType.normal,
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: true,
+                  zoomControlsEnabled: false,
+                  buildingsEnabled: true,
+                  compassEnabled: true,
+                  indoorViewEnabled: true,
+                  mapToolbarEnabled: true,
+                  rotateGesturesEnabled: _mapaHabilitado,
+                  scrollGesturesEnabled: _mapaHabilitado,
+                  tiltGesturesEnabled: _mapaHabilitado,
+                  zoomGesturesEnabled: _mapaHabilitado,
+                  markers: _markers,
+                  onMapCreated: (controller) {
+                    if (!_disposed) {
+                      _mapController = controller;
+                    }
+                  },
                 ),
-                mapType: MapType.normal,
-                myLocationEnabled: true,
-                myLocationButtonEnabled: true,
-                zoomControlsEnabled: false,
-                buildingsEnabled: true,
-                compassEnabled: true,
-                indoorViewEnabled: true,
-                mapToolbarEnabled: true,
-                rotateGesturesEnabled: true,
-                scrollGesturesEnabled: true,
-                tiltGesturesEnabled: true,
-                zoomGesturesEnabled: true,
-                markers: _markers,
-                onMapCreated: (controller) {
-                  if (!_disposed) {
-                    _mapController = controller;
-                  }
-                },
               ),
             ),
           ),
@@ -408,47 +428,50 @@ class _TelaprincipalState extends State<Telaprincipal>
           Positioned(
             right: 16,
             bottom: 100,
-            child: Column(
-              children: [
-                FloatingActionButton.small(
-                  onPressed: () {
-                    if (!_disposed) {
-                      _mapController?.animateCamera(
-                        CameraUpdate.zoomIn(),
-                      );
-                    }
-                  },
-                  backgroundColor: Colors.white,
-                  child: const Icon(Icons.add, color: Color(0xFF1E3A5F)),
-                  heroTag: "zoom_in",
-                ),
-                const SizedBox(height: 10),
-                FloatingActionButton.small(
-                  onPressed: () {
-                    if (!_disposed) {
-                      _mapController?.animateCamera(
-                        CameraUpdate.zoomOut(),
-                      );
-                    }
-                  },
-                  backgroundColor: Colors.white,
-                  child: const Icon(Icons.remove, color: Color(0xFF1E3A5F)),
-                  heroTag: "zoom_out",
-                ),
-                const SizedBox(height: 10),
-                FloatingActionButton.small(
-                  onPressed: () {
-                    if (!_disposed) {
-                      _mapController?.animateCamera(
-                        CameraUpdate.newLatLng(_senaiFeiraDeSantana),
-                      );
-                    }
-                  },
-                  backgroundColor: Colors.white,
-                  child: const Icon(Icons.my_location, color: Color(0xFF1E3A5F)),
-                  heroTag: "location",
-                ),
-              ],
+            child: AbsorbPointer(
+              absorbing: !_mapaHabilitado,
+              child: Column(
+                children: [
+                  FloatingActionButton.small(
+                    onPressed: () {
+                      if (!_disposed && _mapaHabilitado) {
+                        _mapController?.animateCamera(
+                          CameraUpdate.zoomIn(),
+                        );
+                      }
+                    },
+                    backgroundColor: Colors.white,
+                    child: const Icon(Icons.add, color: Color(0xFF1E3A5F)),
+                    heroTag: "zoom_in",
+                  ),
+                  const SizedBox(height: 10),
+                  FloatingActionButton.small(
+                    onPressed: () {
+                      if (!_disposed && _mapaHabilitado) {
+                        _mapController?.animateCamera(
+                          CameraUpdate.zoomOut(),
+                        );
+                      }
+                    },
+                    backgroundColor: Colors.white,
+                    child: const Icon(Icons.remove, color: Color(0xFF1E3A5F)),
+                    heroTag: "zoom_out",
+                  ),
+                  const SizedBox(height: 10),
+                  FloatingActionButton.small(
+                    onPressed: () {
+                      if (!_disposed && _mapaHabilitado) {
+                        _mapController?.animateCamera(
+                          CameraUpdate.newLatLng(_senaiFeiraDeSantana),
+                        );
+                      }
+                    },
+                    backgroundColor: Colors.white,
+                    child: const Icon(Icons.my_location, color: Color(0xFF1E3A5F)),
+                    heroTag: "location",
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -468,14 +491,7 @@ class _TelaprincipalState extends State<Telaprincipal>
             ],
           ),
           child: FloatingActionButton.extended(
-            onPressed: () {
-              mostrarModal(context, widget.usuarioID);
-              Future.delayed(const Duration(seconds: 2), () {
-                if (!_disposed) {
-                  _carregarReports();
-                }
-              });
-            },
+            onPressed: _abrirModalReport,
             backgroundColor: Colors.redAccent,
             icon: const Icon(Icons.warning_amber_rounded, color: Colors.white),
             label: const Text(

@@ -119,12 +119,13 @@ class _TelaCadastroState extends State<TelaCadastro>
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
+        borderSide: const BorderSide(color: Color(0xFFFF6B6B), width: 1.5),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.redAccent, width: 2.0),
+        borderSide: const BorderSide(color: Color(0xFFFF6B6B), width: 2.0),
       ),
+      errorStyle: const TextStyle(color: Color(0xFFFF6B6B)),
       counterStyle: counterStyle,
       contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
     );
@@ -202,7 +203,7 @@ class _TelaCadastroState extends State<TelaCadastro>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Erro ao cadastrar usuario: ${resultado}."),
-            backgroundColor: Colors.redAccent,
+            backgroundColor: const Color(0xFFFF6B6B),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
