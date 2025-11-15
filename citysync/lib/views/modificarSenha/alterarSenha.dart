@@ -49,11 +49,11 @@ class AlterarSenha extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(30),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E3A5F).withOpacity(0.8),
+                  color: const Color(0xFF1E3A5F).withValues(alpha: 0.8),
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 20,
                       spreadRadius: 5,
                       offset: const Offset(0, 10),
@@ -124,7 +124,7 @@ class AlterarSenha extends StatelessWidget {
                           borderRadius: BorderRadius.circular(14),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF20C997).withOpacity(0.6),
+                              color: const Color(0xFF20C997).withValues(alpha: 0.6),
                               blurRadius: 10,
                               offset: const Offset(0, 5),
                             ),
@@ -205,10 +205,10 @@ class AlterarSenha extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E3A5F).withOpacity(0.6),
+                  color: const Color(0xFF1E3A5F).withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(15),
                   border: Border.all(
-                      color: const Color(0xFF20C997).withOpacity(0.3),
+                      color: const Color(0xFF20C997).withValues(alpha: 0.3),
                       width: 1),
                 ),
                 child: const Column(
@@ -256,7 +256,7 @@ class AlterarSenha extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -271,7 +271,7 @@ class AlterarSenha extends StatelessWidget {
           labelStyle: const TextStyle(color: Colors.white70),
           prefixIcon: Icon(icon, color: Colors.white70),
           filled: true,
-          fillColor: Colors.white.withOpacity(0.08),
+          fillColor: Colors.white.withValues(alpha: 0.08),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,

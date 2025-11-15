@@ -98,7 +98,7 @@ class _ProblemasReportViewState extends State<_ProblemasReportView>
       appBar: AppBar(
         backgroundColor: const Color(0xFF1E3A5F),
         elevation: 8,
-        shadowColor: Colors.black.withOpacity(0.4),
+        shadowColor: Colors.black.withValues(alpha: 0.4),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
         ),
@@ -107,7 +107,7 @@ class _ProblemasReportViewState extends State<_ProblemasReportView>
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: const Color(0xFF20C997).withOpacity(0.2),
+                color: const Color(0xFF20C997).withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.people_alt_outlined,
@@ -133,7 +133,7 @@ class _ProblemasReportViewState extends State<_ProblemasReportView>
             icon: Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.refresh, color: Colors.white, size: 22),

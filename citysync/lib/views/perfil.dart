@@ -40,7 +40,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           onSecondary: kTextMain,
         ),
         cardColor: kCardBg,
-        dialogBackgroundColor: kDialogBlue,
         textTheme: const TextTheme(
           bodyLarge: TextStyle(color: kTextMain),
           bodyMedium: TextStyle(color: kTextMain),
@@ -52,7 +51,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           titleTextStyle: TextStyle(
             color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 15),
           subtitleTextStyle: TextStyle(color: Colors.black87),
-        ),
+        ), dialogTheme: DialogThemeData(backgroundColor: kDialogBlue),
       );
 
   @override
@@ -169,7 +168,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (ctx) => Theme( 
         data: _lockedTheme.copyWith(
-          dialogBackgroundColor: kDialogBlue,
           colorScheme: _lockedTheme.colorScheme.copyWith(
             surface: kDialogBlue,
             onSurface: kTextMain,
@@ -180,7 +178,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             labelStyle: const TextStyle(color: Colors.white70),
             hintStyle: const TextStyle(color: Colors.white70),
             enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.white.withOpacity(0.5)),
+              borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.5)),
               borderRadius: BorderRadius.circular(12),
             ),
             focusedBorder: const OutlineInputBorder(
@@ -196,8 +194,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               borderRadius: BorderRadius.all(Radius.circular(12)),
             ),
             filled: true,
-            fillColor: Colors.white.withOpacity(0.10),
-          ),
+            fillColor: Colors.white.withValues(alpha: 0.10),
+          ), dialogTheme: DialogThemeData(backgroundColor: kDialogBlue),
         ),
         child: AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -231,7 +229,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             FilledButton(
               style: FilledButton.styleFrom(
-                backgroundColor: Colors.white.withOpacity(0.15),
+                backgroundColor: Colors.white.withValues(alpha: 0.15),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
@@ -427,7 +425,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       foregroundColor: kTextMain,
-                      side: BorderSide(color: kTextMain.withOpacity(0.7)),
+                      side: BorderSide(color: kTextMain.withValues(alpha: 0.7)),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
