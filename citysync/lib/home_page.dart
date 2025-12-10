@@ -6,7 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'Tema/color_extension.dart';
 
 class Homepage extends StatefulWidget {
-  const Homepage({super.key});
+  Homepage({super.key});
 
   @override
   State<Homepage> createState() => _HomepageState();

@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'dart:io' as io;
-import 'package:citysync/model/model_report.dart';
+import 'package:citysync/model/modelReport.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 

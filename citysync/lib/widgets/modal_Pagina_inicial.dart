@@ -25,7 +25,7 @@ int mapearCategoriaId(String nome) {
 }
 
 // MUDANÇA PRINCIPAL: Retorna Future<void> em vez de void
-Future<void> mostrarModal(BuildContext context, String idUsuario) async {
+Future<void> mostrarModal(BuildContext context, String id_usuario) async {
   String? categoriaSelecionada;
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -160,7 +160,7 @@ Future<void> mostrarModal(BuildContext context, String idUsuario) async {
                               MaterialPageRoute(
                                   builder: (context) => TelaReport(
                                         categoria: categoriaSelecionada!,
-                                        usuarioId: idUsuario,
+                                        usuarioId: id_usuario,
                                       )),
                             );
                           },
@@ -168,8 +168,8 @@ Future<void> mostrarModal(BuildContext context, String idUsuario) async {
                       backgroundColor: isDark ? Colors.white : Colors.white,
                       foregroundColor: isDark ? Colors.black : Colors.black,
                       disabledBackgroundColor: isDark
-                          ? Colors.white.withValues(alpha: 0.4)
-                          : Colors.white.withValues(alpha: 0.6),
+                          ? Colors.white.withOpacity(0.4)
+                          : Colors.white.withOpacity(0.6),
                       disabledForegroundColor:
                           isDark ? Colors.black38 : Colors.black45,
                       shape: RoundedRectangleBorder(

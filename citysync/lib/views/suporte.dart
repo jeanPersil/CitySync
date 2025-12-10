@@ -49,7 +49,7 @@ class _SuportePageState extends State<SuportePage> {
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.black.withValues(alpha: 0.2),
+        backgroundColor: Colors.black.withOpacity(0.2),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -73,7 +73,7 @@ class _SuportePageState extends State<SuportePage> {
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Card(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: Colors.white.withOpacity(0.05),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -126,7 +126,7 @@ class _SuportePageState extends State<SuportePage> {
                           hintText: "Digite aqui sua sugestão ou problema...",
                           hintStyle: const TextStyle(color: Colors.white70),
                           filled: true,
-                          fillColor: Colors.white.withValues(alpha: 0.05),
+                          fillColor: Colors.white.withOpacity(0.05),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
                             borderSide: const BorderSide(color: Colors.white24),

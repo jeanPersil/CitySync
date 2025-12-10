@@ -31,7 +31,7 @@ class ReportHeader extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF20C997).withValues(alpha: 0.4),
+                color: const Color(0xFF20C997).withOpacity(0.4),
                 blurRadius: 15,
                 spreadRadius: 2,
                 offset: const Offset(0, 5),
