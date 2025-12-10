@@ -16,7 +16,7 @@ class ReportApiService {
 
   static const String _bucketName = 'imagens';
 
-  /// Upload de imagem para o storage
+  
   Future<String?> uploadImagem({
     io.File? imageFile,
     Uint8List? imageBytes,
@@ -52,7 +52,7 @@ class ReportApiService {
     }
   }
 
-  /// Busca reports paginados de um usuário específico
+  
   Future<List<Report>> obterListaReports(String idUsuario, int pagina) async {
     try {
       final int from = (pagina - 1) * tamanhoDaPagina;

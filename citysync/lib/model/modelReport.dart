@@ -1,4 +1,5 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
 
 class Report {
   final int id;
@@ -44,8 +45,30 @@ class Report {
     );
   }
 
-  
   LatLng toLatLng() {
     return LatLng(latitude, longitude);
+  }
+
+ 
+  String get dataFormatada {
+    try {
+    
+      DateTime data = DateTime.parse(dataCriacao);
+      
+      return DateFormat('dd/MM/yyyy HH:mm').format(data);
+    } catch (e) {
+      
+      return dataCriacao;
+    }
+  }
+
+  
+  String get dataSimples {
+    try {
+      DateTime data = DateTime.parse(dataCriacao);
+      return DateFormat('dd/MM/yyyy').format(data);
+    } catch (e) {
+      return dataCriacao;
+    }
   }
 }
