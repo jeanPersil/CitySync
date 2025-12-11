@@ -2,8 +2,10 @@ import 'package:citysync/controller/reportController.dart';
 import 'package:citysync/services/reports.dart';
 import 'package:citysync/widgets/listaDeReports.dart';
 import 'package:citysync/widgets/report_header.dart';
+import 'package:citysync/views/perfil.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProblemasReport extends StatelessWidget {
   final String nomeUsuario;
@@ -42,6 +44,9 @@ class _ProblemasReportViewState extends State<_ProblemasReportView>
   late Animation<Offset> _slideAnimation;
   final ScrollController _scrollController = ScrollController();
 
+  
+  String? fotoUrl;
+
   @override
   void initState() {
     super.initState();
@@ -65,6 +70,29 @@ class _ProblemasReportViewState extends State<_ProblemasReportView>
     _animationController.forward();
 
     _scrollController.addListener(_onScroll);
+    _carregarFotoUsuario();
+  }
+
+  Future<void> _carregarFotoUsuario() async {
+    try {
+      final supabase = Supabase.instance.client;
+      final user = supabase.auth.currentUser;
+      if (user == null) return;
+
+      final data = await supabase
+          .from("users")
+          .select("foto_url")
+          .eq("id", user.id)
+          .maybeSingle();
+
+      if (mounted && data != null) {
+        setState(() {
+          fotoUrl = data["foto_url"] as String?;
+        });
+      }
+    } catch (e) {
+      print("Erro ao carregar foto do usuário: $e");
+    }
   }
 
   @override
@@ -102,18 +130,41 @@ class _ProblemasReportViewState extends State<_ProblemasReportView>
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
         ),
+
+       
         title: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: const Color(0xFF20C997).withOpacity(0.2),
-                shape: BoxShape.circle,
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => ProfileScreen()),
+                ).then((_) => _carregarFotoUsuario());
+              },
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: CircleAvatar(
+                  radius: 16,
+                  backgroundColor: Colors.transparent,
+                  backgroundImage: (fotoUrl != null && fotoUrl!.isNotEmpty)
+                      ? NetworkImage(
+                          "${fotoUrl!}?t=${DateTime.now().millisecondsSinceEpoch}",
+                        )
+                      : null,
+                  child: (fotoUrl == null || fotoUrl!.isEmpty)
+                      ? const Icon(Icons.person_outline,
+                          color: Colors.white, size: 20)
+                      : null,
+                ),
               ),
-              child: const Icon(Icons.people_alt_outlined,
-                  color: Colors.white, size: 22),
             ),
+
             const SizedBox(width: 12),
+
             Text(
               widget.nomeUsuario,
               style: const TextStyle(
@@ -128,7 +179,9 @@ class _ProblemasReportViewState extends State<_ProblemasReportView>
             ),
           ],
         ),
+
         actions: [
+         
           IconButton(
             icon: Container(
               padding: const EdgeInsets.all(6),
@@ -143,6 +196,7 @@ class _ProblemasReportViewState extends State<_ProblemasReportView>
           const SizedBox(width: 8),
         ],
       ),
+
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
         child: Column(

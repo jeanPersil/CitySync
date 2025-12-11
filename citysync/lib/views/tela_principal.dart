@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:citysync/views/perfil.dart';
 import 'package:citysync/services/reports.dart';
 import 'package:citysync/model/modelReport.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Telaprincipal extends StatefulWidget {
   const Telaprincipal({
@@ -33,6 +34,9 @@ class _TelaprincipalState extends State<Telaprincipal>
   bool _disposed = false;
   bool _mapaHabilitado = true;
 
+  // Variável para armazenar a URL da foto do usuário
+  String? fotoUrl;
+
   @override
   void initState() {
     super.initState();
@@ -58,6 +62,39 @@ class _TelaprincipalState extends State<Telaprincipal>
 
     _animationController.forward();
     _carregarReports();
+    _carregarFotoUsuario(); // Carrega a foto do usuário ao iniciar
+  }
+
+  // Método para carregar a foto do usuário do banco de dados
+  Future<void> _carregarFotoUsuario() async {
+    try {
+      final supabase = Supabase.instance.client;
+      final user = supabase.auth.currentUser;
+      if (user == null) return;
+
+      final data = await supabase
+          .from("users")
+          .select("foto_url")
+          .eq("id", user.id)
+          .maybeSingle();
+
+      if (mounted && data != null) {
+        final urlBase = data["foto_url"] as String?;
+        if (urlBase != null && urlBase.isNotEmpty) {
+          // Adiciona timestamp para evitar cache
+          final updatedUrl =
+              "$urlBase?t=${DateTime.now().millisecondsSinceEpoch}";
+
+          setState(() {
+            fotoUrl = updatedUrl;
+          });
+        } else {
+          setState(() => fotoUrl = null);
+        }
+      }
+    } catch (e) {
+      print("Erro ao carregar foto do usuário: $e");
+    }
   }
 
   Future<void> _carregarReports() async {
@@ -295,13 +332,17 @@ class _TelaprincipalState extends State<Telaprincipal>
               children: [
                 InkWell(
                   borderRadius: BorderRadius.circular(24),
-                  onTap: () {
-                    Navigator.push(
+                  onTap: () async {
+                    // Navega para a tela de perfil
+                    await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) => ProfileScreen(),
                       ),
                     );
+
+                    // Recarrega a foto ao voltar do perfil
+                    _carregarFotoUsuario();
                   },
                   child: Container(
                     padding: const EdgeInsets.all(6),
@@ -309,10 +350,27 @@ class _TelaprincipalState extends State<Telaprincipal>
                       color: const Color(0xFF20C997).withOpacity(0.2),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.person_outline,
-                      color: Colors.white,
-                      size: 22,
+                    child: ClipOval(
+                      child: (fotoUrl != null && fotoUrl!.isNotEmpty)
+                          ? Image.network(
+                              "$fotoUrl?t=${DateTime.now().millisecondsSinceEpoch}", 
+                              width: 32,
+                              height: 32,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) {
+                                // Se houver erro ao carregar, mostra o ícone padrão
+                                return const Icon(
+                                  Icons.person_outline,
+                                  color: Colors.white,
+                                  size: 22
+                                );
+                              },
+                            )
+                          : const Icon(
+                              Icons.person_outline,
+                              color: Colors.white,
+                              size: 22
+                            ),
                     ),
                   ),
                 ),

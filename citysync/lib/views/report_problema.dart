@@ -355,39 +355,22 @@ class TelaReportState extends State<TelaReport> {
       body: Column(
         children: [
           Expanded(
-            child: Stack(
-              children: [
-                GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: _initialPosicao,
-                    zoom: 16,
-                  ),
-                  markers: _markers,
-                  onMapCreated: (controller) {
-                    _mapController = controller;
-                  },
-                  onTap: (posicao) {
-                    _atualizarPosicao(posicao);
-                  },
-
-                  // ========== LINHAS ADICIONADAS ==========
-                  // Restringe a área de visualização do mapa
-                  cameraTargetBounds: CameraTargetBounds(_fsaBounds),
-
-                  // Restringe os níveis de zoom
-                  minMaxZoomPreference: _zoomPreference,
-                  // ======================================
-                  
-                ),
-                Positioned(
-                  top: 16,
-                  left: 16,
-                  child: CircleAvatar(
-                    backgroundColor: Colors.grey[300],
-                    child: const Icon(Icons.person, color: Colors.white),
-                  ),
-                ),
-              ],
+            child: GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: _initialPosicao,
+                zoom: 16,
+              ),
+              markers: _markers,
+              onMapCreated: (controller) {
+                _mapController = controller;
+              },
+              onTap: (posicao) {
+                _atualizarPosicao(posicao);
+              },
+              // Restringe a área de visualização do mapa
+              cameraTargetBounds: CameraTargetBounds(_fsaBounds),
+              // Restringe os níveis de zoom
+              minMaxZoomPreference: _zoomPreference,
             ),
           ),
           Container(

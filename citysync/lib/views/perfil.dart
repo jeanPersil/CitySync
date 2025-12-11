@@ -1,13 +1,15 @@
 import 'dart:async';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:citysync/views/login.dart'; 
+import 'package:citysync/views/login.dart';
 
-
-const Color kBgNavy     = Color(0xFF0B223D);  
-const Color kCardBg     = Color(0xFFF4F6F8);   
-const Color kTextMain   = Colors.white;        
-const Color kDialogBlue = Color(0xFF1E3A5F);   
+const Color kBgNavy     = Color(0xFF0B223D);
+const Color kCardBg     = Color(0xFFF4F6F8);
+const Color kTextMain   = Colors.white;
+const Color kDialogBlue = Color(0xFF1E3A5F);
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -17,6 +19,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final _supabase = Supabase.instance.client;
+  final _picker = ImagePicker();
   late Future<Map<String, dynamic>?> _profileFuture;
   StreamSubscription<AuthState>? _authSub;
 
@@ -46,13 +49,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           bodyMedium: TextStyle(color: kTextMain),
           titleMedium: TextStyle(color: kTextMain),
         ),
-        listTileTheme: const ListTileThemeData(
-          iconColor: kBgNavy,
-          textColor: Colors.black87,
-          titleTextStyle: TextStyle(
-            color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 15),
-          subtitleTextStyle: TextStyle(color: Colors.black87),
-        ),
       );
 
   @override
@@ -60,29 +56,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _profileFuture = _loadProfile();
 
-    
     _authSub = _supabase.auth.onAuthStateChange.listen((data) {
-      final event = data.event;
-      final session = data.session;
-
-      if (event == AuthChangeEvent.signedOut || session == null) {
+      if (data.event == AuthChangeEvent.signedOut || data.session == null) {
         if (!mounted) return;
         _goToLogin();
         return;
       }
-      
-      
-      if (mounted) {
-        _recarregarPerfil();
-      }
+      _recarregarPerfil();
     });
   }
 
-  
   void _recarregarPerfil() {
-    final novoPerfil = _loadProfile();
+    final future = _loadProfile();
     setState(() {
-      _profileFuture = novoPerfil;
+      _profileFuture = future;
     });
   }
 
@@ -107,10 +94,65 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _goToLogin() {
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => TelaLogin()), 
+      MaterialPageRoute(builder: (_) => TelaLogin()),
       (route) => false,
     );
   }
+
+
+  Future<void> _selecionarImagem() async {
+    final XFile? img = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+    );
+    if (img == null) return;
+
+    await _uploadImagemBytes(img);
+  }
+
+  Future<void> _uploadImagemBytes(XFile xfile) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return;
+
+    final bucket = "imagensPerfil";
+    final path = "${user.id}.jpg";
+
+    try {
+      Uint8List bytes = await xfile.readAsBytes();
+
+      try {
+        await _supabase.storage.from(bucket).remove([path]);
+      } catch (_) {}
+
+      await _supabase.storage.from(bucket).uploadBinary(
+        path,
+        bytes,
+        fileOptions: const FileOptions(upsert: true),
+      );
+
+     
+      final baseUrl = _supabase.storage.from(bucket).getPublicUrl(path);
+      final url = "$baseUrl?t=${DateTime.now().millisecondsSinceEpoch}";
+
+      await _supabase
+          .from("users")
+          .update({"foto_url": url})
+          .eq("id", user.id);
+
+      _recarregarPerfil();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text("Foto atualizada!")));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Erro: $e")));
+      }
+    }
+  }
+
 
   Future<void> _updateUserField({
     required String column,
@@ -122,38 +164,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (column == 'email') {
       try {
         await _supabase.auth.updateUser(UserAttributes(email: value));
-      } catch (_) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('E-mail atualizado no perfil; no Auth pode exigir reautenticação.'),
-            ),
-          );
-        }
-      }
+      } catch (_) {}
     }
 
-    final updated = await _supabase
+    final data = await _supabase
         .from('users')
         .update({column: value})
         .eq('id', user.id)
         .select()
-        .maybeSingle() as Map<String, dynamic>?;
+        .maybeSingle();
 
-    if (!mounted) return;
-
-    
     setState(() {
-      _profileFuture = Future.value(
-        updated == null ? null : Map<String, dynamic>.from(updated),
-      );
+      _profileFuture = Future.value(data);
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Informação atualizada com sucesso!')),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Informação atualizada!")),
+      );
+    }
   }
-
 
   Future<void> _openEditDialog({
     required String titulo,
@@ -167,49 +197,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     await showDialog(
       context: context,
-      builder: (ctx) => Theme( 
-        data: _lockedTheme.copyWith(
-          dialogBackgroundColor: kDialogBlue,
-          colorScheme: _lockedTheme.colorScheme.copyWith(
-            surface: kDialogBlue,
-            onSurface: kTextMain,
-            primary: kTextMain,
-            onPrimary: kDialogBlue,
-          ),
-          inputDecorationTheme: InputDecorationTheme(
-            labelStyle: const TextStyle(color: Colors.white70),
-            hintStyle: const TextStyle(color: Colors.white70),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.white.withOpacity(0.5)),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            focusedBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.white),
-              borderRadius: BorderRadius.all(Radius.circular(12)),
-            ),
-            errorBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.redAccent),
-              borderRadius: BorderRadius.all(Radius.circular(12)),
-            ),
-            focusedErrorBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.redAccent),
-              borderRadius: BorderRadius.all(Radius.circular(12)),
-            ),
-            filled: true,
-            fillColor: Colors.white.withOpacity(0.10),
-          ),
-        ),
+      builder: (ctx) => Theme(
+        data: _lockedTheme,
         child: AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: Row(
             children: [
               const Icon(Icons.edit, color: kTextMain),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(
-                  titulo, 
-                  style: const TextStyle(color: kTextMain, fontWeight: FontWeight.w700),
-                ),
+                child: Text(titulo,
+                    style: const TextStyle(
+                        color: kTextMain, fontWeight: FontWeight.w700)),
               ),
             ],
           ),
@@ -226,25 +227,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Cancelar', style: TextStyle(color: Colors.white70)),
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text("Cancelar",
+                  style: TextStyle(color: Colors.white70)),
             ),
             FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: Colors.white.withOpacity(0.15),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
               onPressed: () async {
                 if (formKey.currentState!.validate()) {
-                  Navigator.of(ctx).pop();
+                  Navigator.pop(ctx);
                   await _updateUserField(
                     column: column,
                     value: controller.text.trim(),
                   );
                 }
               },
-              child: const Text('Salvar'),
+              child: const Text("Salvar"),
             ),
           ],
         ),
@@ -252,184 +249,220 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+
+
   String _maskCPF(String? v) {
     if (v == null) return '';
     final d = v.replaceAll(RegExp(r'\D'), '');
     if (d.length != 11) return v;
-    return '${d.substring(0,3)}.${d.substring(3,6)}.${d.substring(6,9)}-${d.substring(9)}';
+    return '${d.substring(0, 3)}.${d.substring(3, 6)}.${d.substring(6, 9)}-${d.substring(9)}';
   }
+
   String _maskCEP(String? v) {
     if (v == null) return '';
     final d = v.replaceAll(RegExp(r'\D'), '');
     if (d.length != 8) return v;
-    return '${d.substring(0,5)}-${d.substring(5)}';
+    return '${d.substring(0, 5)}-${d.substring(5)}';
   }
+
   String _maskPhoneBR(String? v) {
     if (v == null) return '';
     final d = v.replaceAll(RegExp(r'\D'), '');
     if (d.length == 11) {
-      return '(${d.substring(0,2)}) ${d.substring(2,7)}-${d.substring(7)}';
-    } else if (d.length == 10) {
-      return '(${d.substring(0,2)}) ${d.substring(2,6)}-${d.substring(6)}';
+      return '(${d.substring(0, 2)}) ${d.substring(2, 7)}-${d.substring(7)}';
+    }
+    if (d.length == 10) {
+      return '(${d.substring(0, 2)}) ${d.substring(2, 6)}-${d.substring(6)}';
     }
     return v;
   }
 
-  String? _vazio(String? v) => (v == null || v.trim().isEmpty) ? 'Preencha este campo' : null;
-  String? _validaEmail(String? v) {
-    if (v == null || v.trim().isEmpty) return 'Preencha o e-mail';
-    final ok = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(v.trim());
-    return ok ? null : 'E-mail inválido';
-  }
-  String? _validaCPF(String? v) {
-    final d = (v ?? '').replaceAll(RegExp(r'\D'), '');
-    return d.length == 11 ? null : 'CPF deve ter 11 dígitos';
-  }
-  String? _validaTelefone(String? v) {
-    final d = (v ?? '').replaceAll(RegExp(r'\D'), '');
-    return (d.length == 10 || d.length == 11) ? null : 'Telefone deve ter 10–11 dígitos';
-  }
-  String? _validaCEP(String? v) {
-    final d = (v ?? '').replaceAll(RegExp(r'\D'), '');
-    return d.length == 8 ? null : 'CEP deve ter 8 dígitos';
-  }
+ 
 
   @override
   Widget build(BuildContext context) {
-
     return Theme(
       data: _lockedTheme,
       child: Scaffold(
-        appBar: AppBar( 
-          title: const Text('Meu Perfil'),
-        ),
+        appBar: AppBar(title: const Text("Meu Perfil")),
         body: FutureBuilder<Map<String, dynamic>?>(
           future: _profileFuture,
           builder: (context, snap) {
-            if (snap.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator(color: kCardBg));
-            }
-
-            if (!snap.hasData || snap.data == null) {
+            if (!snap.hasData) {
               return const Center(
-                child: Text(
-                  'Não foi possível carregar o perfil.',
-                  style: TextStyle(color: kTextMain),
-                ),
+                child: CircularProgressIndicator(color: kCardBg),
               );
             }
 
             final data = snap.data!;
-            final nome = (data['nome'] ?? '') as String;
-            final email = (data['email'] ?? '') as String;
-            final cpf = (data['cpf'] ?? '') as String;
-            final telefone = (data['telefone'] ?? '') as String;
-            final cep = (data['cep'] ?? '') as String;
+            final nome = data["nome"] ?? "";
+            final email = data["email"] ?? "";
+            final cpf = data["cpf"] ?? "";
+            final telefone = data["telefone"] ?? "";
+            final cep = data["cep"] ?? "";
+            final fotoUrl = data["foto_url"] ?? "";
 
             return RefreshIndicator(
               onRefresh: () async {
-                // CORREÇÃO: Usar o novo método
                 _recarregarPerfil();
                 await _profileFuture;
               },
-              color: kCardBg,
-              backgroundColor: kBgNavy,
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
                   const SizedBox(height: 12),
+
                   Center(
-                    child: CircleAvatar(
-                      radius: 36,
-                      backgroundColor: kCardBg,
-                      child: Text(
-                        (nome.isNotEmpty ? nome[0] : '?').toUpperCase(),
-                        style: const TextStyle(
-                          fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black87),
+                    child: Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 48,
+                          backgroundColor: kCardBg,
+
+                  
+                          backgroundImage: fotoUrl.isNotEmpty
+                              ? NetworkImage(
+                                  "$fotoUrl&t=${DateTime.now().millisecondsSinceEpoch}")
+                              : null,
+
+                          child: fotoUrl.isEmpty
+                              ? Text(
+                                  nome.isNotEmpty
+                                      ? nome[0].toUpperCase()
+                                      : "?",
+                                  style: const TextStyle(
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                )
+                              : null,
+                        ),
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: InkWell(
+                            onTap: _selecionarImagem,
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: kCardBg,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.black54),
+                              ),
+                              child: const Icon(Icons.camera_alt,
+                                  size: 20, color: Colors.black87),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  Center(
+                    child: Text(
+                      nome.isEmpty ? "Usuário" : nome,
+                      style: const TextStyle(
+                        color: kTextMain,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Center(
-                    child: Text(
-                      nome.isEmpty ? 'Usuário' : nome,
-                      style: const TextStyle(
-                        color: kTextMain, fontSize: 22, fontWeight: FontWeight.w700),
-                    ),
-                  ),
+
                   const SizedBox(height: 24),
 
-                  const _SectionTitle('Informações pessoais'),
+                  const _SectionTitle("Informações pessoais"),
+
                   _InfoTileEditable(
                     icon: Icons.badge_outlined,
-                    label: 'Nome',
+                    label: "Nome",
                     value: nome,
                     onEdit: () => _openEditDialog(
-                      titulo: 'Editar nome',
-                      column: 'nome',
+                      titulo: "Editar nome",
+                      column: "nome",
                       initialValue: nome,
-                      validator: _vazio,
+                      validator: (v) =>
+                          v == null || v.isEmpty ? "Preencha este campo" : null,
                     ),
                   ),
+
                   _InfoTileEditable(
                     icon: Icons.email_outlined,
-                    label: 'E-mail',
+                    label: "E-mail",
                     value: email,
                     onEdit: () => _openEditDialog(
-                      titulo: 'Editar e-mail',
-                      column: 'email',
+                      titulo: "Editar e-mail",
+                      column: "email",
                       initialValue: email,
                       keyboardType: TextInputType.emailAddress,
-                      validator: _validaEmail,
                     ),
                   ),
-                  _InfoTileEditable(
-                    icon: Icons.credit_card,
-                    label: 'CPF',
-                    value: _maskCPF(cpf),
-                    onEdit: () => _openEditDialog(
-                      titulo: 'Editar CPF',
-                      column: 'cpf',
-                      initialValue: cpf,
-                      keyboardType: TextInputType.number,
-                      validator: _validaCPF,
+
+         
+                  Card(
+                    color: kCardBg,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: ListTile(
+                      leading: const Icon(Icons.credit_card, color: kBgNavy),
+                      title: const Text(
+                        "CPF",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      subtitle: Text(
+                        _maskCPF(cpf),
+                        style: const TextStyle(color: Colors.black87),
+                      ),
                     ),
                   ),
+
                   _InfoTileEditable(
                     icon: Icons.phone_outlined,
-                    label: 'Telefone',
+                    label: "Telefone",
                     value: _maskPhoneBR(telefone),
                     onEdit: () => _openEditDialog(
-                      titulo: 'Editar telefone',
-                      column: 'telefone',
+                      titulo: "Editar telefone",
+                      column: "telefone",
                       initialValue: telefone,
                       keyboardType: TextInputType.phone,
-                      validator: _validaTelefone,
                     ),
                   ),
 
                   const SizedBox(height: 20),
-                  const _SectionTitle('Endereço'),
+
+                  const _SectionTitle("Endereço"),
+
                   _InfoTileEditable(
                     icon: Icons.location_on_outlined,
-                    label: 'CEP',
+                    label: "CEP",
                     value: _maskCEP(cep),
                     onEdit: () => _openEditDialog(
-                      titulo: 'Editar CEP',
-                      column: 'cep',
+                      titulo: "Editar CEP",
+                      column: "cep",
                       initialValue: cep,
                       keyboardType: TextInputType.number,
-                      validator: _validaCEP,
                     ),
                   ),
 
                   const SizedBox(height: 32),
+
                   OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       foregroundColor: kTextMain,
-                      side: BorderSide(color: kTextMain.withOpacity(0.7)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      side:
+                          BorderSide(color: kTextMain.withOpacity(0.7)),
                       padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                     onPressed: () async {
                       await _supabase.auth.signOut();
@@ -437,7 +470,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _goToLogin();
                     },
                     icon: const Icon(Icons.exit_to_app),
-                    label: const Text('Sair'),
+                    label: const Text("Sair"),
                   ),
                 ],
               ),
@@ -460,7 +493,10 @@ class _SectionTitle extends StatelessWidget {
       child: Text(
         text,
         style: const TextStyle(
-          color: kCardBg, fontWeight: FontWeight.bold, fontSize: 18),
+          color: kCardBg,
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
       ),
     );
   }
@@ -483,22 +519,28 @@ class _InfoTileEditable extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       color: kCardBg,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+      ),
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         leading: Icon(icon, color: kBgNavy),
         title: Text(
           label,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
+            color: Colors.black87,
+          ),
         ),
         subtitle: Text(
-          value.isEmpty ? '-' : value,
+          value.isEmpty ? "-" : value,
           style: const TextStyle(color: Colors.black87),
         ),
         trailing: IconButton(
           icon: const Icon(Icons.edit, color: Colors.black87),
           onPressed: onEdit,
-          tooltip: 'Editar',
+          tooltip: "Editar",
         ),
       ),
     );
