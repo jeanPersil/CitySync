@@ -45,6 +45,7 @@ dependencies:
   provider: ^6.1.5
   supabase_flutter: ^2.10.1
   brasil_fields: ^1.14.1
+  flutter_typeahead: ^5.2.0
 
 dev_dependencies:
   flutter_test:
