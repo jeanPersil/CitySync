@@ -91,29 +91,29 @@ class _SuportePageState extends State<SuportePage> {
 
   void _updateRatingFromPosition(double localX) {
     final RenderBox? box =
-        _starRowKey.currentContext?.findRenderObject() as RenderBox?;
-    if (box == null) return;
+      _starRowKey.currentContext?.findRenderObject() as RenderBox?;
+      if (box == null) return;
+      
+      final width = box.size.width;
+      final clampedX = localX.clamp(0.0, width);
+      final double rawRating = (clampedX / width) * 10;
+      final double rating = (rawRating / 2).clamp(0.0, 5.0);
 
-    final width = box.size.width;
-    final clampedX = localX.clamp(0.0, width);
-    final double rawRating = (clampedX / width) * 10;
-    final double rating = (rawRating / 2).clamp(0.0, 5.0);
-    
-    double finalRating;
-    if (rating % 0.5 == 0) {
-      finalRating = rating;
-    } else {
-      finalRating = (rating * 2).round() / 2;
-    }
-    
-    if (finalRating < 0.5 && clampedX > 0) {
-      finalRating = 0.5;
-    }
-    
-    setState(() {
-      _avaliacao = finalRating.clamp(0.0, 5.0);
-    });
+      double finalRating;
+      if (rating % 0.5 == 0) {
+        finalRating = rating;
+      } else{
+        finalRating = (rating * 2).round() / 2;
+      }
+
+      if (finalRating < 0.5 && clampedX > 0) {
+        finalRating = 0.5;
+      }
+      setState(() {
+        _avaliacao = finalRating.clamp(0.0, 5.0);
+      });
   }
+
 
   @override
   void dispose() {
