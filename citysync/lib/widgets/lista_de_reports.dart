@@ -1,6 +1,6 @@
-import 'package:citysync/controller/reportController.dart';
-import 'package:citysync/views/reportCompleto.dart';
-import 'package:citysync/widgets/cardProblema.dart';
+import 'package:citysync/controller/report_controller.dart';
+import 'package:citysync/views/report_completo.dart';
+import 'package:citysync/widgets/card_problema.dart';
 import 'package:citysync/widgets/report_empty_view.dart';
 import 'package:citysync/widgets/report_error_view.dart';
 import 'package:citysync/widgets/report_loading_indicator.dart';
@@ -20,18 +20,25 @@ class ReportListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Exibe loading inicial
     if (controller.isInitialLoading) return const ReportLoadingIndicator();
+    
+    // Exibe erro
     if (controller.error != null) {
       return ReportErrorView(onRetry: () => controller.loadReports(refresh: true));
     }
+    
+    // Exibe view vazia
     if (controller.reports.isEmpty) {
       return ReportEmptyView(fadeAnimation: fadeAnimation);
     }
 
+    // Exibe a lista
     return ListView.builder(
       controller: scrollController,
       itemCount: controller.reports.length + (controller.hasMoreData ? 1 : 0),
       itemBuilder: (context, index) {
+        // Loader de paginação no final da lista
         if (index == controller.reports.length) {
           return const Padding(
             padding: EdgeInsets.all(16.0),
@@ -44,6 +51,7 @@ class ReportListView extends StatelessWidget {
         }
 
         final report = controller.reports[index];
+        
         return AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
@@ -53,7 +61,7 @@ class ReportListView extends StatelessWidget {
               MaterialPageRoute(builder: (_) => ReportCompleto(report: report)),
             ),
             borderRadius: BorderRadius.circular(12),
-            child: CardPRoblema(report: report),
+            child: CardProblema(report: report), 
           ),
         );
       },

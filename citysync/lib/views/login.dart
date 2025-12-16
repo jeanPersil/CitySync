@@ -124,6 +124,8 @@ class _TelaLoginState extends State<TelaLogin> with TickerProviderStateMixin {
       _senhaController.text,
     );
 
+    if (!mounted) return;
+
     setState(() {
       _isLoading = false;
     });
@@ -255,7 +257,7 @@ class _TelaLoginState extends State<TelaLogin> with TickerProviderStateMixin {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => Esqueceu_senha_view()));
+                            builder: (context) => EsqueceuSenhaView()));
                   },
                   child: Text('Esqueceu a senha?',
                       style: TextStyle(color: Colors.white70))),

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -43,12 +42,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           onSecondary: kTextMain,
         ),
         cardColor: kCardBg,
-        dialogBackgroundColor: kDialogBlue,
         textTheme: const TextTheme(
           bodyLarge: TextStyle(color: kTextMain),
           bodyMedium: TextStyle(color: kTextMain),
           titleMedium: TextStyle(color: kTextMain),
-        ),
+        ), dialogTheme: DialogThemeData(backgroundColor: kDialogBlue),
       );
 
   @override

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:citysync/views/perfil.dart';
 import 'package:citysync/services/reports.dart';
-import 'package:citysync/model/modelReport.dart';
+import 'package:citysync/model/model_report.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Telaprincipal extends StatefulWidget {

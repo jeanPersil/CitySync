@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:citysync/model/modelReport.dart';
+import 'package:citysync/model/model_report.dart';
 import 'package:citysync/services/reports.dart';
 
 const int kPageSize = 10;

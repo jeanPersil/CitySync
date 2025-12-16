@@ -1,9 +1,9 @@
-import 'package:citysync/views/modificarSenha/alterarSenha.dart';
+import 'package:citysync/views/modificarSenha/alterar_senha.dart';
 import 'package:flutter/material.dart';
 import '../../services/auth.dart';
 
-class Esqueceu_senha_view extends StatelessWidget {
-  Esqueceu_senha_view({super.key});
+class EsqueceuSenhaView extends StatelessWidget {
+  EsqueceuSenhaView({super.key});
 
   final _emailController = TextEditingController();
   final autenticacaoUsuario = AutenticacaoUsuario();
@@ -88,7 +88,7 @@ class Esqueceu_senha_view extends StatelessWidget {
                         decoration: InputDecoration(
                           labelText: "E-mail",
                           labelStyle: const TextStyle(color: Colors.white70),
-                          prefixIcon: Icon(Icons.email, color: Colors.white70),
+                          prefixIcon: const Icon(Icons.email, color: Colors.white70),
                           filled: true,
                           fillColor: Colors.white.withValues(alpha: 0.08),
                           enabledBorder: OutlineInputBorder(
@@ -144,7 +144,9 @@ class Esqueceu_senha_view extends StatelessWidget {
                             }
 
                             String res = await autenticacaoUsuario
-                                .recuperar_senha(_emailController.text);
+                                .recuperarSenha(_emailController.text);
+
+                            if (!context.mounted) return;
 
                             if (res ==
                                 "Email de recuperação enviado! Verifique seu email.") {
@@ -251,8 +253,8 @@ class Esqueceu_senha_view extends StatelessWidget {
         Container(
           width: 24,
           height: 24,
-          decoration: BoxDecoration(
-            color: const Color(0xFF20C997),
+          decoration: const BoxDecoration(
+            color: Color(0xFF20C997),
             shape: BoxShape.circle,
           ),
           child: Center(

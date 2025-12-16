@@ -1,4 +1,4 @@
-import 'package:citysync/model/modelReport.dart';
+import 'package:citysync/model/model_report.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 

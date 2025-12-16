@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:citysync/model/modelReport.dart';
+import 'package:citysync/model/model_report.dart';
 import 'package:intl/intl.dart';
 
-class CardPRoblema extends StatelessWidget {
-  CardPRoblema({super.key, required this.report});
+class CardProblema extends StatelessWidget {
+  const CardProblema({super.key, required this.report});
 
   final Report report;
 

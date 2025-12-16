@@ -1,8 +1,9 @@
-import 'package:citysync/controller/reportController.dart';
+import 'package:citysync/controller/report_controller.dart';
 import 'package:citysync/services/reports.dart';
-import 'package:citysync/widgets/listaDeReports.dart';
+import 'package:citysync/widgets/lista_de_reports.dart';
 import 'package:citysync/widgets/report_header.dart';
 import 'package:citysync/views/perfil.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -91,7 +92,9 @@ class _ProblemasReportViewState extends State<_ProblemasReportView>
         });
       }
     } catch (e) {
-      print("Erro ao carregar foto do usuário: $e");
+      if (kDebugMode) {
+        print("Erro ao carregar foto do usuário: $e");
+      }
     }
   }
 
