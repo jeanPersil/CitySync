@@ -22,59 +22,71 @@ class TelaReport extends StatefulWidget {
 }
 
 class TelaReportState extends State<TelaReport> {
+  // Controladores de Texto
   final TextEditingController addressController = TextEditingController();
   final TextEditingController problemController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
 
-  final LatLng _initialPosicao = LatLng(-12.2664, -38.9668);
-  LatLng _posicaoSelecionada = LatLng(-12.2664, -38.9668);
-
+  // Estado do Mapa
+  final LatLng _initialPosicao = const LatLng(-12.2664, -38.9668);
+  LatLng _posicaoSelecionada = const LatLng(-12.2664, -38.9668);
   GoogleMapController? _mapController;
-  Set<Marker> _markers = {};
+  final Set<Marker> _markers = {};
+  
+  // Controle para evitar loop infinito entre mapa e texto
   bool _isUpdatingFromMap = false;
-  bool _isUpdatingFromTextField = false;
 
-  // Google API Key do projeto
+  // Imagem
+  Uint8List? imageBytes;
+  io.File? imageFile;
+  String? imageName;
+
+  // Google API Key 
   static const String _googleApiKey = "AIzaSyBuuPoXMIcbCOMSgIzTnHENU9jzfzb22nc";
 
-  // ========== ADIÇÃO: LIMITES DO MAPA ==========
-
-  // Define os limites geográficos (Bounds) para Feira de Santana
-  // 
+  // Limites de Feira de Santana
   static final LatLngBounds _fsaBounds = LatLngBounds(
-    southwest: const LatLng(-12.35, -39.05), // Ponto Sudoeste
-    northeast: const LatLng(-12.15, -38.85), // Ponto Nordeste
+    southwest: const LatLng(-12.35, -39.05),
+    northeast: const LatLng(-12.15, -38.85),
   );
 
-  // Define os limites de zoom
   static const MinMaxZoomPreference _zoomPreference = MinMaxZoomPreference(
-    13.0, // Nível MÍNIMO de zoom (para não se afastar muito)
-    20.0, // Nível MÁXIMO de zoom (para não aproximar demais)
+    13.0,
+    20.0,
   );
-
-  // ===============================================
 
   @override
   void initState() {
     super.initState();
     problemController.text = widget.categoria;
     _posicaoSelecionada = _initialPosicao;
-    _adicionarMarcador(_initialPosicao);
+    _adicionarMarcador(_initialPosicao, snippet: "Segure e arraste para ajustar");
   }
 
-  Uint8List? imageBytes;
-  io.File? imageFile;
-  String? imageName;
+  @override
+  void dispose() {
+    addressController.dispose();
+    problemController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
 
-  // Adiciona ou atualiza o marcador no mapa
-  void _adicionarMarcador(LatLng posicao) {
+  // --- LÓGICA DO MAPA E MARCADORES ---
+
+  void _adicionarMarcador(LatLng posicao, {String? titulo, String? snippet}) {
+    if (!mounted) return;
+
     setState(() {
       _markers.clear();
       _markers.add(
         Marker(
-          markerId: MarkerId('local_selecionado'),
+          markerId: const MarkerId('local_selecionado'),
           position: posicao,
           draggable: true,
+          infoWindow: InfoWindow(
+            title: titulo ?? "Local Selecionado",
+            snippet: snippet ?? "Segure e arraste para ajustar",
+          ),
           onDragEnd: (novaPosicao) {
             _atualizarPosicao(novaPosicao);
           },
@@ -83,79 +95,63 @@ class TelaReportState extends State<TelaReport> {
     });
   }
 
-  // Atualiza a posição e busca o endereço
   void _atualizarPosicao(LatLng novaPosicao) async {
     setState(() {
       _posicaoSelecionada = novaPosicao;
-      _isUpdatingFromMap = true;
+      _isUpdatingFromMap = true; 
     });
 
-    _adicionarMarcador(novaPosicao);
+    _adicionarMarcador(novaPosicao, snippet: "Buscando endereço...");
+    
     _mapController?.animateCamera(
       CameraUpdate.newLatLng(novaPosicao),
     );
 
-    // Busca o endereço da posição usando a API do Google
     try {
-      // Verifica se a API key está configurada
-      if (_googleApiKey == "SUA_API_KEY_AQUI" || _googleApiKey.isEmpty) {
-        print(
-            "⚠️ API Key não configurada! Configure a chave na constante _googleApiKey");
-        addressController.text =
-            "Lat: ${novaPosicao.latitude.toStringAsFixed(6)}, Lng: ${novaPosicao.longitude.toStringAsFixed(6)}";
-        _isUpdatingFromMap = false;
+      if (_googleApiKey.isEmpty) {
+        addressController.text = "Lat: ${novaPosicao.latitude}, Lng: ${novaPosicao.longitude}";
         return;
       }
 
       final url = Uri.parse(
           'https://maps.googleapis.com/maps/api/geocode/json?latlng=${novaPosicao.latitude},${novaPosicao.longitude}&key=$_googleApiKey&language=pt-BR');
 
-      print(
-          "🔍 Buscando endereço para: ${novaPosicao.latitude}, ${novaPosicao.longitude}");
-
       final response = await http.get(url);
 
-      print("📡 Status da resposta: ${response.statusCode}");
+      if (!mounted) return;
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print("📦 Resposta da API: ${data['status']}");
-
+        
         if (data['status'] == 'OK' && data['results'].isNotEmpty) {
           String endereco = data['results'][0]['formatted_address'];
           endereco = endereco.replaceAll(', Brasil', '');
 
-          print("✅ Endereço encontrado: $endereco");
           addressController.text = endereco;
-        } else if (data['status'] == 'REQUEST_DENIED') {
-          print("❌ API Key inválida ou sem permissão para Geocoding API");
-          addressController.text = "Erro: API Key inválida";
-        } else if (data['status'] == 'ZERO_RESULTS') {
-          print("⚠️ Nenhum endereço encontrado para esta localização");
-          addressController.text =
-              "Lat: ${novaPosicao.latitude.toStringAsFixed(6)}, Lng: ${novaPosicao.longitude.toStringAsFixed(6)}";
+
+          _adicionarMarcador(
+            novaPosicao, 
+            titulo: "Endereço Encontrado", 
+            snippet: endereco 
+          );
+          
         } else {
-          throw Exception('Status: ${data['status']}');
+          addressController.text = "Endereço desconhecido";
         }
-      } else {
-        throw Exception('Erro HTTP: ${response.statusCode}');
       }
     } catch (e) {
-      print("❌ Erro ao buscar endereço: $e");
-      addressController.text =
-          "Lat: ${novaPosicao.latitude.toStringAsFixed(6)}, Lng: ${novaPosicao.longitude.toStringAsFixed(6)}";
+      debugPrint("❌ Erro ao buscar endereço: $e");
     } finally {
-      _isUpdatingFromMap = false;
+      if (mounted) {
+        setState(() {
+           _isUpdatingFromMap = false;
+        });
+      }
     }
   }
 
-  // Busca coordenadas a partir do endereço digitado
   void _buscarLocalizacaoPorEndereco(String endereco) async {
     if (endereco.isEmpty || _isUpdatingFromMap || endereco.length < 3) return;
-
-    setState(() {
-      _isUpdatingFromTextField = true;
-    });
 
     try {
       String enderecoCompleto = endereco;
@@ -168,75 +164,62 @@ class TelaReportState extends State<TelaReport> {
 
       final response = await http.get(url);
 
+      if (!mounted) return;
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 
         if (data['status'] == 'OK' && data['results'].isNotEmpty) {
           final location = data['results'][0]['geometry']['location'];
-          LatLng novaPosicao = LatLng(location['lat'], location['lng']);
+          final LatLng novaPosicao = LatLng(location['lat'], location['lng']);
+          final String enderecoFormatado = data['results'][0]['formatted_address'];
 
           setState(() {
             _posicaoSelecionada = novaPosicao;
           });
 
-          _adicionarMarcador(novaPosicao);
+          _adicionarMarcador(novaPosicao, snippet: enderecoFormatado);
+          
           _mapController?.animateCamera(
             CameraUpdate.newLatLngZoom(novaPosicao, 16),
           );
         }
       }
     } catch (e) {
-      print("Erro ao buscar localização: $e");
-    } finally {
-      _isUpdatingFromTextField = false;
+      debugPrint("Erro ao buscar localização: $e");
     }
   }
+
+  // --- LÓGICA DE IMAGEM ---
 
   Future<void> pickImage() async {
     final picker = ImagePicker();
 
-    if (kIsWeb) {
-      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-      if (pickedFile != null) {
-        final bytes = await pickedFile.readAsBytes();
-        setState(() {
-          imageBytes = bytes;
-          imageName = pickedFile.name;
-          imageFile = null;
-        });
+    try {
+      if (kIsWeb) {
+        final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+        if (pickedFile != null) {
+          final bytes = await pickedFile.readAsBytes();
+          if (!mounted) return;
+          setState(() {
+            imageBytes = bytes;
+            imageName = pickedFile.name;
+            imageFile = null;
+          });
+        }
+      } else {
+        final pickedFile = await picker.pickImage(source: ImageSource.camera);
+        if (pickedFile != null) {
+          if (!mounted) return;
+          setState(() {
+            imageFile = io.File(pickedFile.path);
+            imageName = pickedFile.name;
+            imageBytes = null;
+          });
+        }
       }
-    } else {
-      final pickedFile = await picker.pickImage(source: ImageSource.camera);
-
-      if (pickedFile != null) {
-        setState(() {
-          imageFile = io.File(pickedFile.path);
-          imageName = pickedFile.name;
-          imageBytes = null;
-        });
-      }
-    }
-  }
-
-  int mapearCategoriaId(String nome) {
-    switch (nome.toLowerCase()) {
-      case 'buraco':
-        return 1;
-      case 'iluminação':
-        return 2;
-      case 'lixo':
-        return 3;
-      case 'semafaro':
-        return 4;
-      case 'vazamento/esgoto':
-        return 5;
-      case 'transporte':
-        return 6;
-      case 'outros':
-        return 7;
-      default:
-        return 0;
+    } catch (e) {
+      debugPrint("Erro ao selecionar imagem: $e");
     }
   }
 
@@ -245,12 +228,13 @@ class TelaReportState extends State<TelaReport> {
       context: context,
       builder: (context) {
         return Scaffold(
-          backgroundColor: Colors.black.withValues(alpha: 0.9),
+          backgroundColor: Colors.black.withValues( alpha:0.9),
           body: Stack(
             children: [
               Center(
-                child:
-                    kIsWeb ? Image.memory(imageBytes!) : Image.file(imageFile!),
+                child: kIsWeb 
+                    ? Image.memory(imageBytes!) 
+                    : Image.file(imageFile!),
               ),
               Positioned(
                 top: 40,
@@ -260,14 +244,10 @@ class TelaReportState extends State<TelaReport> {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.5),
+                      color: Colors.white.withValues( alpha:0.5),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.close,
-                      size: 28,
-                      color: Colors.black,
-                    ),
+                    child: const Icon(Icons.close, size: 28, color: Colors.black),
                   ),
                 ),
               ),
@@ -278,21 +258,32 @@ class TelaReportState extends State<TelaReport> {
     );
   }
 
+  // --- LÓGICA DE ENVIO ---
+
+  int mapearCategoriaId(String nome) {
+    switch (nome.toLowerCase()) {
+      case 'buraco': return 1;
+      case 'iluminação': return 2;
+      case 'lixo': return 3;
+      case 'semafaro': return 4;
+      case 'vazamento/esgoto': return 5;
+      case 'transporte': return 6;
+      case 'outros': return 7;
+      default: return 5; 
+    }
+  }
+
   void _reportarProblema() async {
-    if (addressController.text.isNotEmpty &&
-        problemController.text.isNotEmpty) {
-      // Mostrar loading
+    if (addressController.text.isNotEmpty && problemController.text.isNotEmpty) {
+      
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        builder: (context) => const Center(child: CircularProgressIndicator()),
       );
 
       String? urlImagem;
 
-      // Fazer upload da imagem ANTES de enviar o report
       if (imageName != null) {
         urlImagem = await ReportApiService().uploadImagem(
           imageFile: imageFile,
@@ -300,16 +291,16 @@ class TelaReportState extends State<TelaReport> {
           imageName: imageName!,
         );
 
+        if (!mounted) return;
         if (urlImagem == null) {
-          Navigator.of(context).pop(); // Fechar loading
+          Navigator.of(context).pop(); 
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Erro ao fazer upload da imagem")),
+            const SnackBar(content: Text("Erro ao fazer upload da imagem.")),
           );
           return;
         }
       }
 
-      // Enviar o report com a URL da imagem
       final resultado = await ReportApiService().enviarReport(
         endereco: addressController.text,
         categoriaId: mapearCategoriaId(widget.categoria),
@@ -320,36 +311,33 @@ class TelaReportState extends State<TelaReport> {
         longitude: _posicaoSelecionada.longitude,
       );
 
-      Navigator.of(context).pop();
+      if (!mounted) return;
+      Navigator.of(context).pop(); 
 
       if (resultado == null) {
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(); 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Seu problema foi reportado!")),
+          const SnackBar(
+            content: Text("Problema reportado com sucesso!"),
+            backgroundColor: Colors.green,
+          ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Erro: $resultado")),
+          SnackBar(content: Text("Erro: $resultado"), backgroundColor: Colors.red),
         );
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, preencha todos os campos obrigatórios.'),
-          duration: Duration(seconds: 2),
-        ),
+        const SnackBar(content: Text('Verifique o endereço.')),
       );
     }
-  }
-
-  void _cancelarReport() {
-    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    final panelHeight = screenHeight * 0.6;
+    final panelHeight = screenHeight * 0.65; 
 
     return Scaffold(
       body: Column(
@@ -361,18 +349,15 @@ class TelaReportState extends State<TelaReport> {
                 zoom: 16,
               ),
               markers: _markers,
-              onMapCreated: (controller) {
-                _mapController = controller;
-              },
-              onTap: (posicao) {
-                _atualizarPosicao(posicao);
-              },
-              // Restringe a área de visualização do mapa
+              onMapCreated: (controller) => _mapController = controller,
+              onTap: _atualizarPosicao,
               cameraTargetBounds: CameraTargetBounds(_fsaBounds),
-              // Restringe os níveis de zoom
               minMaxZoomPreference: _zoomPreference,
+              myLocationEnabled: true,
+              myLocationButtonEnabled: true,
             ),
           ),
+          
           Container(
             width: double.infinity,
             height: panelHeight,
@@ -391,24 +376,31 @@ class TelaReportState extends State<TelaReport> {
                   _buildSectionTitle("Endereço selecionado:"),
                   _buildTextField(
                     addressController,
-                    "EX: Senai - FSA",
+                    "Buscando endereço...",
                     onChanged: (valor) {
-                      if (!_isUpdatingFromMap) {
-                        _buscarLocalizacaoPorEndereco(valor);
-                      }
+                      if (!_isUpdatingFromMap) _buscarLocalizacaoPorEndereco(valor);
                     },
                   ),
+                  
                   _buildSectionTitle("Problema relatado"),
-                  _buildTextField(problemController, "EX: Buraco",
-                      readOnly: true),
+                  _buildTextField(
+                    problemController, 
+                    "Categoria",
+                    readOnly: true
+                  ),
+                  
                   _buildSectionTitle("Descrição (opcional)"),
                   _buildTextField(
-                      descriptionController, "Descreva o problema..."),
-                  const SizedBox(height: 10),
+                    descriptionController, 
+                    "Descreva o problema com detalhes..."
+                  ),
+                  
+                  const SizedBox(height: 15),
+                  
                   GestureDetector(
                     onTap: pickImage,
                     child: Container(
-                      padding: const EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
@@ -416,95 +408,76 @@ class TelaReportState extends State<TelaReport> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.camera_alt,
-                              color: Colors.black, size: 30),
+                          const Icon(Icons.camera_alt, color: Colors.black, size: 28),
                           if (imageName != null) ...[
                             const SizedBox(width: 8),
-                            Text(
-                              'Imagem salva: ${imageName!.length > 15 ? '${imageName!.substring(0, 12)}...' : imageName}',
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontSize: 14,
+                            Flexible(
+                              child: Text(
+                                'Imagem: ${imageName!.length > 15 ? '${imageName!.substring(0, 12)}...' : imageName}',
+                                style: const TextStyle(color: Colors.black, fontSize: 14),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: 8),
                             GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  imageBytes = null;
-                                  imageFile = null;
-                                  imageName = null;
-                                });
-                              },
-                              child: const Icon(
-                                Icons.close,
-                                color: Colors.red,
-                                size: 20,
-                              ),
+                              onTap: () => setState(() {
+                                imageBytes = null;
+                                imageFile = null;
+                                imageName = null;
+                              }),
+                              child: const Icon(Icons.close, color: Colors.red, size: 20),
                             ),
-                          ],
+                          ] else ...[
+                            const SizedBox(width: 8),
+                            const Text("Adicionar Foto", style: TextStyle(color: Colors.black)),
+                          ]
                         ],
                       ),
                     ),
                   ),
+
                   if (imageName != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 10),
-                      child: ElevatedButton(
+                      child: TextButton.icon(
                         onPressed: _abrirVisualizacaoImagem,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                        child: const Text("Visualizar Imagem"),
+                        icon: const Icon(Icons.visibility, color: Colors.white),
+                        label: const Text("Visualizar Foto", style: TextStyle(color: Colors.white)),
                       ),
                     ),
-                  const SizedBox(height: 20),
+
+                  const SizedBox(height: 25),
+                  
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.4,
-                        height: 35,
+                        height: 45,
                         child: ElevatedButton(
                           onPressed: _reportarProblema,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                           ),
-                          child: const Text(
-                            "Reportar",
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 14),
-                          ),
+                          child: const Text("REPORTAR", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                         ),
                       ),
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.4,
-                        height: 35,
+                        height: 45,
                         child: ElevatedButton(
-                          onPressed: _cancelarReport,
+                          onPressed: () => Navigator.pop(context),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              side: const BorderSide(color: Colors.grey),
-                            ),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                           ),
-                          child: const Text(
-                            "Cancelar",
-                            style:
-                                TextStyle(color: Colors.black, fontSize: 14),
-                          ),
+                          child: const Text("CANCELAR", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                         ),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 20), 
                 ],
               ),
             ),
@@ -519,11 +492,7 @@ class TelaReportState extends State<TelaReport> {
       padding: const EdgeInsets.only(top: 12, bottom: 8),
       child: Text(
         title,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 16,
-        ),
+        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
         textAlign: TextAlign.center,
       ),
     );
@@ -546,13 +515,15 @@ class TelaReportState extends State<TelaReport> {
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: const TextStyle(color: Colors.white70),
-          filled: false,
+          filled: true,
+          fillColor: Colors.white.withValues( alpha:0.1),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           enabledBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.white),
+            borderSide: const BorderSide(color: Colors.white54),
             borderRadius: BorderRadius.circular(20),
           ),
           focusedBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.white),
+            borderSide: const BorderSide(color: Colors.white, width: 2),
             borderRadius: BorderRadius.circular(20),
           ),
         ),

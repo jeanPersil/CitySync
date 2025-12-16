@@ -20,7 +20,9 @@ class ProblemasReportController extends ChangeNotifier {
   List<Report> get reports => _reports;
 
   int _currentPage = 1;
-  bool _isInitialLoading = true;
+  
+  // Inicializa como false, o método loadReports define quando vira true
+  bool _isInitialLoading = false; 
   bool get isInitialLoading => _isInitialLoading;
 
   bool _isLoadingMore = false;
@@ -58,39 +60,41 @@ class ProblemasReportController extends ChangeNotifier {
     if (_disposed) return;
 
     // Evita múltiplas requisições simultâneas
-    if (_isLoadingMore) return;
+    if (_isLoadingMore && !refresh) return;
 
-    if (refresh) {
-      _safeSetState(() {
+    _safeSetState(() {
+      _error = null; // Limpa erros anteriores
+      
+      if (refresh) {
         _reports.clear();
         _currentPage = 1;
         _hasMoreData = true;
-        _error = null;
         _isInitialLoading = true;
-      });
-    } else if (_isInitialLoading) {
-      _safeSetState(() {
+      } else if (_reports.isEmpty) {
         _isInitialLoading = true;
-      });
-    } else {
-      _safeSetState(() {
+      } else {
         _isLoadingMore = true;
-      });
-    }
+      }
+    });
 
     try {
-      final newReports =
-          await reportApiService.obterListaReports(usuarioID, _currentPage);
+      final newReports = await reportApiService.obterListaReports(usuarioID, _currentPage);
 
       // CRÍTICO: Verifica se foi disposed após operação assíncrona
       if (_disposed) return;
 
       _safeSetState(() {
         _reports.addAll(newReports);
-        _currentPage++;
+        
+        // Só incrementa a página se vieram dados
+        if (newReports.isNotEmpty) {
+           _currentPage++;
+        }
+
         _isInitialLoading = false;
         _isLoadingMore = false;
 
+        // Se vieram menos itens que o tamanho da página, acabou os dados
         if (newReports.length < kPageSize) {
           _hasMoreData = false;
         }
@@ -99,41 +103,42 @@ class ProblemasReportController extends ChangeNotifier {
     } catch (e) {
       // CRÍTICO: Verifica se foi disposed antes de atualizar erro
       if (_disposed) return;
+      
+      debugPrint("Erro controller: $e"); // Log para o desenvolvedor
 
       _safeSetState(() {
         _isInitialLoading = false;
         _isLoadingMore = false;
-        _error = "Erro ao carregar reports: $e";
+        // Mensagem amigável para a UI, mantendo o erro técnico no console
+        _error = "Não foi possível carregar os dados. Tente novamente.";
       });
     }
   }
 
-  // Método adicional para limpar erro
   void clearError() {
     _safeSetState(() {
       _error = null;
     });
   }
 
-  // Método adicional para adicionar report manualmente (útil após criar novo)
   void addReport(Report newReport) {
     if (_disposed) return;
-    
     _safeSetState(() {
       _reports.insert(0, newReport);
     });
   }
 
-  // Método adicional para remover report
-  void removeReport(String reportId) {
+  // CORREÇÃO IMPORTANTE AQUI:
+  // Mudamos o tipo para dynamic para evitar erro de comparação entre Int e String
+  void removeReport(dynamic reportId) {
     if (_disposed) return;
     
     _safeSetState(() {
-      _reports.removeWhere((report) => report.id == reportId);
+      // .toString() garante que comparamos texto com texto, evitando o erro
+      _reports.removeWhere((report) => report.id.toString() == reportId.toString());
     });
   }
 
-  // Método adicional para atualizar report
   void updateReport(Report updatedReport) {
     if (_disposed) return;
     

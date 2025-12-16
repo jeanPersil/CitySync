@@ -4,17 +4,13 @@ import 'package:brasil_fields/brasil_fields.dart';
 import 'package:http/http.dart' as http;
 
 class Validator {
-  validarCPF(String cpf) {
+  
+  bool validarCPF(String cpf) {
     if (cpf.isEmpty) {
-      return "O cpf é obrigatorio";
+      return false; 
     }
 
-    final String numeros = cpf.replaceAll(RegExp(r'\D'), '');
-
-    if (!CPFValidator.isValid(cpf)) {
-      return false;
-    }
-    return true;
+    return CPFValidator.isValid(cpf);
   }
 
   Future<bool> validarCepComApi(String cep) async {
@@ -23,6 +19,7 @@ class Validator {
 
       if (cepLimpo.length != 8) return false;
 
+      // Verifica se é um CEP com todos números iguais (ex: 11111111)
       if (RegExp(r'^(\d)\1{7}$').hasMatch(cepLimpo)) return false;
 
       final url = Uri.parse("https://viacep.com.br/ws/$cepLimpo/json/");

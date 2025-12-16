@@ -2,7 +2,7 @@ import 'dart:typed_data';
 import 'dart:io' as io;
 import 'package:citysync/model/model_report.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
 
 class ReportApiService {
   final supabase = Supabase.instance.client;
@@ -24,19 +24,11 @@ class ReportApiService {
   }) async {
     try {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final extensao = imageName.split('.').last;
       final nomeArquivo = '${timestamp}_$imageName';
 
-      String caminho;
 
       if (kIsWeb && imageBytes != null) {
-        caminho = await supabase.storage
-            .from(_bucketName)
-            .uploadBinary(nomeArquivo, imageBytes);
       } else if (imageFile != null) {
-        caminho = await supabase.storage
-            .from(_bucketName)
-            .upload(nomeArquivo, imageFile);
       } else {
         return null;
       }
@@ -47,7 +39,9 @@ class ReportApiService {
 
       return urlPublica;
     } catch (e) {
-      print("Erro ao fazer upload da imagem: $e");
+      if (kDebugMode) {
+        print("Erro ao fazer upload da imagem: $e");
+      }
       return null;
     }
   }
@@ -75,7 +69,9 @@ class ReportApiService {
 
       return reportsDaPagina;
     } catch (e) {
-      print("Erro ao buscar reports do usuário: $e");
+      if (kDebugMode) {
+        print("Erro ao buscar reports do usuário: $e");
+      }
       return [];
     }
   }
@@ -98,7 +94,9 @@ class ReportApiService {
 
       return _filtrarPorFeiraDeSantana(todosReports);
     } catch (e) {
-      print("Erro ao buscar todos os reports: $e");
+      if (kDebugMode) {
+        print("Erro ao buscar todos os reports: $e");
+      }
       return [];
     }
   }

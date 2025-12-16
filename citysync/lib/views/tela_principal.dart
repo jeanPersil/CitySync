@@ -23,16 +23,17 @@ class Telaprincipal extends StatefulWidget {
 class _TelaprincipalState extends State<Telaprincipal>
     with SingleTickerProviderStateMixin {
   final LatLng _senaiFeiraDeSantana = const LatLng(-12.2663, -38.9458);
+  
   late AnimationController _animationController;
   late Animation<double> _fabAnimation;
   late Animation<double> _appBarFadeAnimation;
 
+  // ignore: unused_field
   GoogleMapController? _mapController;
   Set<Marker> _markers = {};
   List<Report> _reports = [];
   bool _isLoading = true;
   bool _disposed = false;
-  bool _mapaHabilitado = true;
 
   String? fotoUrl;
 
@@ -99,9 +100,7 @@ class _TelaprincipalState extends State<Telaprincipal>
 
     try {
       if (mounted) {
-        setState(() {
-          _isLoading = true;
-        });
+        setState(() => _isLoading = true);
       }
 
       final reports = await ReportApiService().obterTodosReports();
@@ -116,9 +115,7 @@ class _TelaprincipalState extends State<Telaprincipal>
     } catch (e) {
       debugPrint("Erro ao carregar reports: $e");
       if (mounted && !_disposed) {
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
       }
     }
   }
@@ -134,10 +131,12 @@ class _TelaprincipalState extends State<Telaprincipal>
           markerId: MarkerId('report_${report.id}'),
           position: report.toLatLng(),
           icon: markerIcon,
+          // O SEGREDO ESTÁ AQUI: O InfoWindow com onTap configurado
           infoWindow: InfoWindow(
             title: report.nomeCategoria,
-            snippet: "Status: ${report.nomeStatus}",
+            snippet: "Status: ${report.nomeStatus} (Toque para ver)",
             onTap: () {
+              // Quando clica no balão branco, abre o modal cinza
               _mostrarDetalhesReport(report);
             },
           ),
@@ -152,58 +151,44 @@ class _TelaprincipalState extends State<Telaprincipal>
     }
   }
 
-  // --- LÓGICA DE CORES DOS PINOS ---
   BitmapDescriptor _getMarkerIconByStatus(String status) {
     double hue;
-
-    // Normaliza para minúsculo e remove espaços extras
     switch (status.toLowerCase().trim()) {
-      case 'pendente':
-        hue = BitmapDescriptor.hueOrange; // Laranja
-        break;
-
-      case 'em andamento':
-        hue = BitmapDescriptor.hueAzure; // Azul claro
-        break;
-
-      case 'resolvido':
+      case 'pendente': hue = BitmapDescriptor.hueOrange; break;
+      case 'em andamento': hue = BitmapDescriptor.hueAzure; break;
+      case 'resolvido': 
       case 'concluido':
-      case 'concluído':
-        hue = BitmapDescriptor.hueGreen; // Verde
-        break;
-
+      case 'concluído': hue = BitmapDescriptor.hueGreen; break;
       case 'invalido':
       case 'inválido':
-      case 'cancelado':
-        // Marcador padrão não tem cinza escuro, usamos Violeta como "neutro"
-        hue = BitmapDescriptor.hueViolet; 
-        break;
-
-      default:
-        // Caso venha algo desconhecido, usamos Laranja (pendente) por segurança
-        hue = BitmapDescriptor.hueOrange; 
+      case 'cancelado': hue = BitmapDescriptor.hueViolet; break;
+      default: hue = BitmapDescriptor.hueOrange;
     }
-
     return BitmapDescriptor.defaultMarkerWithHue(hue);
   }
 
-  // --- LÓGICA DE CORES DA UI (TEXTOS/ETIQUETAS) ---
   Color _getColorByStatus(String status) {
     switch (status.toLowerCase().trim()) {
-      case 'pendente':
-        return Colors.orange;
-      case 'em andamento':
-        return Colors.blue;
+      case 'pendente': return Colors.orange.shade900;
+      case 'em andamento': return Colors.blue.shade800;
       case 'resolvido':
       case 'concluido':
-      case 'concluído':
-        return Colors.green;
+      case 'concluído': return Colors.green.shade800;
       case 'invalido':
       case 'inválido':
-      case 'cancelado':
-        return Colors.grey.shade700;
-      default:
-        return Colors.black;
+      case 'cancelado': return Colors.grey.shade700;
+      default: return Colors.black;
+    }
+  }
+  
+  Color _getBackgroundColorByStatus(String status) {
+     switch (status.toLowerCase().trim()) {
+      case 'pendente': return Colors.orange.withValues(alpha: 0.2);
+      case 'em andamento': return Colors.blue.withValues( alpha:0.2);
+      case 'resolvido':
+      case 'concluido':
+      case 'concluído': return Colors.green.withValues( alpha:0.2);
+      default: return Colors.grey.withValues( alpha:0.2);
     }
   }
 
@@ -211,11 +196,16 @@ class _TelaprincipalState extends State<Telaprincipal>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(report.nomeCategoria),
+        backgroundColor: Colors.grey[300], // Estilo Cinza da Imagem 2
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          report.nomeCategoria, 
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+        ),
         content: ConstrainedBox(
           constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.8,
-            maxHeight: MediaQuery.of(context).size.height * 0.6,
+            maxWidth: MediaQuery.of(context).size.width * 0.9,
+            maxHeight: MediaQuery.of(context).size.height * 0.7,
           ),
           child: SingleChildScrollView(
             child: Column(
@@ -229,61 +219,26 @@ class _TelaprincipalState extends State<Telaprincipal>
                       borderRadius: BorderRadius.circular(12),
                       child: Image.network(
                         report.urlImagem,
-                        width: MediaQuery.of(context).size.width * 0.7,
+                        width: double.infinity,
                         height: 200,
                         fit: BoxFit.cover,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Container(
-                            width: MediaQuery.of(context).size.width * 0.7,
-                            height: 200,
-                            alignment: Alignment.center,
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!
-                                  : null,
-                            ),
-                          );
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            width: MediaQuery.of(context).size.width * 0.7,
-                            height: 200,
-                            color: Colors.grey[300],
-                            alignment: Alignment.center,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                Icon(Icons.broken_image,
-                                    size: 50, color: Colors.grey),
-                                SizedBox(height: 8),
-                                Text(
-                                  'Erro ao carregar imagem',
-                                  style: TextStyle(color: Colors.grey),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
+                        errorBuilder: (_, __, ___) => const SizedBox(),
                       ),
                     ),
                   ),
-                Text('Endereço: ${report.endereco}'),
-                const SizedBox(height: 8),
+                
+                _buildLabelValue('Endereço: ', report.endereco),
+                const SizedBox(height: 10),
 
                 Row(
                   children: [
-                    const Text('Status: '),
+                    const Text('Status: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: _getColorByStatus(report.nomeStatus)
-                            .withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
-                            color: _getColorByStatus(report.nomeStatus)),
+                        color: _getBackgroundColorByStatus(report.nomeStatus),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: _getColorByStatus(report.nomeStatus)),
                       ),
                       child: Text(
                         report.nomeStatus,
@@ -296,12 +251,12 @@ class _TelaprincipalState extends State<Telaprincipal>
                   ],
                 ),
 
-                if (report.descricao.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Text('Descrição: ${report.descricao}'),
-                ],
-                const SizedBox(height: 8),
-                Text('Data: ${report.dataSimples}'),
+                const SizedBox(height: 10),
+                if (report.descricao.isNotEmpty) 
+                  _buildLabelValue('Descrição: ', report.descricao),
+                
+                const SizedBox(height: 10),
+                _buildLabelValue('Data: ', report.dataSimples),
               ],
             ),
           ),
@@ -309,30 +264,33 @@ class _TelaprincipalState extends State<Telaprincipal>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Fechar'),
+            style: TextButton.styleFrom(backgroundColor: Colors.grey[500]),
+            child: const Text('Fechar', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
     );
   }
 
+  Widget _buildLabelValue(String label, String value) {
+    return RichText(
+      text: TextSpan(
+        style: const TextStyle(color: Colors.black, fontSize: 16),
+        children: [
+          TextSpan(text: label, style: const TextStyle(fontWeight: FontWeight.bold)),
+          TextSpan(text: value),
+        ],
+      ),
+    );
+  }
+
   Future<void> _abrirModalReport() async {
-    setState(() {
-      _mapaHabilitado = false;
-    });
 
     await mostrarModal(context, widget.usuarioID);
 
     if (mounted && !_disposed) {
-      setState(() {
-        _mapaHabilitado = true;
-      });
-
-      Future.delayed(const Duration(seconds: 2), () {
-        if (!_disposed) {
-          _carregarReports();
-        }
-      });
+      // Atualiza os reports após voltar do modal
+      _carregarReports();
     }
   }
 
@@ -355,12 +313,6 @@ class _TelaprincipalState extends State<Telaprincipal>
           child: AppBar(
             backgroundColor: const Color(0xFF1E3A5F),
             elevation: 8,
-            shadowColor: Colors.black.withValues(alpha: 0.4),
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(16),
-              ),
-            ),
             title: Row(
               children: [
                 InkWell(
@@ -368,226 +320,70 @@ class _TelaprincipalState extends State<Telaprincipal>
                   onTap: () async {
                     await Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => ProfileScreen(),
-                      ),
+                      MaterialPageRoute(builder: (_) => ProfileScreen()),
                     );
                     _carregarFotoUsuario();
                   },
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF20C997).withValues(alpha: 0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: ClipOval(
-                      child: (fotoUrl != null && fotoUrl!.isNotEmpty)
-                          ? Image.network(
-                              "$fotoUrl?t=${DateTime.now().millisecondsSinceEpoch}",
-                              width: 32,
-                              height: 32,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) {
-                                return const Icon(
-                                  Icons.person_outline,
-                                  color: Colors.white,
-                                  size: 22,
-                                );
-                              },
-                            )
-                          : const Icon(
-                              Icons.person_outline,
-                              color: Colors.white,
-                              size: 22,
-                            ),
-                    ),
+                  child: CircleAvatar(
+                    backgroundImage: fotoUrl != null ? NetworkImage(fotoUrl!) : null,
+                    backgroundColor: Colors.grey[300],
+                    child: fotoUrl == null
+                        ? const Icon(Icons.person, color: Colors.grey)
+                        : null,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  widget.nomeUsuario,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    fontSize: 18,
-                    shadows: [
-                      Shadow(
-                        blurRadius: 4,
-                        color: Colors.black,
-                        offset: Offset(0, 1),
-                      )
-                    ],
-                  ),
+                  "Olá, ${widget.nomeUsuario}",
+                  style: const TextStyle(color: Colors.white, fontSize: 18),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.refresh, color: Colors.white),
-                onPressed: _carregarReports,
-                tooltip: 'Atualizar reports',
-              ),
+               // Botão de Atualizar Reports na AppBar
+               IconButton(
+                 icon: const Icon(Icons.refresh, color: Colors.white),
+                 tooltip: "Atualizar Reports",
+                 onPressed: _carregarReports,
+               )
             ],
           ),
         ),
       ),
+      
+      // Corpo com Mapa (Stack para colocar botão em cima se precisar)
       body: Stack(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.4),
-                  blurRadius: 15,
-                  spreadRadius: 2,
-                  offset: const Offset(0, 5),
-                ),
-              ],
+          GoogleMap(
+            initialCameraPosition: CameraPosition(
+              target: _senaiFeiraDeSantana,
+              zoom: 14,
             ),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(20),
-                bottomRight: Radius.circular(20),
-              ),
-              child: AbsorbPointer(
-                absorbing: !_mapaHabilitado,
-                child: GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: _senaiFeiraDeSantana,
-                    zoom: 18,
-                  ),
-                  mapType: MapType.normal,
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: true,
-                  zoomControlsEnabled: false,
-                  buildingsEnabled: true,
-                  compassEnabled: true,
-                  indoorViewEnabled: true,
-                  mapToolbarEnabled: true,
-                  rotateGesturesEnabled: _mapaHabilitado,
-                  scrollGesturesEnabled: _mapaHabilitado,
-                  tiltGesturesEnabled: _mapaHabilitado,
-                  zoomGesturesEnabled: _mapaHabilitado,
-                  markers: _markers,
-                  onMapCreated: (controller) {
-                    if (!_disposed) {
-                      _mapController = controller;
-                    }
-                  },
-                ),
-              ),
-            ),
+            markers: _markers,
+            onMapCreated: (controller) => _mapController = controller,
+            myLocationEnabled: true,
+            myLocationButtonEnabled: true,
+            zoomControlsEnabled: false, // Remove botões de zoom padrão para limpar a tela
           ),
+          
           if (_isLoading)
-            const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1E3A5F)),
+            Container(
+              color: Colors.black.withValues( alpha:0.3),
+              child: const Center(
+                child: CircularProgressIndicator(color: Colors.white),
               ),
             ),
-          Positioned(
-            top: 16,
-            left: 16,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Text(
-                '${_reports.length} reports',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E3A5F),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            right: 16,
-            bottom: 100,
-            child: AbsorbPointer(
-              absorbing: !_mapaHabilitado,
-              child: Column(
-                children: [
-                  FloatingActionButton.small(
-                    onPressed: () {
-                      if (!_disposed && _mapaHabilitado) {
-                        _mapController?.animateCamera(
-                          CameraUpdate.zoomIn(),
-                        );
-                      }
-                    },
-                    backgroundColor: Colors.white,
-                    heroTag: "zoom_in",
-                    child: const Icon(Icons.add, color: Color(0xFF1E3A5F)),
-                  ),
-                  const SizedBox(height: 10),
-                  FloatingActionButton.small(
-                    onPressed: () {
-                      if (!_disposed && _mapaHabilitado) {
-                        _mapController?.animateCamera(
-                          CameraUpdate.zoomOut(),
-                        );
-                      }
-                    },
-                    backgroundColor: Colors.white,
-                    heroTag: "zoom_out",
-                    child: const Icon(Icons.remove, color: Color(0xFF1E3A5F)),
-                  ),
-                  const SizedBox(height: 10),
-                  FloatingActionButton.small(
-                    onPressed: () {
-                      if (!_disposed && _mapaHabilitado) {
-                        _mapController?.animateCamera(
-                          CameraUpdate.newLatLng(_senaiFeiraDeSantana),
-                        );
-                      }
-                    },
-                    backgroundColor: Colors.white,
-                    heroTag: "location",
-                    child:
-                        const Icon(Icons.my_location, color: Color(0xFF1E3A5F)),
-                  ),
-                ],
-              ),
-            ),
-          ),
         ],
       ),
+
       floatingActionButton: ScaleTransition(
         scale: _fabAnimation,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.redAccent.withValues(alpha: 0.5),
-                blurRadius: 10,
-                spreadRadius: 2,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: FloatingActionButton.extended(
-            onPressed: _abrirModalReport,
-            backgroundColor: Colors.redAccent,
-            icon: const Icon(Icons.warning_amber_rounded, color: Colors.white),
-            label: const Text(
-              'Reportar um problema',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-              ),
-            ),
-          ),
+        child: FloatingActionButton.extended(
+          onPressed: _abrirModalReport,
+          backgroundColor: const Color(0xFF1E3A5F),
+          icon: const Icon(Icons.add_location_alt, color: Colors.white),
+          label: const Text("Novo Report", style: TextStyle(color: Colors.white)),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
