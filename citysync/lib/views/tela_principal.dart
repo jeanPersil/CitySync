@@ -26,7 +26,7 @@ class _TelaprincipalState extends State<Telaprincipal>
   late AnimationController _animationController;
   late Animation<double> _fabAnimation;
   late Animation<double> _appBarFadeAnimation;
-  
+
   GoogleMapController? _mapController;
   Set<Marker> _markers = {};
   List<Report> _reports = [];
@@ -34,7 +34,6 @@ class _TelaprincipalState extends State<Telaprincipal>
   bool _disposed = false;
   bool _mapaHabilitado = true;
 
-  // Variável para armazenar a URL da foto do usuário
   String? fotoUrl;
 
   @override
@@ -62,10 +61,9 @@ class _TelaprincipalState extends State<Telaprincipal>
 
     _animationController.forward();
     _carregarReports();
-    _carregarFotoUsuario(); // Carrega a foto do usuário ao iniciar
+    _carregarFotoUsuario();
   }
 
-  // Método para carregar a foto do usuário do banco de dados
   Future<void> _carregarFotoUsuario() async {
     try {
       final supabase = Supabase.instance.client;
@@ -81,7 +79,6 @@ class _TelaprincipalState extends State<Telaprincipal>
       if (mounted && data != null) {
         final urlBase = data["foto_url"] as String?;
         if (urlBase != null && urlBase.isNotEmpty) {
-          // Adiciona timestamp para evitar cache
           final updatedUrl =
               "$urlBase?t=${DateTime.now().millisecondsSinceEpoch}";
 
@@ -93,22 +90,22 @@ class _TelaprincipalState extends State<Telaprincipal>
         }
       }
     } catch (e) {
-      print("Erro ao carregar foto do usuário: $e");
+      debugPrint("Erro ao carregar foto do usuário: $e");
     }
   }
 
   Future<void> _carregarReports() async {
-    if (_disposed) return; 
-    
+    if (_disposed) return;
+
     try {
       if (mounted) {
         setState(() {
           _isLoading = true;
         });
       }
-      
+
       final reports = await ReportApiService().obterTodosReports();
-      
+
       if (mounted && !_disposed) {
         setState(() {
           _reports = reports;
@@ -116,9 +113,8 @@ class _TelaprincipalState extends State<Telaprincipal>
           _isLoading = false;
         });
       }
-      
     } catch (e) {
-      print("Erro ao carregar reports: $e");
+      debugPrint("Erro ao carregar reports: $e");
       if (mounted && !_disposed) {
         setState(() {
           _isLoading = false;
@@ -131,7 +127,7 @@ class _TelaprincipalState extends State<Telaprincipal>
     Set<Marker> novosMarcadores = {};
 
     for (var report in _reports) {
-      BitmapDescriptor markerIcon = _getMarkerIconByCategory(report.nomeCategoria);
+      BitmapDescriptor markerIcon = _getMarkerIconByStatus(report.nomeStatus);
 
       novosMarcadores.add(
         Marker(
@@ -140,7 +136,7 @@ class _TelaprincipalState extends State<Telaprincipal>
           icon: markerIcon,
           infoWindow: InfoWindow(
             title: report.nomeCategoria,
-            snippet: report.endereco,
+            snippet: "Status: ${report.nomeStatus}",
             onTap: () {
               _mostrarDetalhesReport(report);
             },
@@ -156,47 +152,59 @@ class _TelaprincipalState extends State<Telaprincipal>
     }
   }
 
-  BitmapDescriptor _getMarkerIconByCategory(String categoria) {
-    Color color;
-    
-    switch (categoria.toLowerCase()) {
-      case 'buraco':
-        color = Colors.orange;
+  // --- LÓGICA DE CORES DOS PINOS ---
+  BitmapDescriptor _getMarkerIconByStatus(String status) {
+    double hue;
+
+    // Normaliza para minúsculo e remove espaços extras
+    switch (status.toLowerCase().trim()) {
+      case 'pendente':
+        hue = BitmapDescriptor.hueOrange; // Laranja
         break;
-      case 'iluminação':
-        color = Colors.yellow;
+
+      case 'em andamento':
+        hue = BitmapDescriptor.hueAzure; // Azul claro
         break;
-      case 'lixo':
-        color = Colors.green;
+
+      case 'resolvido':
+      case 'concluido':
+      case 'concluído':
+        hue = BitmapDescriptor.hueGreen; // Verde
         break;
-      case 'semafaro':
-        color = Colors.red;
+
+      case 'invalido':
+      case 'inválido':
+      case 'cancelado':
+        // Marcador padrão não tem cinza escuro, usamos Violeta como "neutro"
+        hue = BitmapDescriptor.hueViolet; 
         break;
-      case 'vazamento/esgoto':
-        color = Colors.blue;
-        break;
-      case 'transporte':
-        color = Colors.purple;
-        break;
-      case 'outros':
-        color = Colors.grey;
-        break;
+
       default:
-        color = Colors.black;
+        // Caso venha algo desconhecido, usamos Laranja (pendente) por segurança
+        hue = BitmapDescriptor.hueOrange; 
     }
-    
-    return BitmapDescriptor.defaultMarkerWithHue(_colorToHue(color));
+
+    return BitmapDescriptor.defaultMarkerWithHue(hue);
   }
 
-  double _colorToHue(Color color) {
-    if (color == Colors.orange) return BitmapDescriptor.hueOrange;
-    if (color == Colors.yellow) return BitmapDescriptor.hueYellow;
-    if (color == Colors.green) return BitmapDescriptor.hueGreen;
-    if (color == Colors.red) return BitmapDescriptor.hueRed;
-    if (color == Colors.blue) return BitmapDescriptor.hueBlue;
-    if (color == Colors.purple) return BitmapDescriptor.hueViolet;
-    if (color == Colors.grey) return BitmapDescriptor.hueRose;
-    return BitmapDescriptor.hueAzure;
+  // --- LÓGICA DE CORES DA UI (TEXTOS/ETIQUETAS) ---
+  Color _getColorByStatus(String status) {
+    switch (status.toLowerCase().trim()) {
+      case 'pendente':
+        return Colors.orange;
+      case 'em andamento':
+        return Colors.blue;
+      case 'resolvido':
+      case 'concluido':
+      case 'concluído':
+        return Colors.green;
+      case 'invalido':
+      case 'inválido':
+      case 'cancelado':
+        return Colors.grey.shade700;
+      default:
+        return Colors.black;
+    }
   }
 
   void _mostrarDetalhesReport(Report report) {
@@ -247,7 +255,8 @@ class _TelaprincipalState extends State<Telaprincipal>
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: const [
-                                Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                                Icon(Icons.broken_image,
+                                    size: 50, color: Colors.grey),
                                 SizedBox(height: 8),
                                 Text(
                                   'Erro ao carregar imagem',
@@ -262,7 +271,31 @@ class _TelaprincipalState extends State<Telaprincipal>
                   ),
                 Text('Endereço: ${report.endereco}'),
                 const SizedBox(height: 8),
-                Text('Status: ${report.nomeStatus}'),
+
+                Row(
+                  children: [
+                    const Text('Status: '),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: _getColorByStatus(report.nomeStatus)
+                            .withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                            color: _getColorByStatus(report.nomeStatus)),
+                      ),
+                      child: Text(
+                        report.nomeStatus,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: _getColorByStatus(report.nomeStatus),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
                 if (report.descricao.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Text('Descrição: ${report.descricao}'),
@@ -294,7 +327,7 @@ class _TelaprincipalState extends State<Telaprincipal>
       setState(() {
         _mapaHabilitado = true;
       });
-      
+
       Future.delayed(const Duration(seconds: 2), () {
         if (!_disposed) {
           _carregarReports();
@@ -305,7 +338,7 @@ class _TelaprincipalState extends State<Telaprincipal>
 
   @override
   void dispose() {
-    _disposed = true; 
+    _disposed = true;
     _animationController.dispose();
     _mapController = null;
     super.dispose();
@@ -333,15 +366,12 @@ class _TelaprincipalState extends State<Telaprincipal>
                 InkWell(
                   borderRadius: BorderRadius.circular(24),
                   onTap: () async {
-                    // Navega para a tela de perfil
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) => ProfileScreen(),
                       ),
                     );
-
-                    // Recarrega a foto ao voltar do perfil
                     _carregarFotoUsuario();
                   },
                   child: Container(
@@ -353,23 +383,22 @@ class _TelaprincipalState extends State<Telaprincipal>
                     child: ClipOval(
                       child: (fotoUrl != null && fotoUrl!.isNotEmpty)
                           ? Image.network(
-                              "$fotoUrl?t=${DateTime.now().millisecondsSinceEpoch}", 
+                              "$fotoUrl?t=${DateTime.now().millisecondsSinceEpoch}",
                               width: 32,
                               height: 32,
                               fit: BoxFit.cover,
                               errorBuilder: (_, __, ___) {
-                                // Se houver erro ao carregar, mostra o ícone padrão
                                 return const Icon(
                                   Icons.person_outline,
                                   color: Colors.white,
-                                  size: 22
+                                  size: 22,
                                 );
                               },
                             )
                           : const Icon(
                               Icons.person_outline,
                               color: Colors.white,
-                              size: 22
+                              size: 22,
                             ),
                     ),
                   ),
@@ -449,14 +478,12 @@ class _TelaprincipalState extends State<Telaprincipal>
               ),
             ),
           ),
-          
           if (_isLoading)
             const Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1E3A5F)),
               ),
             ),
-
           Positioned(
             top: 16,
             left: 16,
@@ -482,7 +509,6 @@ class _TelaprincipalState extends State<Telaprincipal>
               ),
             ),
           ),
-
           Positioned(
             right: 16,
             bottom: 100,
@@ -499,8 +525,8 @@ class _TelaprincipalState extends State<Telaprincipal>
                       }
                     },
                     backgroundColor: Colors.white,
-                    child: const Icon(Icons.add, color: Color(0xFF1E3A5F)),
                     heroTag: "zoom_in",
+                    child: const Icon(Icons.add, color: Color(0xFF1E3A5F)),
                   ),
                   const SizedBox(height: 10),
                   FloatingActionButton.small(
@@ -512,8 +538,8 @@ class _TelaprincipalState extends State<Telaprincipal>
                       }
                     },
                     backgroundColor: Colors.white,
-                    child: const Icon(Icons.remove, color: Color(0xFF1E3A5F)),
                     heroTag: "zoom_out",
+                    child: const Icon(Icons.remove, color: Color(0xFF1E3A5F)),
                   ),
                   const SizedBox(height: 10),
                   FloatingActionButton.small(
@@ -525,8 +551,9 @@ class _TelaprincipalState extends State<Telaprincipal>
                       }
                     },
                     backgroundColor: Colors.white,
-                    child: const Icon(Icons.my_location, color: Color(0xFF1E3A5F)),
                     heroTag: "location",
+                    child:
+                        const Icon(Icons.my_location, color: Color(0xFF1E3A5F)),
                   ),
                 ],
               ),
