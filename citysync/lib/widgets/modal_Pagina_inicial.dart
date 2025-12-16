@@ -22,7 +22,46 @@ int mapearCategoriaId(String nome) {
   }
 }
 
-Future<void> mostrarModal(BuildContext context, String id_usuario) async {
+final List<Map<String, dynamic>> _categoriasData = [
+  {
+    'titulo': 'Buraco',
+    'cor': const Color(0xFFFF9800),
+    'asset': 'assets/images/icones/icone_buraco.png'
+  },
+  {
+    'titulo': 'Iluminação',
+    'cor': const Color(0xFFFFC107),
+    'asset': 'assets/images/icones/icone_poste.png'
+  },
+  {
+    'titulo': 'Lixo',
+    'cor': const Color(0xFF4CAF50),
+    'asset': 'assets/images/icones/icone_lixo.png'
+  },
+  {
+    'titulo': 'Semafaro',
+    'cor': const Color(0xFFF44336),
+    'asset': 'assets/images/icones/icone_semafaro.png'
+  },
+  {
+    'titulo': 'Vazamento/esgoto',
+    'cor': const Color(0xFF2196F3),
+    'asset': 'assets/images/icones/icone_vazamento.png'
+  },
+  {
+    'titulo': 'Transporte',
+    'cor': const Color(0xFF9C27B0),
+    'asset': 'assets/images/icones/transporte.png'
+  },
+  {
+    'titulo': 'Outros',
+    'cor': const Color(0xFF607D8B),
+    'asset': 'assets/images/icones/outros.png'
+  },
+];
+
+
+Future<void> mostrarModal(BuildContext context, String idUsuario) async {
   String? categoriaSelecionada;
 
   await showModalBottomSheet(
@@ -42,7 +81,7 @@ Future<void> mostrarModal(BuildContext context, String id_usuario) async {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
+                    color: Colors.black.withValues(alpha: 0.3),
                     blurRadius: 20,
                     spreadRadius: 5,
                     offset: const Offset(0, -5),
@@ -58,7 +97,7 @@ Future<void> mostrarModal(BuildContext context, String id_usuario) async {
                     width: 50,
                     height: 5,
                     decoration: BoxDecoration(
-                      color:  Colors.grey.withOpacity(0.3),
+                      color: Colors.grey.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
@@ -79,7 +118,7 @@ Future<void> mostrarModal(BuildContext context, String id_usuario) async {
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFFFF6B6B).withOpacity(0.3),
+                                color: const Color(0xFFFF6B6B).withValues(alpha: 0.3),
                                 blurRadius: 8,
                                 offset: const Offset(0, 4),
                               ),
@@ -96,12 +135,12 @@ Future<void> mostrarModal(BuildContext context, String id_usuario) async {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              const Text(
                                 'Reportar Problema',
                                 style: TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.bold,
-                                  color: const Color.fromARGB(255, 255, 255, 255),
+                                  color: Color.fromARGB(255, 255, 255, 255),
                                 ),
                               ),
                               const SizedBox(height: 4),
@@ -119,21 +158,20 @@ Future<void> mostrarModal(BuildContext context, String id_usuario) async {
                     ),
                   ),
 
-                 
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                     height: 1,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Colors.transparent, Colors.grey.withOpacity(0.3),
+                          Colors.transparent,
+                          Colors.grey.withValues(alpha: 0.3),
                           Colors.transparent,
                         ],
                       ),
                     ),
                   ),
 
-                  
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: GridView.count(
@@ -142,8 +180,8 @@ Future<void> mostrarModal(BuildContext context, String id_usuario) async {
                       crossAxisSpacing: 12,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      children: [
-                        _buildCategoriaCard(
+                      children: _categoriasData.map((data) {
+                        return _buildCategoriaCard(
                           context: context,
                           setModalState: setModalState,
                           categoriaSelecionada: categoriaSelecionada,
@@ -152,101 +190,16 @@ Future<void> mostrarModal(BuildContext context, String id_usuario) async {
                               categoriaSelecionada = categoria;
                             });
                           },
-                          icone: Image.asset('assets/images/icones/icone_buraco.png'),
-                          titulo: 'Buraco',
-                          cor: const Color(0xFFFF9800),
-                        ),
-                        _buildCategoriaCard(
-                          context: context,
-                          setModalState: setModalState,
-                          categoriaSelecionada: categoriaSelecionada,
-                          onSelect: (categoria) {
-                            setModalState(() {
-                              categoriaSelecionada = categoria;
-                            });
-                          },
-                          icone: Image.asset('assets/images/icones/icone_poste.png'),
-                          titulo: 'Iluminação',
-                          cor: const Color(0xFFFFC107),
-                          
-                        ),
-                        _buildCategoriaCard(
-                          context: context,
-                          setModalState: setModalState,
-                          categoriaSelecionada: categoriaSelecionada,
-                          onSelect: (categoria) {
-                            setModalState(() {
-                              categoriaSelecionada = categoria;
-                            });
-                          },
-                          icone: Image.asset('assets/images/icones/icone_lixo.png'),
-                          titulo: 'Lixo',
-                          cor: const Color(0xFF4CAF50),
-                          
-                        ),
-                        _buildCategoriaCard(
-                          context: context,
-                          setModalState: setModalState,
-                          categoriaSelecionada: categoriaSelecionada,
-                          onSelect: (categoria) {
-                            setModalState(() {
-                              categoriaSelecionada = categoria;
-                            });
-                          },
-                          icone: Image.asset('assets/images/icones/icone_semafaro.png'),
-                          titulo: 'Semafaro',
-                          cor: const Color(0xFFF44336),
-                          
-                        ),
-                        _buildCategoriaCard(
-                          context: context,
-                          setModalState: setModalState,
-                          categoriaSelecionada: categoriaSelecionada,
-                          onSelect: (categoria) {
-                            setModalState(() {
-                              categoriaSelecionada = categoria;
-                            });
-                          },
-                          icone: Image.asset('assets/images/icones/icone_vazamento.png'),
-                          titulo: 'Vazamento/esgoto',
-                          cor: const Color(0xFF2196F3),
-                          
-                        ),
-                        _buildCategoriaCard(
-                          context: context,
-                          setModalState: setModalState,
-                          categoriaSelecionada: categoriaSelecionada,
-                          onSelect: (categoria) {
-                            setModalState(() {
-                              categoriaSelecionada = categoria;
-                            });
-                          },
-                          icone: Image.asset('assets/images/icones/transporte.png'),
-                          titulo: 'Transporte',
-                          cor: const Color(0xFF9C27B0),
-                          
-                        ),
-                        _buildCategoriaCard(
-                          context: context,
-                          setModalState: setModalState,
-                          categoriaSelecionada: categoriaSelecionada,
-                          onSelect: (categoria) {
-                            setModalState(() {
-                              categoriaSelecionada = categoria;
-                            });
-                          },
-                          icone: Image.asset('assets/images/icones/outros.png'),
-                          titulo: 'Outros',
-                          cor: const Color(0xFF607D8B),
-                         
-                        ),
-                      ],
+                          icone: Image.asset(data['asset'] as String),
+                          titulo: data['titulo'] as String,
+                          cor: data['cor'] as Color,
+                        );
+                      }).toList(),
                     ),
                   ),
 
                   const SizedBox(height: 24),
 
-                  
                   Padding(
                     padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
                     child: AnimatedContainer(
@@ -257,26 +210,26 @@ Future<void> mostrarModal(BuildContext context, String id_usuario) async {
                         onPressed: categoriaSelecionada == null
                             ? null
                             : () {
-                                Navigator.pop(context);
+                                Navigator.pop(ctx); 
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => TelaReport(
                                       categoria: categoriaSelecionada!,
-                                      usuarioId: id_usuario,
+                                      usuarioId: idUsuario,
                                     ),
                                   ),
                                 );
                               },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: categoriaSelecionada == null
-                              ? ( Colors.grey[300])
+                              ? (Colors.grey[300])
                               : const Color.fromARGB(255, 255, 255, 255),
                           foregroundColor: Colors.white,
                           disabledBackgroundColor: const Color.fromARGB(136, 224, 224, 224),
-                          disabledForegroundColor:  Colors.black38,
+                          disabledForegroundColor: Colors.black38,
                           elevation: categoriaSelecionada == null ? 0 : 4,
-                          shadowColor: const Color(0xFF1E3A5F).withOpacity(0.5),
+                          shadowColor: const Color(0xFF1E3A5F).withValues(alpha: 0.5),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
@@ -284,13 +237,13 @@ Future<void> mostrarModal(BuildContext context, String id_usuario) async {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
+                            const Text(
                               'Continuar',
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 0.5,
-                                color: Colors.black
+                                color: Colors.black,
                               ),
                             ),
                             if (categoriaSelecionada != null) ...[
@@ -328,9 +281,7 @@ Widget _buildCategoriaCard({
     child: AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
-        color: isSelected
-            ? cor.withOpacity(0.15)
-            : (Colors.grey[100]),
+        color: isSelected ? cor.withValues(alpha: 0.15) : (Colors.grey[100]),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isSelected ? cor : Colors.transparent,
@@ -339,7 +290,7 @@ Widget _buildCategoriaCard({
         boxShadow: isSelected
             ? [
                 BoxShadow(
-                  color: cor.withOpacity(0.3),
+                  color: cor.withValues(alpha: 0.3),
                   blurRadius: 12,
                   spreadRadius: 0,
                   offset: const Offset(0, 4),
@@ -353,9 +304,7 @@ Widget _buildCategoriaCard({
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isSelected
-                  ? cor.withOpacity(0.2)
-                  : ( Colors.white),
+              color: isSelected ? cor.withValues(alpha: 0.2) : (Colors.white),
               shape: BoxShape.circle,
             ),
             child: SizedBox(
@@ -375,9 +324,7 @@ Widget _buildCategoriaCard({
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                color: isSelected
-                    ? cor
-                    : ( const Color(0xFF1E3A5F)),
+                color: isSelected ? cor : (const Color(0xFF1E3A5F)),
               ),
             ),
           ),

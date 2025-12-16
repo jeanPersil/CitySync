@@ -57,7 +57,7 @@ class _TelaConfigState extends State<TelaConfig> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       child: ListTile(
                         leading: Icon(Icons.language, color: Colors.blueGrey[700]),
                         title: Text(
@@ -102,7 +102,7 @@ class _TelaConfigState extends State<TelaConfig> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       child: ListTile(
                         leading: Icon(Icons.policy, color: Colors.blueGrey[700]),
                         title: Text(
@@ -129,7 +129,7 @@ class _TelaConfigState extends State<TelaConfig> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       child: ListTile(
                         leading: Icon(Icons.help_outline, color: Colors.blueGrey[700]),
                         title: Text(
@@ -156,7 +156,7 @@ class _TelaConfigState extends State<TelaConfig> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      color: Colors.red[700]!.withOpacity(0.9),
+                      color: Colors.red[700]!.withValues(alpha: 0.9),
                       child: ListTile(
                         leading: const Icon(Icons.exit_to_app, color: Colors.white),
                         title: const Text(

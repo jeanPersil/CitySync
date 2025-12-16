@@ -13,7 +13,7 @@ class PoliticaPrivacidadePage extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         centerTitle: true,
-        backgroundColor: Colors.black.withOpacity(0.2),
+        backgroundColor: Colors.black.withValues(alpha: 0.2),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -35,7 +35,7 @@ class PoliticaPrivacidadePage extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Card(
-              color: Colors.white.withOpacity(0.05),
+              color: Colors.white.withValues(alpha: 0.05),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -93,7 +93,7 @@ class PoliticaPrivacidadePage extends StatelessWidget {
                         child: Text(
                           'Obrigado por usar o CitySync!',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.95),
+                            color: Colors.white.withValues(alpha: 0.95),
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),

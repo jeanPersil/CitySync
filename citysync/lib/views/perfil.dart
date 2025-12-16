@@ -458,7 +458,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: kTextMain,
                       side:
-                          BorderSide(color: kTextMain.withOpacity(0.7)),
+                          BorderSide(color: kTextMain.withValues(alpha: 0.7)),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),

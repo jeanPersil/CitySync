@@ -322,7 +322,7 @@ class _TelaprincipalState extends State<Telaprincipal>
           child: AppBar(
             backgroundColor: const Color(0xFF1E3A5F),
             elevation: 8,
-            shadowColor: Colors.black.withOpacity(0.4),
+            shadowColor: Colors.black.withValues(alpha: 0.4),
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.vertical(
                 bottom: Radius.circular(16),
@@ -347,7 +347,7 @@ class _TelaprincipalState extends State<Telaprincipal>
                   child: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF20C997).withOpacity(0.2),
+                      color: const Color(0xFF20C997).withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                     child: ClipOval(
@@ -408,7 +408,7 @@ class _TelaprincipalState extends State<Telaprincipal>
             decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.4),
+                  color: Colors.black.withValues(alpha: 0.4),
                   blurRadius: 15,
                   spreadRadius: 2,
                   offset: const Offset(0, 5),
@@ -463,11 +463,11 @@ class _TelaprincipalState extends State<Telaprincipal>
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -541,7 +541,7 @@ class _TelaprincipalState extends State<Telaprincipal>
             borderRadius: BorderRadius.circular(30),
             boxShadow: [
               BoxShadow(
-                color: Colors.redAccent.withOpacity(0.5),
+                color: Colors.redAccent.withValues(alpha: 0.5),
                 blurRadius: 10,
                 spreadRadius: 2,
                 offset: const Offset(0, 4),

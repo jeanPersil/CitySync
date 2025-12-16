@@ -195,11 +195,11 @@ class _TelaLoginState extends State<TelaLogin> with TickerProviderStateMixin {
                   child: Container(
                     padding: const EdgeInsets.all(30),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E3A5F).withOpacity(0.8),
+                      color: const Color(0xFF1E3A5F).withValues(alpha: 0.8),
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
+                          color: Colors.black.withValues(alpha: 0.3),
                           blurRadius: 20,
                           spreadRadius: 5,
                           offset: const Offset(0, 10),
@@ -280,8 +280,8 @@ class _TelaLoginState extends State<TelaLogin> with TickerProviderStateMixin {
                           borderRadius: BorderRadius.circular(8),
                           gradient: LinearGradient(
                             colors: [
-                              const Color(0xFF20C997).withOpacity(0.1),
-                              const Color(0xFF20C997).withOpacity(0.05),
+                              const Color(0xFF20C997).withValues(alpha: 0.1),
+                              const Color(0xFF20C997).withValues(alpha: 0.05),
                             ],
                           ),
                         ),
@@ -330,7 +330,7 @@ class _TelaLoginState extends State<TelaLogin> with TickerProviderStateMixin {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -350,7 +350,7 @@ class _TelaLoginState extends State<TelaLogin> with TickerProviderStateMixin {
           prefixIcon: Icon(icon, color: Colors.white70),
           suffixIcon: suffixIcon,
           filled: true,
-          fillColor: Colors.white.withOpacity(0.08),
+          fillColor: Colors.white.withValues(alpha: 0.08),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
@@ -385,7 +385,7 @@ class _TelaLoginState extends State<TelaLogin> with TickerProviderStateMixin {
           boxShadow: [
             BoxShadow(
               color:
-                  const Color(0xFF20C997).withOpacity(_isLoading ? 0.3 : 0.6),
+                  const Color(0xFF20C997).withValues(alpha: _isLoading ? 0.3 : 0.6),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
