@@ -120,10 +120,14 @@ class _TelaprincipalState extends State<Telaprincipal>
     }
   }
 
-  // Lógica crítica dos marcadores
+  // --- Lógica de Marcadores ---
+
   Set<Marker> _gerarMarcadores(List<Report> listaReports) {
     return listaReports.map((report) {
       BitmapDescriptor icone = _definirCorDoIcone(report);
+      
+      // Obtém o emoji correspondente ao status para dar o efeito de cor
+      String emojiStatus = _obterEmojiStatus(report.nomeStatus);
 
       final String markerIdUnico = 'report_${report.id}_v$_markerVersion';
 
@@ -136,7 +140,8 @@ class _TelaprincipalState extends State<Telaprincipal>
         
         infoWindow: InfoWindow(
           title: report.nomeCategoria,
-          snippet: "Toque para ver detalhes >", 
+          // AQUI: Usamos o emoji para simular a cor, já que o InfoWindow não aceita Style
+          snippet: "$emojiStatus ${report.nomeStatus} • Toque para ver >", 
           onTap: () {
             try {
               final reportAtual = _reports.firstWhere(
@@ -153,7 +158,22 @@ class _TelaprincipalState extends State<Telaprincipal>
     }).toSet();
   }
 
-  // Lógica de cores baseada no STATUS
+  // Função auxiliar para definir o emoji baseado no status
+  String _obterEmojiStatus(String statusNome) {
+    String status = statusNome.toLowerCase();
+    if (status.contains('pendente') || status.contains('aberto')) {
+      return "🔴"; // Vermelho
+    } else if (status.contains('andamento') || status.contains('analise')) {
+      return "🟡"; // Amarelo
+    } else if (status.contains('concluído') || status.contains('resolvido')) {
+      return "🟢"; // Verde
+    } else if (status.contains('inválido')) {
+      return "⚪"; // Cinza/Branco
+    }
+    return "🔵"; // Azul padrão
+  }
+
+  // Lógica de cores baseada no STATUS para o Ícone (Pino)
   BitmapDescriptor _definirCorDoIcone(Report report) {
     Color cor;
     String status = report.nomeStatus.toLowerCase();
@@ -188,8 +208,12 @@ class _TelaprincipalState extends State<Telaprincipal>
     return BitmapDescriptor.hueAzure;
   }
 
+  // --- Exibição de Detalhes ---
+
   void _exibirDetalhesDoReport(Report report) {
     bool temImagem = report.urlImagem.isNotEmpty;
+    // Definindo cor do badge no modal
+    Color corStatus = _obterCorStatus(report.nomeStatus);
 
     showDialog(
       context: context,
@@ -260,8 +284,33 @@ class _TelaprincipalState extends State<Telaprincipal>
                     ),
 
                   _linhaInfo(Icons.location_on, report.endereco),
-                  const SizedBox(height: 8),
-                  _linhaInfo(Icons.info, "Status: ${report.nomeStatus}", isBold: true),
+                  const SizedBox(height: 12),
+                  
+                  // Status estilizado no Modal (Aqui podemos usar Container colorido)
+                  Row(
+                    children: [
+                      const Icon(Icons.info, size: 20, color: Color(0xFF1E3A5F)),
+                      const SizedBox(width: 8),
+                      const Text("Status: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: corStatus.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: corStatus),
+                        ),
+                        child: Text(
+                          report.nomeStatus,
+                          style: TextStyle(
+                            color: corStatus,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+
                   if (report.descricao.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     _linhaInfo(Icons.description, report.descricao),
@@ -288,6 +337,15 @@ class _TelaprincipalState extends State<Telaprincipal>
         );
       },
     );
+  }
+  
+  // Função auxiliar para cor no modal (apenas visual)
+  Color _obterCorStatus(String statusNome) {
+    String status = statusNome.toLowerCase();
+    if (status.contains('pendente') || status.contains('aberto')) return Colors.red;
+    if (status.contains('andamento') || status.contains('analise')) return Colors.orange;
+    if (status.contains('concluído') || status.contains('resolvido')) return Colors.green;
+    return Colors.blue;
   }
 
   Widget _linhaInfo(IconData icon, String text, {bool isBold = false}) {
