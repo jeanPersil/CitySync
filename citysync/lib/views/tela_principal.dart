@@ -120,15 +120,12 @@ class _TelaprincipalState extends State<Telaprincipal>
     }
   }
 
-  // --- Lógica de Marcadores ---
+  // --- Lógica de Marcadores (MODIFICADA PARA CORRIGIR O BUG) ---
 
   Set<Marker> _gerarMarcadores(List<Report> listaReports) {
     return listaReports.map((report) {
       BitmapDescriptor icone = _definirCorDoIcone(report);
-      
-      // Obtém o emoji correspondente ao status para dar o efeito de cor
       String emojiStatus = _obterEmojiStatus(report.nomeStatus);
-
       final String markerIdUnico = 'report_${report.id}_v$_markerVersion';
 
       return Marker(
@@ -136,13 +133,16 @@ class _TelaprincipalState extends State<Telaprincipal>
         position: report.toLatLng(),
         icon: icone,
         
-        consumeTapEvents: false, 
+        consumeTapEvents: true, 
         
         infoWindow: InfoWindow(
           title: report.nomeCategoria,
-          // AQUI: Usamos o emoji para simular a cor, já que o InfoWindow não aceita Style
           snippet: "$emojiStatus ${report.nomeStatus} • Toque para ver >", 
           onTap: () {
+            // CORREÇÃO 2: Esconde o balão (InfoWindow) IMEDIATAMENTE antes de abrir o modal.
+            // Isso impede que ele fique "atrás" do botão fechar.
+            _mapController?.hideMarkerInfoWindow(MarkerId(markerIdUnico));
+
             try {
               final reportAtual = _reports.firstWhere(
                 (r) => r.id == report.id,
@@ -212,11 +212,11 @@ class _TelaprincipalState extends State<Telaprincipal>
 
   void _exibirDetalhesDoReport(Report report) {
     bool temImagem = report.urlImagem.isNotEmpty;
-    // Definindo cor do badge no modal
     Color corStatus = _obterCorStatus(report.nomeStatus);
 
     showDialog(
       context: context,
+      barrierDismissible: true,
       builder: (context) {
         return Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -286,7 +286,6 @@ class _TelaprincipalState extends State<Telaprincipal>
                   _linhaInfo(Icons.location_on, report.endereco),
                   const SizedBox(height: 12),
                   
-                  // Status estilizado no Modal (Aqui podemos usar Container colorido)
                   Row(
                     children: [
                       const Icon(Icons.info, size: 20, color: Color(0xFF1E3A5F)),
@@ -339,7 +338,6 @@ class _TelaprincipalState extends State<Telaprincipal>
     );
   }
   
-  // Função auxiliar para cor no modal (apenas visual)
   Color _obterCorStatus(String statusNome) {
     String status = statusNome.toLowerCase();
     if (status.contains('pendente') || status.contains('aberto')) return Colors.red;
