@@ -3,7 +3,6 @@ import 'package:citysync/views/lista_problemas_report.dart';
 import 'package:citysync/views/tela_principal.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'Tema/color_extension.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -57,9 +56,9 @@ class _HomepageState extends State<Homepage> {
         currentIndex: paginaAtual,
         backgroundColor: backgroundColor,
         selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white.withOpacidade(0.7),
+        unselectedItemColor: Colors.white.withValues(alpha: 0.7),
         selectedLabelStyle: const TextStyle(color: Colors.white),
-        unselectedLabelStyle: TextStyle(color: Colors.white.withOpacidade(0.7)),
+        unselectedLabelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),

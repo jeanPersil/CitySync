@@ -22,45 +22,48 @@ class Telaprincipal extends StatefulWidget {
 
 class _TelaprincipalState extends State<Telaprincipal>
     with SingleTickerProviderStateMixin {
-  final LatLng _senaiFeiraDeSantana = const LatLng(-12.2663, -38.9458);
+  
+  // Posição inicial (SENAI Feira de Santana)
+  final LatLng _posicaoInicial = const LatLng(-12.2663, -38.9458);
   
   late AnimationController _animationController;
   late Animation<double> _fabAnimation;
   late Animation<double> _appBarFadeAnimation;
 
-  // ignore: unused_field
   GoogleMapController? _mapController;
+  
+  // Dados do Mapa
   Set<Marker> _markers = {};
   List<Report> _reports = [];
+  
+  // Estado
   bool _isLoading = true;
   bool _disposed = false;
-
   String? fotoUrl;
+
+  int _markerVersion = 0; 
 
   @override
   void initState() {
     super.initState();
 
+    // Configuração das animações
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
     );
 
     _fabAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOutBack,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutBack),
     );
 
     _appBarFadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeIn,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
     );
 
     _animationController.forward();
+    
+    // Carregamento inicial
     _carregarReports();
     _carregarFotoUsuario();
   }
@@ -68,47 +71,44 @@ class _TelaprincipalState extends State<Telaprincipal>
   Future<void> _carregarFotoUsuario() async {
     try {
       final supabase = Supabase.instance.client;
-      final user = supabase.auth.currentUser;
-      if (user == null) return;
-
       final data = await supabase
           .from("users")
           .select("foto_url")
-          .eq("id", user.id)
+          .eq("id", widget.usuarioID)
           .maybeSingle();
 
-      if (mounted && data != null) {
+      if (mounted && !_disposed && data != null) {
         final urlBase = data["foto_url"] as String?;
         if (urlBase != null && urlBase.isNotEmpty) {
-          final updatedUrl =
-              "$urlBase?t=${DateTime.now().millisecondsSinceEpoch}";
-
+          final updatedUrl = "$urlBase?t=${DateTime.now().millisecondsSinceEpoch}";
           setState(() {
             fotoUrl = updatedUrl;
           });
-        } else {
-          setState(() => fotoUrl = null);
         }
       }
     } catch (e) {
-      debugPrint("Erro ao carregar foto do usuário: $e");
+      debugPrint("Erro ao carregar foto: $e");
     }
   }
 
   Future<void> _carregarReports() async {
     if (_disposed) return;
-
+    
+    if (_reports.isEmpty && mounted) {
+      setState(() => _isLoading = true);
+    }
+      
     try {
-      if (mounted) {
-        setState(() => _isLoading = true);
-      }
-
       final reports = await ReportApiService().obterTodosReports();
 
+      _markerVersion++;
+
+      final novosMarcadores = _gerarMarcadores(reports);
+      
       if (mounted && !_disposed) {
         setState(() {
           _reports = reports;
-          _adicionarMarcadores();
+          _markers = novosMarcadores;
           _isLoading = false;
         });
       }
@@ -120,177 +120,202 @@ class _TelaprincipalState extends State<Telaprincipal>
     }
   }
 
-  void _adicionarMarcadores() {
-    Set<Marker> novosMarcadores = {};
+  // Lógica crítica dos marcadores
+  Set<Marker> _gerarMarcadores(List<Report> listaReports) {
+    return listaReports.map((report) {
+      BitmapDescriptor icone = _definirCorDoIcone(report);
 
-    for (var report in _reports) {
-      BitmapDescriptor markerIcon = _getMarkerIconByStatus(report.nomeStatus);
+      final String markerIdUnico = 'report_${report.id}_v$_markerVersion';
 
-      novosMarcadores.add(
-        Marker(
-          markerId: MarkerId('report_${report.id}'),
-          position: report.toLatLng(),
-          icon: markerIcon,
-          // O SEGREDO ESTÁ AQUI: O InfoWindow com onTap configurado
-          infoWindow: InfoWindow(
-            title: report.nomeCategoria,
-            snippet: "Status: ${report.nomeStatus} (Toque para ver)",
-            onTap: () {
-              // Quando clica no balão branco, abre o modal cinza
-              _mostrarDetalhesReport(report);
-            },
-          ),
+      return Marker(
+        markerId: MarkerId(markerIdUnico),
+        position: report.toLatLng(),
+        icon: icone,
+        
+        consumeTapEvents: false, 
+        
+        infoWindow: InfoWindow(
+          title: report.nomeCategoria,
+          snippet: "Toque para ver detalhes >", 
+          onTap: () {
+            try {
+              final reportAtual = _reports.firstWhere(
+                (r) => r.id == report.id,
+                orElse: () => report,
+              );
+              _exibirDetalhesDoReport(reportAtual);
+            } catch (e) {
+              _exibirDetalhesDoReport(report);
+            }
+          },
         ),
       );
-    }
-
-    if (mounted && !_disposed) {
-      setState(() {
-        _markers = novosMarcadores;
-      });
-    }
+    }).toSet();
   }
 
-  BitmapDescriptor _getMarkerIconByStatus(String status) {
-    double hue;
-    switch (status.toLowerCase().trim()) {
-      case 'pendente': hue = BitmapDescriptor.hueOrange; break;
-      case 'em andamento': hue = BitmapDescriptor.hueAzure; break;
-      case 'resolvido': 
-      case 'concluido':
-      case 'concluído': hue = BitmapDescriptor.hueGreen; break;
-      case 'invalido':
-      case 'inválido':
-      case 'cancelado': hue = BitmapDescriptor.hueViolet; break;
-      default: hue = BitmapDescriptor.hueOrange;
+  // Lógica de cores baseada no STATUS
+  BitmapDescriptor _definirCorDoIcone(Report report) {
+    Color cor;
+    String status = report.nomeStatus.toLowerCase();
+    
+    if (status.contains('pendente') || status.contains('aberto')) {
+      cor = Colors.red;
+    } else if (status.contains('andamento') || status.contains('analise')) {
+      cor = Colors.orange;
+    } else if (status.contains('concluído') || status.contains('resolvido')) {
+      cor = Colors.green;
+    } else if (status.contains('inválido')) {
+      cor = Colors.grey;
+    } else {
+      switch (report.nomeCategoria.toLowerCase()) {
+        case 'buraco': cor = Colors.orange; break;
+        case 'iluminação': cor = Colors.yellow; break;
+        case 'lixo': cor = Colors.green; break;
+        default: cor = Colors.blue;
+      }
     }
-    return BitmapDescriptor.defaultMarkerWithHue(hue);
+    
+    return BitmapDescriptor.defaultMarkerWithHue(_converterCorParaHue(cor));
   }
 
-  Color _getColorByStatus(String status) {
-    switch (status.toLowerCase().trim()) {
-      case 'pendente': return Colors.orange.shade900;
-      case 'em andamento': return Colors.blue.shade800;
-      case 'resolvido':
-      case 'concluido':
-      case 'concluído': return Colors.green.shade800;
-      case 'invalido':
-      case 'inválido':
-      case 'cancelado': return Colors.grey.shade700;
-      default: return Colors.black;
-    }
-  }
-  
-  Color _getBackgroundColorByStatus(String status) {
-     switch (status.toLowerCase().trim()) {
-      case 'pendente': return Colors.orange.withValues(alpha: 0.2);
-      case 'em andamento': return Colors.blue.withValues( alpha:0.2);
-      case 'resolvido':
-      case 'concluido':
-      case 'concluído': return Colors.green.withValues( alpha:0.2);
-      default: return Colors.grey.withValues( alpha:0.2);
-    }
+  double _converterCorParaHue(Color color) {
+    if (color == Colors.red) return BitmapDescriptor.hueRed;
+    if (color == Colors.orange) return BitmapDescriptor.hueOrange;
+    if (color == Colors.yellow) return BitmapDescriptor.hueYellow;
+    if (color == Colors.green) return BitmapDescriptor.hueGreen;
+    if (color == Colors.blue) return BitmapDescriptor.hueBlue;
+    if (color == Colors.grey) return BitmapDescriptor.hueRose;
+    return BitmapDescriptor.hueAzure;
   }
 
-  void _mostrarDetalhesReport(Report report) {
+  void _exibirDetalhesDoReport(Report report) {
+    bool temImagem = report.urlImagem.isNotEmpty;
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey[300], // Estilo Cinza da Imagem 2
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          report.nomeCategoria, 
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
-        ),
-        content: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.9,
-            maxHeight: MediaQuery.of(context).size.height * 0.7,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (report.urlImagem.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        report.urlImagem,
-                        width: double.infinity,
-                        height: 200,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const SizedBox(),
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          insetPadding: const EdgeInsets.all(20),
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            padding: const EdgeInsets.all(16),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          report.nomeCategoria,
+                          style: const TextStyle(
+                            fontSize: 20, 
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1E3A5F)
+                          ),
+                        ),
                       ),
-                    ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      )
+                    ],
                   ),
-                
-                _buildLabelValue('Endereço: ', report.endereco),
-                const SizedBox(height: 10),
-
-                Row(
-                  children: [
-                    const Text('Status: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: _getBackgroundColorByStatus(report.nomeStatus),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: _getColorByStatus(report.nomeStatus)),
-                      ),
-                      child: Text(
-                        report.nomeStatus,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: _getColorByStatus(report.nomeStatus),
+                  const Divider(),
+                  
+                  if (temImagem)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.network(
+                          report.urlImagem,
+                          height: 200,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_,__,___) => Container(
+                            height: 150,
+                            color: Colors.grey[200],
+                            child: const Center(child: Icon(Icons.broken_image, color: Colors.grey)),
+                          ),
+                          loadingBuilder: (context, child, loading) {
+                            if (loading == null) return child;
+                            return Container(
+                              height: 200,
+                              color: Colors.grey[100],
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  value: loading.expectedTotalBytes != null
+                                      ? loading.cumulativeBytesLoaded / loading.expectedTotalBytes!
+                                      : null,
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ),
-                  ],
-                ),
 
-                const SizedBox(height: 10),
-                if (report.descricao.isNotEmpty) 
-                  _buildLabelValue('Descrição: ', report.descricao),
-                
-                const SizedBox(height: 10),
-                _buildLabelValue('Data: ', report.dataSimples),
-              ],
+                  _linhaInfo(Icons.location_on, report.endereco),
+                  const SizedBox(height: 8),
+                  _linhaInfo(Icons.info, "Status: ${report.nomeStatus}", isBold: true),
+                  if (report.descricao.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    _linhaInfo(Icons.description, report.descricao),
+                  ],
+                  const SizedBox(height: 8),
+                  _linhaInfo(Icons.calendar_month, report.dataSimples),
+                  
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1E3A5F),
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Fechar"),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _linhaInfo(IconData icon, String text, {bool isBold = false}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 20, color: const Color(0xFF1E3A5F)),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+              fontSize: 14,
             ),
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            style: TextButton.styleFrom(backgroundColor: Colors.grey[500]),
-            child: const Text('Fechar', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
+      ],
     );
   }
 
-  Widget _buildLabelValue(String label, String value) {
-    return RichText(
-      text: TextSpan(
-        style: const TextStyle(color: Colors.black, fontSize: 16),
-        children: [
-          TextSpan(text: label, style: const TextStyle(fontWeight: FontWeight.bold)),
-          TextSpan(text: value),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _abrirModalReport() async {
-
+  Future<void> _abrirModalNovoReport() async {
     await mostrarModal(context, widget.usuarioID);
-
-    if (mounted && !_disposed) {
-      // Atualiza os reports após voltar do modal
-      _carregarReports();
+    
+    if (mounted) {
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (!_disposed) _carregarReports();
+      });
     }
   }
 
@@ -312,11 +337,10 @@ class _TelaprincipalState extends State<Telaprincipal>
           opacity: _appBarFadeAnimation,
           child: AppBar(
             backgroundColor: const Color(0xFF1E3A5F),
-            elevation: 8,
+            elevation: 4,
             title: Row(
               children: [
-                InkWell(
-                  borderRadius: BorderRadius.circular(24),
+                GestureDetector(
                   onTap: () async {
                     await Navigator.push(
                       context,
@@ -325,65 +349,118 @@ class _TelaprincipalState extends State<Telaprincipal>
                     _carregarFotoUsuario();
                   },
                   child: CircleAvatar(
-                    backgroundImage: fotoUrl != null ? NetworkImage(fotoUrl!) : null,
-                    backgroundColor: Colors.grey[300],
-                    child: fotoUrl == null
-                        ? const Icon(Icons.person, color: Colors.grey)
+                    radius: 18,
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
+                    backgroundImage: (fotoUrl != null) ? NetworkImage(fotoUrl!) : null,
+                    child: (fotoUrl == null) 
+                        ? const Icon(Icons.person, color: Colors.white) 
                         : null,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  "Olá, ${widget.nomeUsuario}",
+                  widget.nomeUsuario,
                   style: const TextStyle(color: Colors.white, fontSize: 18),
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
             actions: [
-               // Botão de Atualizar Reports na AppBar
-               IconButton(
-                 icon: const Icon(Icons.refresh, color: Colors.white),
-                 tooltip: "Atualizar Reports",
-                 onPressed: _carregarReports,
-               )
+              IconButton(
+                icon: const Icon(Icons.refresh, color: Colors.white),
+                onPressed: _carregarReports,
+              )
             ],
           ),
         ),
       ),
-      
-      // Corpo com Mapa (Stack para colocar botão em cima se precisar)
       body: Stack(
         children: [
+          // MAPA
           GoogleMap(
             initialCameraPosition: CameraPosition(
-              target: _senaiFeiraDeSantana,
-              zoom: 14,
+              target: _posicaoInicial,
+              zoom: 16,
             ),
+            myLocationEnabled: true,
+            myLocationButtonEnabled: false,
+            zoomControlsEnabled: false,
+            mapToolbarEnabled: false,
             markers: _markers,
             onMapCreated: (controller) => _mapController = controller,
-            myLocationEnabled: true,
-            myLocationButtonEnabled: true,
-            zoomControlsEnabled: false, // Remove botões de zoom padrão para limpar a tela
           ),
           
-          if (_isLoading)
-            Container(
-              color: Colors.black.withValues( alpha:0.3),
-              child: const Center(
-                child: CircularProgressIndicator(color: Colors.white),
+          // Contador de Reports
+          Positioned(
+            top: 16,
+            left: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [BoxShadow(blurRadius: 4, color: Colors.black26)],
+              ),
+              child: Text(
+                "${_reports.length} problemas encontrados",
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold, 
+                  color: Color(0xFF1E3A5F)
+                ),
               ),
             ),
+          ),
+
+          // Loading Indicator
+          if (_isLoading)
+            const Center(
+              child: Card(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            ),
+
+          // Controles de Zoom e Localização
+          Positioned(
+            right: 16,
+            bottom: 100,
+            child: Column(
+              children: [
+                FloatingActionButton.small(
+                  heroTag: "zoom_in",
+                  backgroundColor: Colors.white,
+                  child: const Icon(Icons.add, color: Color(0xFF1E3A5F)),
+                  onPressed: () => _mapController?.animateCamera(CameraUpdate.zoomIn()),
+                ),
+                const SizedBox(height: 8),
+                FloatingActionButton.small(
+                  heroTag: "zoom_out",
+                  backgroundColor: Colors.white,
+                  child: const Icon(Icons.remove, color: Color(0xFF1E3A5F)),
+                  onPressed: () => _mapController?.animateCamera(CameraUpdate.zoomOut()),
+                ),
+                const SizedBox(height: 8),
+                FloatingActionButton.small(
+                  heroTag: "my_loc",
+                  backgroundColor: Colors.white,
+                  child: const Icon(Icons.my_location, color: Color(0xFF1E3A5F)),
+                  onPressed: () {
+                    _mapController?.animateCamera(CameraUpdate.newLatLng(_posicaoInicial));
+                  },
+                ),
+              ],
+            ),
+          ),
         ],
       ),
-
       floatingActionButton: ScaleTransition(
         scale: _fabAnimation,
         child: FloatingActionButton.extended(
-          onPressed: _abrirModalReport,
-          backgroundColor: const Color(0xFF1E3A5F),
-          icon: const Icon(Icons.add_location_alt, color: Colors.white),
-          label: const Text("Novo Report", style: TextStyle(color: Colors.white)),
+          onPressed: _abrirModalNovoReport,
+          backgroundColor: Colors.redAccent,
+          icon: const Icon(Icons.warning_amber_rounded, color: Colors.white),
+          label: const Text("REPORTAR", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
