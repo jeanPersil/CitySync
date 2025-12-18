@@ -96,6 +96,14 @@ class ReportCompleto extends StatelessWidget {
                   fontSize: 15,
                 ),
               ),
+              const SizedBox(height: 20),
+              (report.urlImagem.isNotEmpty)
+                  ? Image.network(report.urlImagem)
+                  : const Text("Nehuma imagem esta anexada a esse report",
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 15,
+                      )),
             ],
           ),
         ),
