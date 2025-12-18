@@ -41,6 +41,9 @@ class _TelaprincipalState extends State<Telaprincipal>
   bool _disposed = false;
   String? fotoUrl;
 
+  // --- CONTROLE DE BLOQUEIO ---
+  bool _interacaoBloqueada = false;
+
   int _markerVersion = 0; 
 
   @override
@@ -120,7 +123,7 @@ class _TelaprincipalState extends State<Telaprincipal>
     }
   }
 
-  // --- Lógica de Marcadores (MODIFICADA PARA CORRIGIR O BUG) ---
+  // --- Lógica de Marcadores ---
 
   Set<Marker> _gerarMarcadores(List<Report> listaReports) {
     return listaReports.map((report) {
@@ -133,24 +136,42 @@ class _TelaprincipalState extends State<Telaprincipal>
         position: report.toLatLng(),
         icon: icone,
         
-        consumeTapEvents: true, 
+        // Se a interação estiver bloqueada, o marcador ignora cliques
+        consumeTapEvents: _interacaoBloqueada, 
         
         infoWindow: InfoWindow(
           title: report.nomeCategoria,
-          snippet: "$emojiStatus ${report.nomeStatus} • Toque para ver >", 
-          onTap: () {
-            // CORREÇÃO 2: Esconde o balão (InfoWindow) IMEDIATAMENTE antes de abrir o modal.
-            // Isso impede que ele fique "atrás" do botão fechar.
+          snippet: "$emojiStatus ${report.nomeStatus} • Toque para ver >",
+          
+          onTap: () async {
+            // 1. Se já estiver bloqueado, não faz nada
+            if (_interacaoBloqueada) return;
+
+            // 2. ATIVA O BLOQUEIO PARA O DETALHE DO REPORT
+            setState(() {
+              _interacaoBloqueada = true;
+            });
+
             _mapController?.hideMarkerInfoWindow(MarkerId(markerIdUnico));
 
+            Report reportParaExibir;
             try {
-              final reportAtual = _reports.firstWhere(
+              reportParaExibir = _reports.firstWhere(
                 (r) => r.id == report.id,
                 orElse: () => report,
               );
-              _exibirDetalhesDoReport(reportAtual);
             } catch (e) {
-              _exibirDetalhesDoReport(report);
+              reportParaExibir = report;
+            }
+            
+            // 3. AGUARDA O FECHAMENTO DO DIALOG
+            await _exibirDetalhesDoReport(reportParaExibir);
+
+            // 4. LIBERA O MAPA
+            if (mounted) {
+              setState(() {
+                _interacaoBloqueada = false;
+              });
             }
           },
         ),
@@ -158,22 +179,15 @@ class _TelaprincipalState extends State<Telaprincipal>
     }).toSet();
   }
 
-  // Função auxiliar para definir o emoji baseado no status
   String _obterEmojiStatus(String statusNome) {
     String status = statusNome.toLowerCase();
-    if (status.contains('pendente') || status.contains('aberto')) {
-      return "🔴"; // Vermelho
-    } else if (status.contains('andamento') || status.contains('analise')) {
-      return "🟡"; // Amarelo
-    } else if (status.contains('concluído') || status.contains('resolvido')) {
-      return "🟢"; // Verde
-    } else if (status.contains('inválido')) {
-      return "⚪"; // Cinza/Branco
-    }
-    return "🔵"; // Azul padrão
+    if (status.contains('pendente') || status.contains('aberto')) return "🔴";
+    if (status.contains('andamento') || status.contains('analise')) return "🟡";
+    if (status.contains('concluído') || status.contains('resolvido')) return "🟢";
+    if (status.contains('inválido')) return "⚪";
+    return "🔵";
   }
 
-  // Lógica de cores baseada no STATUS para o Ícone (Pino)
   BitmapDescriptor _definirCorDoIcone(Report report) {
     Color cor;
     String status = report.nomeStatus.toLowerCase();
@@ -210,11 +224,11 @@ class _TelaprincipalState extends State<Telaprincipal>
 
   // --- Exibição de Detalhes ---
 
-  void _exibirDetalhesDoReport(Report report) {
+  Future<void> _exibirDetalhesDoReport(Report report) async {
     bool temImagem = report.urlImagem.isNotEmpty;
     Color corStatus = _obterCorStatus(report.nomeStatus);
 
-    showDialog(
+    return showDialog(
       context: context,
       barrierDismissible: true,
       builder: (context) {
@@ -265,20 +279,6 @@ class _TelaprincipalState extends State<Telaprincipal>
                             color: Colors.grey[200],
                             child: const Center(child: Icon(Icons.broken_image, color: Colors.grey)),
                           ),
-                          loadingBuilder: (context, child, loading) {
-                            if (loading == null) return child;
-                            return Container(
-                              height: 200,
-                              color: Colors.grey[100],
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  value: loading.expectedTotalBytes != null
-                                      ? loading.cumulativeBytesLoaded / loading.expectedTotalBytes!
-                                      : null,
-                                ),
-                              ),
-                            );
-                          },
                         ),
                       ),
                     ),
@@ -366,9 +366,24 @@ class _TelaprincipalState extends State<Telaprincipal>
   }
 
   Future<void> _abrirModalNovoReport() async {
+    // Se já estiver bloqueado, sai
+    if (_interacaoBloqueada) return;
+
+    // 1. BLOQUEIA O MAPA ANTES DE ABRIR
+    setState(() {
+      _interacaoBloqueada = true;
+    });
+
+    // 2. ABRE O MODAL E ESPERA (AWAIT)
     await mostrarModal(context, widget.usuarioID);
     
+    // 3. DESBLOQUEIA QUANDO VOLTAR
     if (mounted) {
+      setState(() {
+        _interacaoBloqueada = false;
+      });
+
+      // Recarrega os reports
       Future.delayed(const Duration(milliseconds: 500), () {
         if (!_disposed) _carregarReports();
       });
@@ -385,6 +400,9 @@ class _TelaprincipalState extends State<Telaprincipal>
 
   @override
   Widget build(BuildContext context) {
+    // Estilo visual para quando estiver bloqueado
+    final Color corFab = _interacaoBloqueada ? Colors.grey : Colors.redAccent;
+
     return Scaffold(
       backgroundColor: const Color(0xFF1E3A5F),
       appBar: PreferredSize(
@@ -398,6 +416,7 @@ class _TelaprincipalState extends State<Telaprincipal>
               children: [
                 GestureDetector(
                   onTap: () async {
+                    if (_interacaoBloqueada) return; // Bloqueia perfil
                     await Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => ProfileScreen()),
@@ -422,8 +441,8 @@ class _TelaprincipalState extends State<Telaprincipal>
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.refresh, color: Colors.white),
-                onPressed: _carregarReports,
+                icon: Icon(Icons.refresh, color: _interacaoBloqueada ? Colors.grey : Colors.white),
+                onPressed: _interacaoBloqueada ? null : _carregarReports,
               )
             ],
           ),
@@ -432,17 +451,32 @@ class _TelaprincipalState extends State<Telaprincipal>
       body: Stack(
         children: [
           // MAPA
-          GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: _posicaoInicial,
-              zoom: 16,
+          // Usamos AbsorbPointer para garantir que NENHUM toque passe para o mapa quando bloqueado
+          AbsorbPointer(
+            absorbing: _interacaoBloqueada,
+            child: GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: _posicaoInicial,
+                zoom: 16,
+              ),
+              myLocationEnabled: true,
+              myLocationButtonEnabled: false,
+              zoomControlsEnabled: false,
+              mapToolbarEnabled: false,
+              markers: _markers,
+              
+              // Essas propriedades ajudam, mas o AbsorbPointer acima garante o bloqueio total
+              scrollGesturesEnabled: !_interacaoBloqueada,
+              zoomGesturesEnabled: !_interacaoBloqueada,
+              rotateGesturesEnabled: !_interacaoBloqueada,
+              tiltGesturesEnabled: !_interacaoBloqueada,
+
+              onTap: (LatLng pos) {
+                // Bloqueio extra
+              },
+              
+              onMapCreated: (controller) => _mapController = controller,
             ),
-            myLocationEnabled: true,
-            myLocationButtonEnabled: false,
-            zoomControlsEnabled: false,
-            mapToolbarEnabled: false,
-            markers: _markers,
-            onMapCreated: (controller) => _mapController = controller,
           ),
           
           // Contador de Reports
@@ -486,24 +520,24 @@ class _TelaprincipalState extends State<Telaprincipal>
                 FloatingActionButton.small(
                   heroTag: "zoom_in",
                   backgroundColor: Colors.white,
-                  child: const Icon(Icons.add, color: Color(0xFF1E3A5F)),
-                  onPressed: () => _mapController?.animateCamera(CameraUpdate.zoomIn()),
+                  onPressed: _interacaoBloqueada ? null : () => _mapController?.animateCamera(CameraUpdate.zoomIn()),
+                  child: Icon(Icons.add, color: _interacaoBloqueada ? Colors.grey : const Color(0xFF1E3A5F)),
                 ),
                 const SizedBox(height: 8),
                 FloatingActionButton.small(
                   heroTag: "zoom_out",
                   backgroundColor: Colors.white,
-                  child: const Icon(Icons.remove, color: Color(0xFF1E3A5F)),
-                  onPressed: () => _mapController?.animateCamera(CameraUpdate.zoomOut()),
+                  onPressed: _interacaoBloqueada ? null : () => _mapController?.animateCamera(CameraUpdate.zoomOut()),
+                  child: Icon(Icons.remove, color: _interacaoBloqueada ? Colors.grey : const Color(0xFF1E3A5F)),
                 ),
                 const SizedBox(height: 8),
                 FloatingActionButton.small(
                   heroTag: "my_loc",
                   backgroundColor: Colors.white,
-                  child: const Icon(Icons.my_location, color: Color(0xFF1E3A5F)),
-                  onPressed: () {
+                  onPressed: _interacaoBloqueada ? null : () {
                     _mapController?.animateCamera(CameraUpdate.newLatLng(_posicaoInicial));
                   },
+                  child: Icon(Icons.my_location, color: _interacaoBloqueada ? Colors.grey : const Color(0xFF1E3A5F)),
                 ),
               ],
             ),
@@ -513,8 +547,9 @@ class _TelaprincipalState extends State<Telaprincipal>
       floatingActionButton: ScaleTransition(
         scale: _fabAnimation,
         child: FloatingActionButton.extended(
-          onPressed: _abrirModalNovoReport,
-          backgroundColor: Colors.redAccent,
+          // Bloqueia o botão se o modal estiver aberto (evita cliques duplos)
+          onPressed: _interacaoBloqueada ? null : _abrirModalNovoReport,
+          backgroundColor: corFab,
           icon: const Icon(Icons.warning_amber_rounded, color: Colors.white),
           label: const Text("REPORTAR", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         ),

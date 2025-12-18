@@ -2,21 +2,21 @@ import 'dart:typed_data';
 import 'dart:io' as io;
 import 'package:citysync/model/model_report.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
+import 'package:flutter/foundation.dart' show kDebugMode;
 
 class ReportApiService {
   final supabase = Supabase.instance.client;
 
   // Coordenadas aproximadas dos limites de Feira de Santana
   static const double _minLatitude = -12.35;
-  static const double _maxLatitude = -12.20;
+  static const double _maxLatitude = -12.15; // Ajustado levemente para cobrir melhor a zona norte
   static const double _minLongitude = -39.10;
   static const double _maxLongitude = -38.80;
+  
   static const int tamanhoDaPagina = 10;
-
   static const String _bucketName = 'imagens';
 
-  
+  /// Faz o upload da imagem (suporta Web e Mobile via Bytes ou File)
   Future<String?> uploadImagem({
     io.File? imageFile,
     Uint8List? imageBytes,
@@ -24,15 +24,37 @@ class ReportApiService {
   }) async {
     try {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final nomeArquivo = '${timestamp}_$imageName';
+      // Remove caracteres especiais do nome do arquivo para evitar erro na URL
+      final safeName = imageName.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '');
+      final nomeArquivo = '${timestamp}_$safeName';
 
-
-      if (kIsWeb && imageBytes != null) {
-      } else if (imageFile != null) {
+      // 1. Tenta enviar via BYTES (funciona em Web e Mobile se passarmos os bytes)
+      if (imageBytes != null) {
+        await supabase.storage.from(_bucketName).uploadBinary(
+          nomeArquivo,
+          imageBytes,
+          fileOptions: const FileOptions(
+            contentType: 'image/jpeg', // Força o tipo para garantir visualização
+            upsert: false,
+          ),
+        );
+      } 
+      // 2. Fallback: Tenta enviar via ARQUIVO (apenas Mobile/Desktop IO)
+      else if (imageFile != null) {
+        await supabase.storage.from(_bucketName).upload(
+          nomeArquivo,
+          imageFile,
+          fileOptions: const FileOptions(
+            contentType: 'image/jpeg',
+            upsert: false,
+          ),
+        );
       } else {
+        if (kDebugMode) print("Nenhuma imagem fornecida para upload.");
         return null;
       }
 
+      // 3. Pega a URL pública
       final urlPublica = supabase.storage
           .from(_bucketName)
           .getPublicUrl(nomeArquivo);
@@ -40,20 +62,20 @@ class ReportApiService {
       return urlPublica;
     } catch (e) {
       if (kDebugMode) {
-        print("Erro ao fazer upload da imagem: $e");
+        print("❌ Erro ao fazer upload da imagem: $e");
       }
       return null;
     }
   }
 
-  
+  /// Busca reports paginados de um usuário específico
   Future<List<Report>> obterListaReports(String idUsuario, int pagina) async {
     try {
       final int from = (pagina - 1) * tamanhoDaPagina;
       final int to = (pagina * tamanhoDaPagina) - 1;
 
       final response = await supabase
-          .from("listar_reportes")
+          .from("listar_reportes") // Certifique-se que essa VIEW ou TABELA existe
           .select()
           .eq('fk_usuario', idUsuario)
           .order('data_criacao', ascending: false)
@@ -76,13 +98,14 @@ class ReportApiService {
     }
   }
 
-  /// Busca todos os reports e filtra por Feira de Santana
+  /// Busca todos os reports (Admin/Feed) e filtra por FSA
   Future<List<Report>> obterTodosReports() async {
     try {
       final response = await supabase
           .from("listar_reportes")
           .select()
-          .order('data_criacao', ascending: false);
+          .order('data_criacao', ascending: false)
+          .limit(100); // ADICIONADO LIMIT: Segurança para não travar se houver 1 milhão de reports
 
       if (response.isEmpty) {
         return [];
@@ -101,14 +124,13 @@ class ReportApiService {
     }
   }
 
- 
+  // Filtra localmente os reports (idealmente isso seria no banco, mas funciona aqui)
   List<Report> _filtrarPorFeiraDeSantana(List<Report> reports) {
     return reports.where((report) {
       return _estaEmFeiraDeSantana(report.latitude, report.longitude);
     }).toList();
   }
 
-  
   bool _estaEmFeiraDeSantana(double latitude, double longitude) {
     return latitude >= _minLatitude &&
         latitude <= _maxLatitude &&
@@ -116,7 +138,7 @@ class ReportApiService {
         longitude <= _maxLongitude;
   }
 
-  
+  /// Envia o report para o banco de dados
   Future<String?> enviarReport({
     required String endereco,
     required int categoriaId,
@@ -127,25 +149,21 @@ class ReportApiService {
     required double longitude,
   }) async {
     try {
-      // Validação básica de campos obrigatórios
+      // Validação básica
       if (endereco.isEmpty || categoriaId == 0) {
         return "Endereço e categoria são obrigatórios.";
       }
 
-      
+      // Validação Geográfica
       if (!_estaEmFeiraDeSantana(latitude, longitude)) {
-        return "A localização GPS está fora dos limites de Feira de Santana. "
-            "Apenas reports dentro da cidade são permitidos.";
+        return "Localização fora de Feira de Santana. Reporte apenas na cidade.";
       }
-
       
       if (latitude == 0.0 && longitude == 0.0) {
-        return "Coordenadas GPS inválidas. Por favor, ative sua localização.";
+        return "GPS inválido.";
       }
 
-    
-
-      // Inserção no banco de dados
+      // Inserção no banco
       await supabase.from("reportes").insert({
         'endereco': endereco,
         'fk_categoria': categoriaId,
@@ -154,42 +172,14 @@ class ReportApiService {
         'url_imagem': urlImagem ?? '',
         'latitude': latitude,
         'longitude': longitude,
+        // O campo 'status' e 'data_criacao' devem ter defaults no banco (ex: 'Pendente', now())
       });
 
-      return null; // Sucesso
+      return null; // Null significa sucesso
     } on PostgrestException catch (e) {
       return "Erro do banco de dados: ${e.message}";
     } catch (e) {
-      return "Erro inesperado ao enviar report: $e";
+      return "Erro inesperado: $e";
     }
-  }
-
-  
-  bool validarLocalizacao(double latitude, double longitude) {
-    // Verifica se não são coordenadas padrão/inválidas
-    if (latitude == 0.0 && longitude == 0.0) {
-      return false;
-    }
-
-    // Verifica se está dentro dos limites da cidade
-    return _estaEmFeiraDeSantana(latitude, longitude);
-  }
-
-  
-  String obterMensagemErroLocalizacao(double latitude, double longitude) {
-    if (latitude == 0.0 && longitude == 0.0) {
-      return "Não foi possível obter sua localização. "
-          "Verifique se o GPS está ativado e se o app tem permissão de localização.";
-    }
-
-    if (!_estaEmFeiraDeSantana(latitude, longitude)) {
-      return "Você está fora de Feira de Santana. "
-          "Este app aceita apenas reports dentro dos limites da cidade.\n\n"
-          "Sua localização atual:\n"
-          "Latitude: ${latitude.toStringAsFixed(6)}\n"
-          "Longitude: ${longitude.toStringAsFixed(6)}";
-    }
-
-    return "Localização válida.";
   }
 }

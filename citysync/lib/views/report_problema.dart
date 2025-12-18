@@ -36,6 +36,9 @@ class TelaReportState extends State<TelaReport> {
   // Controle para evitar loop infinito entre mapa e texto
   bool _isUpdatingFromMap = false;
 
+  // 🔒 NOVA VARIÁVEL: Controla se o mapa aceita toques ou não
+  bool _mapaInterativo = true;
+
   // Imagem
   Uint8List? imageBytes;
   io.File? imageFile;
@@ -82,13 +85,16 @@ class TelaReportState extends State<TelaReport> {
         Marker(
           markerId: const MarkerId('local_selecionado'),
           position: posicao,
-          draggable: true,
+          draggable: true, // O bloqueio real acontece no build usando copyWith
           infoWindow: InfoWindow(
             title: titulo ?? "Local Selecionado",
             snippet: snippet ?? "Segure e arraste para ajustar",
           ),
           onDragEnd: (novaPosicao) {
-            _atualizarPosicao(novaPosicao);
+            // Segurança extra: só atualiza se estiver interativo
+            if (_mapaInterativo) {
+              _atualizarPosicao(novaPosicao);
+            }
           },
         ),
       );
@@ -96,6 +102,9 @@ class TelaReportState extends State<TelaReport> {
   }
 
   void _atualizarPosicao(LatLng novaPosicao) async {
+    // Se o mapa estiver bloqueado, ignora
+    if (!_mapaInterativo) return;
+
     setState(() {
       _posicaoSelecionada = novaPosicao;
       _isUpdatingFromMap = true; 
@@ -223,31 +232,53 @@ class TelaReportState extends State<TelaReport> {
     }
   }
 
-  void _abrirVisualizacaoImagem() {
-    showDialog(
+  // 🔒 AQUI ESTÁ A LÓGICA DE BLOQUEIO DO MAPA
+  void _abrirVisualizacaoImagem() async { // Adicionado async
+    if (imageBytes == null) return;
+
+    // 1. Bloqueia o mapa
+    setState(() {
+      _mapaInterativo = false;
+    });
+
+    // 2. Abre o modal e espera ele fechar (await)
+    await showDialog(
       context: context,
+      barrierDismissible: false, 
+      barrierColor: Colors.black.withValues(alpha: 0.9), 
       builder: (context) {
         return Scaffold(
-          backgroundColor: Colors.black.withValues( alpha:0.9),
+          backgroundColor: Colors.transparent,
           body: Stack(
             children: [
               Center(
-                child: kIsWeb 
-                    ? Image.memory(imageBytes!) 
-                    : Image.file(imageFile!),
+                child: InteractiveViewer(
+                  panEnabled: true, 
+                  minScale: 0.5,
+                  maxScale: 4.0,
+                  child: Image.memory(
+                    imageBytes!,
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
               Positioned(
-                top: 40,
+                top: 50,
                 right: 20,
                 child: GestureDetector(
                   onTap: () => Navigator.of(context).pop(),
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues( alpha:0.5),
+                      color: Colors.white.withValues(alpha: 0.3),
                       shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 1.5),
                     ),
-                    child: const Icon(Icons.close, size: 28, color: Colors.black),
+                    child: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 30,
+                    ),
                   ),
                 ),
               ),
@@ -256,6 +287,13 @@ class TelaReportState extends State<TelaReport> {
         );
       },
     );
+
+    // 3. Desbloqueia o mapa quando o modal fechar
+    if (mounted) {
+      setState(() {
+        _mapaInterativo = true;
+      });
+    }
   }
 
   // --- LÓGICA DE ENVIO ---
@@ -348,13 +386,27 @@ class TelaReportState extends State<TelaReport> {
                 target: _initialPosicao,
                 zoom: 16,
               ),
-              markers: _markers,
+              
+              // 🔒 USO DA VARIÁVEL DE BLOQUEIO NO MAPA
+              scrollGesturesEnabled: _mapaInterativo,
+              zoomGesturesEnabled: _mapaInterativo,
+              tiltGesturesEnabled: _mapaInterativo,
+              rotateGesturesEnabled: _mapaInterativo,
+              zoomControlsEnabled: false,
+              myLocationButtonEnabled: _mapaInterativo,
+              
+              // Se não estiver interativo, o clique é nulo
+              onTap: _mapaInterativo ? _atualizarPosicao : null,
+
+              // 🔒 FORÇA O MARCADOR A NÃO SER DRAGGABLE SE O MAPA ESTIVER TRAVADO
+              markers: _markers.map((m) {
+                return m.copyWith(draggableParam: _mapaInterativo);
+              }).toSet(),
+
               onMapCreated: (controller) => _mapController = controller,
-              onTap: _atualizarPosicao,
               cameraTargetBounds: CameraTargetBounds(_fsaBounds),
               minMaxZoomPreference: _zoomPreference,
               myLocationEnabled: true,
-              myLocationButtonEnabled: true,
             ),
           ),
           
